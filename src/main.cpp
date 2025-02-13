@@ -53,7 +53,7 @@ int main(int argc, char const* argv[]) {
 	wolfResources->setLife(200);
 	wolfResources->setMana(0);
 
-	player->addComponent(std::make_shared<CastSpellComponent>());
+	player->addComponent(std::make_shared<CastSpellComponent>(&sm));
 	player->addComponent(std::make_shared<AttackComponent>());
 	player->addComponent(playerTag);
 	player->addComponent(playerResources);
@@ -67,13 +67,13 @@ int main(int argc, char const* argv[]) {
 	scene->addChild(wolf);
 
 	print(std::cout, scene, 0);
-	char x;
-	while(std::cin >> x) {
-		if(x == 'x') {
-			break;
-		}
-		print(std::cout, scene, 0);
-	}
+	// char x;
+	// while(std::cin >> x) {
+	// 	if(x == 'x') {
+	// 		break;
+	// 	}
+	// 	print(std::cout, scene, 0);
+	// }
 
 	//TODO: Add combat
 

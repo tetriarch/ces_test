@@ -42,15 +42,22 @@ EntityPtr SpellManager::cast<FireballSpell>(Entity* caster) {
     }
 
     auto velocity = std::make_shared<VelocityComponent>();
+
+    //NOTE: more hardcoded stuff, this should be data driven via parser, 
+    //dmg should also scale with equipment, talents skill level, might need outside dmg deal system that calculates actual output
     velocity->setDirection({1, 0});
     velocity->setSpeed(1.0f);
     fireball->addComponent(std::make_shared<VelocityComponent>());
 
     auto collision = std::make_shared<CollisionComponent>();
+    Vec2 fireballPosition = fireball->getTransform().position;
+    collision->setCollisionBox({fireballPosition.x, fireballPosition.y, 1, 1});
+    fireball->addComponent(collision);
 
-
-
-    return nullptr;
+    auto dmg = std::make_shared<DamageComponent>();
+    dmg->setDamage(10, 50);
+    fireball->addComponent(dmg);
+    return fireball;
 }
 
 template<>

@@ -7,18 +7,20 @@
 class CollisionComponent : public Component<CollisionComponent> {
 
 public:
-    void setCollisionBox(const Rect& rect);
+    void setCollisionBox(const Rect& rect) { rect_ = rect; }
     const Rect getCollisionBox() const { return rect_; }
+
     bool checkCollision(EntityPtr target) {
         auto components = target->getComponents();
         for(auto& c : components) {
             if(c->getComponentType() == typeid(CollisionComponent)) {
-                auto targetCollisionComp = static_cast<CollisionComponent*>(c.get());
-                return checkAABBIntersection(rect_, targetCollisionComp->getCollisionBox());
-                // TODO:figure out how to make interaction between produced colllision and hit dmg
-                // return accordingly
+                auto targetCollisionComp = dynamic_cast<CollisionComponent*>(c.get());
+                if(checkAABBIntersection(rect_, targetCollisionComp->getCollisionBox())) {
+                    return true;
+                }
             }
         }
+        return false;
     }
 
 private:

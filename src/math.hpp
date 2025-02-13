@@ -27,3 +27,5 @@ struct Transform {
     Vec2 position;
     // can't be bothered with rotation and scale
 };
+
+f32 lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
