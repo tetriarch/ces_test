@@ -3,9 +3,9 @@
 #include "../component.hpp"
 #include "../spell_manager.hpp"
 
-class CastSpellComponent : public Component<CastSpellComponent> {
+class SpellBookComponent : public Component<SpellBookComponent> {
 public:
-    CastSpellComponent(SpellManager* spellManager) { spellManager_ = spellManager; }
+    SpellBookComponent(SpellManager* spellManager) { spellManager_ = spellManager; }
     auto describe() -> std::string override { return "I cast spells"; }
     void addSpell(const std::string& spellName) { spells_.push_back(spellName); }
     void castSpell(const std::string& spellName) {

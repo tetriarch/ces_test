@@ -53,7 +53,7 @@ int main(int argc, char const* argv[]) {
 	wolfResources->setLife(200);
 	wolfResources->setMana(0);
 
-	player->addComponent(std::make_shared<CastSpellComponent>(&sm));
+	player->addComponent(std::make_shared<SpellBookComponent>(&sm));
 	player->addComponent(std::make_shared<AttackComponent>());
 	player->addComponent(playerTag);
 	player->addComponent(playerResources);
