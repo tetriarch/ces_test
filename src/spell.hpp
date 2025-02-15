@@ -51,6 +51,12 @@ struct ConstantMotion : Motion {
     }
 };
 
+// for snap action abilities, beams like Zap
+struct InstantMotion : Motion {
+    f32 speed{0};
+    //TODO: Unsure of the logic here yet
+};
+
 struct Action {
     ActionType type;
     bool pierce;
