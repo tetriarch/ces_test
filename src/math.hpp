@@ -17,6 +17,10 @@ struct Vec2 {
     Vec2 operator*(f32 scale) const {
         return {x * scale, y * scale};
     }
+
+    Vec2 operator+=(Vec2 addition) {
+        return {x + addition.x, y + addition.y};
+    }
 };
 
 struct Rect {
@@ -25,7 +29,15 @@ struct Rect {
 
 struct Transform {
     Vec2 position;
-    // can't be bothered with rotation and scale
+    f32 rotationInDegrees;
 };
+
+inline Vec2 directionFromAngle(f32 angleInDegrees) {
+    f32 angleInRadians = angleInDegrees * (M_PI / 180.0f);
+    Vec2 direction;
+    direction.x = cos(angleInRadians);
+    direction.y = sin(angleInRadians);
+    return direction.normalized();
+}
 
 inline f32 lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }

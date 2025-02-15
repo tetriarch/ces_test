@@ -1,0 +1,100 @@
+{
+    "fireball": {
+        "name": "Fireball",
+        "cast_time": 2.0,
+        "interrupt_time": 1.5,
+        "mana_cost": 15,
+        "cooldown": 0,
+        "action": [
+            {
+                "type": "projectile",
+                "pierce": false,
+                "movement": {
+                    "type": "constant_motion",
+                    "speed": 1.5
+                },
+                "on_hit": [
+                    {
+                        "effect": "damage",
+                        "type": "fire",
+                        "damage_range": {
+                            "min": 10,
+                            "max": 30
+                        }
+                    },
+                    {
+                        "effect": "dot",
+                        "type": "fire",
+                        "periodic_damage": 5,
+                        "duration_in_sec": 5
+                    }
+                ]
+            }
+        ]
+    },
+    "ice_lance": {
+        "name": "Ice Lance",
+        "cast_time": 2.5,
+        "interrupt_time": 2.0,
+        "mana_cost": 25,
+        "cooldown": 0,
+        "action": [
+            {
+                "type": "projectile",
+                "pierce": true,
+                "movement": {
+                    "type": "constant_motion",
+                    "speed": 2.5
+                },
+                "on_hit": [
+                    {
+                        "effect": "damage",
+                        "type": "cold",
+                        "damage_range": {
+                            "min": 5,
+                            "max": 25
+                        }
+                    },
+                    {
+                        "effect": "slow",
+                        "type": "cold",
+                        "magnitude": 20,
+                        "duration_in_sec": 3
+                    }
+                ]
+            }
+        ]
+    },
+    "zap": {
+        "name": "Zap",
+        "cast_time": 0.1,
+        "interrupt_time": 0,
+        "mana_cost": 35,
+        "cooldown": 5,
+        "action": [
+            {
+                "type": "beam",
+                "pierce": false,
+                "movement": {
+                    "type": "instant",
+                    "speed": 0
+                },
+                "on_hit": [
+                    {
+                        "effect": "damage",
+                        "type": "lightning",
+                        "damage_range": {
+                            "min": 5,
+                            "max": 10
+                        }
+                    },
+                    {
+                        "effect": "stun",
+                        "type": "lightning",
+                        "duration_in_sec": 3
+                    }
+                ]
+            }
+        ]
+    }
+}

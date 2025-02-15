@@ -14,6 +14,11 @@ set(CMAKE_CXX_STANDARD 23)
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS  src/**.cpp)
 
+
+add_custom_target(copy_assets ALL COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:ces_test>/assets)
+
 add_executable(ces_test ${SRC_FILES})
 
 target_link_libraries(ces_test PRIVATE nlohmann_json::nlohmann_json)
+
+add_dependencies(ces_test copy_assets)
