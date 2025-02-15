@@ -51,16 +51,18 @@ struct ConstantMotion : Motion {
     }
 };
 
-// for snap action abilities, beams like Zap
 struct InstantMotion : Motion {
     f32 speed{0};
-    //TODO: Unsure of the logic here yet
+    void apply(const EntityPtr& target) {
+        //TODO: Unsure of the logic here yet
+        //for snap action abilities, beams like Zap
+    }
 };
 
 struct Action {
     ActionType type;
     bool pierce;
-    Motion motion;
+    std::shared_ptr<Motion> motion;
     std::vector<OnHitAction> actions;
 };
 
