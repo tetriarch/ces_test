@@ -2,24 +2,24 @@
 
 #include "../component.hpp"
 
-enum class Tag {
+enum class TagType {
     NPC,
     PLAYER,
     ENEMY
 };
 
-class TagComponent : public Component<TagComponent> {
+class Tag : public Component<Tag> {
 
 public:
     auto describe() -> std::string override { return "I am " + tagToString(tag_); }
-    void setTag(Tag tag) { tag_ = tag; }
+    void setTag(TagType tag) { tag_ = tag; }
 private:
-    Tag tag_{Tag::NPC};
-    std::string tagToString(Tag tag) {
+    TagType tag_{TagType::NPC};
+    std::string tagToString(TagType tag) {
         switch(tag) {
-            case Tag::NPC: return "NPC";
-            case Tag::PLAYER: return "PLAYER";
-            case Tag::ENEMY: return "ENEMY";
+            case TagType::NPC: return "NPC";
+            case TagType::PLAYER: return "PLAYER";
+            case TagType::ENEMY: return "ENEMY";
             default: return "";
         }
     }

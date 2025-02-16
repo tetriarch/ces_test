@@ -2,7 +2,7 @@
 
 #include "../component.hpp"
 
-class LifeManaComponent : public Component<LifeManaComponent> {
+class LifeMana : public Component<LifeMana> {
 public:
     auto describe() -> std::string override {
         return "I have " + std::to_string(life_) + " life and " + std::to_string(mana_) + " mana";

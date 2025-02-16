@@ -49,12 +49,12 @@ EntityPtr SpellManager::cast<FireballSpell>(Entity* caster) {
     velocity->setSpeed(1.0f);
     fireball->addComponent(std::make_shared<VelocityComponent>());
 
-    auto collision = std::make_shared<CollisionComponent>();
+    auto collision = std::make_shared<Collision>();
     Vec2 fireballPosition = fireball->getTransform().position;
     collision->setCollisionBox({fireballPosition.x, fireballPosition.y, 1, 1});
     fireball->addComponent(collision);
 
-    auto dmg = std::make_shared<DamageComponent>();
+    auto dmg = std::make_shared<Damage>();
     dmg->setDamage(10, 50);
     fireball->addComponent(dmg);
     return fireball;

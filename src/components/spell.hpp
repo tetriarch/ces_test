@@ -1,7 +1,7 @@
 #pragma once
 
-#include "entity.hpp"
-#include "utils.hpp"
+#include "../entity.hpp"
+#include "../utils.hpp"
 
 enum class ActionType {
     AOE,
@@ -10,7 +10,7 @@ enum class ActionType {
     PROJECTILE
 };
 
-enum class HitType {
+enum class HitEffect {
     DAMAGE,
     DOT,
     HEAL
@@ -29,13 +29,20 @@ struct DamageRange {
     u32 max;
 };
 
-struct OnHitAction {
-    HitType type;
-    DamageType damageType;
-    DamageRange damageRange;
+struct DamageOverTime {
     u32 periodicDamage;
     f32 duration;
+};
 
+union DamageDelivery {
+    DamageRange damageRange;
+    DamageOverTime damageOverTime;
+};
+
+struct OnHitAction {
+    HitEffect type;
+    DamageType damageType;
+    DamageDelivery damage;
 };
 
 struct Motion {};
@@ -52,14 +59,13 @@ struct ConstantMotion : Motion {
 };
 
 struct InstantMotion : Motion {
-    f32 speed{0};
     void apply(const EntityPtr& target) {
         //TODO: Unsure of the logic here yet
         //for snap action abilities, beams like Zap
     }
 };
 
-struct Action {
+struct SpellAction {
     ActionType type;
     bool pierce;
     std::shared_ptr<Motion> motion;
@@ -67,11 +73,17 @@ struct Action {
 };
 
 
-struct Spell {
-    std::string name;
-    f32 castTime;
-    f32 interruptTime;
-    u32 manaCost;
-    f32 cooldown;
-    std::vector<Action> actions;
+class Spell : public Component<Spell> {
+public:
+    Spell(std::string name, f32 castTime, f32 interruptTime, u32 manaCost, f32 cooldown);
+    void addAction(const SpellAction& action);
+    auto describe() -> std::string;
+
+private:
+    std::string name_;
+    f32 castTime_;
+    f32 interruptTime_;
+    u32 manaCost_;
+    f32 cooldown_;
+    std::vector<SpellAction> actions_;
 };

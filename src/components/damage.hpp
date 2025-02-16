@@ -3,7 +3,7 @@
 #include "../component.hpp"
 #include "../entity.hpp"
 
-class DamageComponent : public Component<DamageComponent> {
+class Damage : public Component<Damage> {
 
 public:
     void setDamage(u32 min, u32 max);

@@ -6,5 +6,5 @@
 #include "damage.hpp"
 #include "life_mana.hpp"
 #include "tag.hpp"
-#include "use_ability.hpp"
+#include "ability.hpp"
 #include "velocity.hpp"

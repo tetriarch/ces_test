@@ -4,7 +4,7 @@
 #include "../entity.hpp"
 #include "../math.hpp"
 
-class CollisionComponent : public Component<CollisionComponent> {
+class Collision : public Component<Collision> {
 
 public:
     void setCollisionBox(const Rect& rect) { rect_ = rect; }
@@ -13,8 +13,8 @@ public:
     bool checkCollision(EntityPtr target) {
         auto components = target->getComponents();
         for(auto& c : components) {
-            if(c->getComponentType() == typeid(CollisionComponent)) {
-                auto targetCollisionComp = dynamic_cast<CollisionComponent*>(c.get());
+            if(c->getComponentType() == typeid(Collision)) {
+                auto targetCollisionComp = dynamic_cast<Collision*>(c.get());
                 if(checkAABBIntersection(rect_, targetCollisionComp->getCollisionBox())) {
                     return true;
                 }
