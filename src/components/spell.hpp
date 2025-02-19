@@ -7,13 +7,17 @@ enum class ActionType {
     AOE,
     ARC,
     BEAM,
-    PROJECTILE
+    PROJECTILE,
+    UNKNOWN
 };
 
 enum class HitEffect {
     DAMAGE,
     DOT,
-    HEAL
+    HEAL,
+    SLOW,
+    STUN,
+    UNKNOWN
 };
 
 enum class DamageType {
@@ -21,7 +25,8 @@ enum class DamageType {
     FIRE,
     COLD,
     LIGHTNING,
-    POSION
+    POSION,
+    UNKNOWN
 };
 
 struct DamageRange {
@@ -75,7 +80,8 @@ struct SpellAction {
 
 class Spell : public Component<Spell> {
 public:
-    Spell(std::string name, f32 castTime, f32 interruptTime, u32 manaCost, f32 cooldown);
+    Spell() = default;
+    Spell(std::string name, f32 castTime, f32 interruptTime, s32 manaCost, f32 cooldown);
     void addAction(const SpellAction& action);
     auto describe() -> std::string;
 
@@ -83,7 +89,7 @@ private:
     std::string name_;
     f32 castTime_;
     f32 interruptTime_;
-    u32 manaCost_;
+    s32 manaCost_;
     f32 cooldown_;
     std::vector<SpellAction> actions_;
 };
