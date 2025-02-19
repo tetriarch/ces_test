@@ -8,7 +8,7 @@ enum class TagType {
     ENEMY
 };
 
-class Tag : public Component<Tag> {
+class TagComponent : public Component<TagComponent> {
 
 public:
     auto describe() -> std::string override { return "I am " + tagToString(tag_); }

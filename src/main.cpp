@@ -52,27 +52,27 @@ int main(int argc, char const* argv[]) {
 
 	SpellManager sm(scene);
 
-	auto playerTag = std::make_shared<Tag>();
+	auto playerTag = std::make_shared<TagComponent>();
 	playerTag->setTag(TagType::PLAYER);
 
-	auto wolfTag = std::make_shared<Tag>();
+	auto wolfTag = std::make_shared<TagComponent>();
 	wolfTag->setTag(TagType::ENEMY);
 
-	auto playerResources = std::make_shared<LifeMana>();
+	auto playerResources = std::make_shared<LifeManaComponent>();
 	playerResources->setLife(100);
 	playerResources->setMana(200);
 
-	auto wolfResources = std::make_shared<LifeMana>();
+	auto wolfResources = std::make_shared<LifeManaComponent>();
 	wolfResources->setLife(200);
 	wolfResources->setMana(0);
 
-	player->addComponent(std::make_shared<SpellBook>(&sm));
-	player->addComponent(std::make_shared<Attack>());
+	player->addComponent(std::make_shared<SpellBookComponent>(&sm));
+	player->addComponent(std::make_shared<AttackComponent>());
 	player->addComponent(playerTag);
 	player->addComponent(playerResources);
 
-	wolf->addComponent(std::make_shared<Attack>());
-	wolf->addComponent(std::make_shared<Ability>());
+	wolf->addComponent(std::make_shared<AttackComponent>());
+	wolf->addComponent(std::make_shared<AbilityComponent>());
 	wolf->addComponent(wolfTag);
 	wolf->addComponent(wolfResources);
 

@@ -9,9 +9,11 @@
 #include <string>
 #include <typeindex>
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 using f32 = float;
+using s32 = int32_t;
 using u32 = uint32_t;
 
 class Entity;

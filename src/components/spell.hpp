@@ -11,7 +11,7 @@ enum class ActionType {
     UNKNOWN
 };
 
-enum class HitEffect {
+enum class EffectType {
     DAMAGE,
     DOT,
     HEAL,
@@ -30,24 +30,43 @@ enum class DamageType {
 };
 
 struct DamageRange {
-    u32 min;
-    u32 max;
+    s32 min;
+    s32 max;
 };
 
 struct DamageOverTime {
-    u32 periodicDamage;
+    s32 periodicDamage;
     f32 duration;
 };
 
-union DamageDelivery {
+struct Slow {
+    s32 magnitude;
+    f32 duration;
+};
+
+struct Stun {
+    f32 duration;
+};
+
+union Damage {
     DamageRange damageRange;
     DamageOverTime damageOverTime;
 };
 
+union Debuff {
+    Slow slow;
+    Stun stun;
+};
+
+union Effect {
+    Damage damage;
+    Debuff debuff;
+};
+
 struct OnHitAction {
-    HitEffect type;
+    EffectType type;
     DamageType damageType;
-    DamageDelivery damage;
+    Effect effect;
 };
 
 struct Motion {};

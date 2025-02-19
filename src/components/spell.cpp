@@ -1,6 +1,6 @@
 #include "spell.hpp"
 
-Spell::Spell(std::string name, f32 castTime, f32 interruptTime, u32 manaCost, f32 cooldown) :
+Spell::Spell(std::string name, f32 castTime, f32 interruptTime, s32 manaCost, f32 cooldown) :
     name_(name),
     castTime_(castTime),
     interruptTime_(interruptTime),

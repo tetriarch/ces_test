@@ -3,7 +3,7 @@
 #include "../component.hpp"
 
 
-class Attack : public Component<Attack> {
+class AttackComponent : public Component<AttackComponent> {
 public:
     auto describe() -> std::string override { return "I attack"; }
 };

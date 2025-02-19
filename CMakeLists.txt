@@ -8,7 +8,14 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/nlohmann/json.git
 )
 
+FetchContent_Declare(
+    magic_enum
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
+    GIT_TAG v0.9.7
+)
+
 FetchContent_MakeAvailable(nlohmann_json)
+FetchContent_MakeAvailable(magic_enum)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -19,6 +26,9 @@ add_custom_target(copy_assets ALL COMMAND ${CMAKE_COMMAND} -E copy_directory ${C
 
 add_executable(ces_test ${SRC_FILES})
 
-target_link_libraries(ces_test PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(ces_test PRIVATE 
+    nlohmann_json::nlohmann_json
+    magic_enum::magic_enum
+)
 
 add_dependencies(ces_test copy_assets)
