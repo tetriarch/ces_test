@@ -3,11 +3,6 @@
 #include "spell_manager.hpp"
 #include "spell_loader.hpp"
 
-//TODO: Combat exchange
-//TODO: Figure out how to tag castSpellComponent to know which spell to cast, 
-// I am thinking that component could have list of actions it can do and those actions would be provided by some ActionManager 
-// which would hold std::unordered_map of std::function that perform action
-
 void indent(std::ostream& out, u32 depth) {
 
 	for(u32 i = 0; i < depth * 1; ++i) {
@@ -39,10 +34,6 @@ int main(int argc, char const* argv[]) {
 	if(!spells) {
 		std::cout << spellLoader.getError(spells.error()) << std::endl;
 		return 1;
-	}
-
-	for(auto& s : spells.value()) {
-		std::cout << s.describe() << std::endl;
 	}
 
 	// hardcoded scene
@@ -79,16 +70,11 @@ int main(int argc, char const* argv[]) {
 	scene->addChild(player);
 	scene->addChild(wolf);
 
-	// print(std::cout, scene, 0);
-	// char x;
-	// while(std::cin >> x) {
-	// 	if(x == 'x') {
-	// 		break;
-	// 	}
-	// 	print(std::cout, scene, 0);
-	// }
+	print(std::cout, scene, 0);
 
-	//TODO: Add combat
+	for(auto& s : spells.value()) {
+		std::cout << s.describe() << std::endl;
+	}
 
 	return 0;
 }

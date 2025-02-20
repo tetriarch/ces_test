@@ -3,17 +3,20 @@
 
 #include <magic_enum/magic_enum.hpp>
 
-
-
 std::string SpellLoader::getError(SpellLoaderError error) {
+
     if(error == SpellLoaderError::LOAD) {
         return "[SPELL LAODER]: failed to load spells\n" + errorMessage_.str();
     }
+
     if(error == SpellLoaderError::PARSE) {
         return "[SPELL LOADER]: failed to parse spells\n" + errorMessage_.str();
     }
+
     return "";
 }
+
+
 
 auto SpellLoader::load(const std::string& fileName) -> std::expected<std::vector<Spell>, SpellLoaderError> {
 
@@ -24,7 +27,7 @@ auto SpellLoader::load(const std::string& fileName) -> std::expected<std::vector
         return std::unexpected(SpellLoaderError::LOAD);
     }
 
-    auto spells = parse(spellsSource.value());
+    auto spells = parseSpells(spellsSource.value());
     if(!spells) {
         return std::unexpected(spells.error());
     }
@@ -32,7 +35,10 @@ auto SpellLoader::load(const std::string& fileName) -> std::expected<std::vector
     return std::move(spells);
 }
 
+
+
 void SpellLoader::addError(const std::string& layer, const std::string& message) {
+
     if(!layer.empty()) {
         errorMessage_ << "[SPELL LOADER]: " << "<" << layer << ">: " << message << '\n';
     }
@@ -41,14 +47,16 @@ void SpellLoader::addError(const std::string& layer, const std::string& message)
     }
 }
 
-auto SpellLoader::parse(const std::string& source) -> std::expected<std::vector<Spell>, SpellLoaderError> {
+
+
+auto SpellLoader::parseSpells(const std::string& source) -> std::expected<std::vector<Spell>, SpellLoaderError> {
 
     json spellData;
     try {
         spellData = json::parse(source);
     }
     catch(json::exception& e) {
-        addError("", e.what());
+        addError("json", e.what());
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
@@ -66,6 +74,7 @@ auto SpellLoader::parse(const std::string& source) -> std::expected<std::vector<
             return std::unexpected(SpellLoaderError::PARSE);
         }
 
+        // parse actions and add them to spell
         for(auto& action : it.value()) {
             auto a = parseAction(action, "action");
             if(!a) {
@@ -79,6 +88,8 @@ auto SpellLoader::parse(const std::string& source) -> std::expected<std::vector<
     return std::move(spells);
 }
 
+
+
 auto SpellLoader::parseBasicStats(const json& spellData, const std::string& parent) -> std::expected<Spell, SpellLoaderError> {
 
     std::string name;
@@ -90,6 +101,7 @@ auto SpellLoader::parseBasicStats(const json& spellData, const std::string& pare
     if(!get<std::string>(spellData, "name", true, name, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
+
     if(!get<f32>(spellData, "cast_time", true, castTime, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
@@ -108,6 +120,8 @@ auto SpellLoader::parseBasicStats(const json& spellData, const std::string& pare
 
     return Spell(name, castTime, interruptTime, manaCost, cooldown);
 }
+
+
 
 auto SpellLoader::parseAction(const json& actionData, const std::string& parent) -> std::expected<SpellAction, SpellLoaderError> {
 
@@ -138,6 +152,7 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
     if(!get<std::string>(it.value(), "type", true, movementType, "movement")) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
+
     if(movementType == "constant_motion") {
         ConstantMotion motion;
         f32 speed;
@@ -146,9 +161,13 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
         }
         action.motion = std::make_shared<ConstantMotion>(motion);
     }
-    else {
+    else if(movementType == "instant") {
         InstantMotion motion;
         action.motion = std::make_shared<InstantMotion>(motion);
+    }
+    else {
+        addError("movement", "invalid movement type");
+        return std::unexpected(SpellLoaderError::PARSE);
     }
 
     // on hit
@@ -170,6 +189,8 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
     return action;
 }
 
+
+
 auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& parent) -> std::expected<OnHitAction, SpellLoaderError> {
 
     std::unordered_map<std::string, std::string> effectMap;
@@ -179,22 +200,23 @@ auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& par
     effectMap.emplace("STUN", "stun");
 
     OnHitAction onHitAction;
-    std::string effect;
+    std::string effectType;
     std::string damageType;
 
-    if(!get<std::string>(onHitData, "effect", true, effect, "on_hit")) {
+    if(!get<std::string>(onHitData, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
+
     if(!get<std::string>(onHitData, "type", true, damageType, "on_hit")) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    onHitAction.type = magic_enum::enum_cast<EffectType>(effect).value_or(EffectType::UNKNOWN);
+    onHitAction.type = magic_enum::enum_cast<EffectType>(effectType).value_or(EffectType::UNKNOWN);
     onHitAction.damageType = magic_enum::enum_cast<DamageType>(damageType).value_or(DamageType::UNKNOWN);
 
     // make sure coresponding key based on effect type is found
-    if(auto em = effectMap.find(effect); em != effectMap.end()) {
-        json::const_iterator it = onHitData.find(em->second);
+    if(auto emIt = effectMap.find(effectType); emIt != effectMap.end()) {
+        json::const_iterator it = onHitData.find(emIt->second);
         if(it == onHitData.end()) {
             addError(parent, it.key() + " not found");
             return std::unexpected(SpellLoaderError::PARSE);
@@ -222,6 +244,7 @@ auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& par
             }
             onHitAction.effect.damage.damageOverTime = dot.damageOverTime;
         }
+
         if(it.key() == "slow") {
             Debuff debuff;
             if(!get<s32>(it.value(), "magnitude", true, debuff.slow.magnitude, "slow")) {
@@ -232,6 +255,7 @@ auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& par
             }
             onHitAction.effect.debuff.slow = debuff.slow;
         }
+
         if(it.key() == "stun") {
             Debuff debuff;
             if(!get<f32>(it.value(), "duration_in_sec", true, debuff.stun.duration, "stun")) {
@@ -249,6 +273,8 @@ auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& par
     return onHitAction;
 }
 
+
+
 auto SpellLoader::valueTypeToTypeID(const json& value) -> std::type_index {
 
     if(value.is_null()) return typeid(nullptr);
@@ -259,6 +285,8 @@ auto SpellLoader::valueTypeToTypeID(const json& value) -> std::type_index {
 
     return typeid(void);
 }
+
+
 
 template<typename T>
 bool SpellLoader::get(const json& object, std::string key, bool required, T& result, const std::string& parent) {
@@ -289,6 +317,8 @@ bool SpellLoader::get(const json& object, std::string key, bool required, T& res
     return true;
 }
 
+
+
 template<typename T>
 auto SpellLoader::typeToString()->std::string {
     if(typeid(T) == typeid(std::string)) return "string";
@@ -301,4 +331,3 @@ auto SpellLoader::typeToString()->std::string {
         return "unknown";
     }
 }
-

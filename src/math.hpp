@@ -32,6 +32,9 @@ struct Transform {
     f32 rotationInDegrees;
 };
 
+/// @brief calculates directional vector based on angle in degrees
+/// @param angleInDegrees 
+/// @return directional vector
 inline Vec2 directionFromAngle(f32 angleInDegrees) {
     f32 angleInRadians = angleInDegrees * (M_PI / 180.0f);
     Vec2 direction;
@@ -40,4 +43,9 @@ inline Vec2 directionFromAngle(f32 angleInDegrees) {
     return direction.normalized();
 }
 
+/// @brief Calculates linear interpolation between 2 values
+/// @param a min value
+/// @param b max value
+/// @param t 0.0 - 1.0 to interpolate min and max value with
+/// @return result of interpolation
 inline f32 lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }

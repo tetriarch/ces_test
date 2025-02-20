@@ -22,7 +22,7 @@ public:
 
 private:
     void addError(const std::string& layer, const std::string& message);
-    auto parse(const std::string& source) -> std::expected<std::vector<Spell>, SpellLoaderError>;
+    auto parseSpells(const std::string& source) -> std::expected<std::vector<Spell>, SpellLoaderError>;
     auto parseBasicStats(const json& spellData, const std::string& parent) -> std::expected<Spell, SpellLoaderError>;
     auto parseAction(const json& actionData, const std::string& parent) -> std::expected<SpellAction, SpellLoaderError>;
     auto parseOnHitAction(const json& onHitData, const std::string& parent) -> std::expected<OnHitAction, SpellLoaderError>;
@@ -34,6 +34,7 @@ private:
     auto typeToString() -> std::string;
 
     auto valueTypeToTypeID(const json& value) -> std::type_index;
+
+private:
     std::stringstream errorMessage_;
-    u32 callCount{0};
 };
