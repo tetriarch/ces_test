@@ -11,15 +11,7 @@ enum class ActionType {
     UNKNOWN
 };
 
-enum class EffectType {
-    DAMAGE,
-    DOT,
-    HEAL,
-    SLOW,
-    STUN,
-    UNKNOWN
-};
-
+// nature/element of the spell
 enum class DamageType {
     PHYSICAL,
     FIRE,
@@ -29,7 +21,7 @@ enum class DamageType {
     UNKNOWN
 };
 
-struct DamageRange {
+struct DirectDamage {
     s32 min;
     s32 max;
 };
@@ -48,25 +40,16 @@ struct Stun {
     f32 duration;
 };
 
-union Damage {
-    DamageRange damageRange;
-    DamageOverTime damageOverTime;
+struct Heal {
+    s32 min;
+    s32 max;
 };
 
-union Debuff {
-    Slow slow;
-    Stun stun;
-};
+using SpellEffect = std::variant<DirectDamage, DamageOverTime, Slow, Stun, Heal>;
 
-union Effect {
-    Damage damage;
-    Debuff debuff;
-};
-
-struct OnHitAction {
-    EffectType type;
+struct SpellEffectOnHit {
     DamageType damageType;
-    Effect effect;
+    SpellEffect effect;
 };
 
 struct Motion {};
@@ -93,7 +76,7 @@ struct SpellAction {
     ActionType type;
     bool pierce;
     std::shared_ptr<Motion> motion;
-    std::vector<OnHitAction> actions;
+    std::vector<SpellEffectOnHit> actions;
 };
 
 

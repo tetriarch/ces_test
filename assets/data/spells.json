@@ -15,15 +15,15 @@
                 },
                 "on_hit": [
                     {
-                        "effect_type": "DAMAGE",
+                        "effect_type": "direct_damage",
                         "type": "FIRE",
-                        "damage_range": {
+                        "direct_damage": {
                             "min": 10,
                             "max": 30
                         }
                     },
                     {
-                        "effect_type": "DOT",
+                        "effect_type": "dot",
                         "type": "FIRE",
                         "dot": {
                             "periodic_damage": 5,
@@ -50,15 +50,15 @@
                 },
                 "on_hit": [
                     {
-                        "effect_type": "DAMAGE",
+                        "effect_type": "direct_damage",
                         "type": "COLD",
-                        "damage_range": {
+                        "direct_damage": {
                             "min": 5,
                             "max": 25
                         }
                     },
                     {
-                        "effect_type": "SLOW",
+                        "effect_type": "slow",
                         "type": "COLD",
                         "slow": {
                             "magnitude": 20,
@@ -84,15 +84,15 @@
                 },
                 "on_hit": [
                     {
-                        "effect_type": "DAMAGE",
+                        "effect_type": "direct_damage",
                         "type": "LIGHTNING",
-                        "damage_range": {
+                        "direct_damage": {
                             "min": 5,
                             "max": 10
                         }
                     },
                     {
-                        "effect_type": "STUN",
+                        "effect_type": "stun",
                         "type": "LIGHTNING",
                         "stun": {
                             "duration_in_sec": 3.0

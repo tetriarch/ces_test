@@ -178,12 +178,12 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
     }
 
     for(auto& oh : it.value()) {
-        auto onHitAction = parseOnHitAction(oh, "on_hit");
-        if(!onHitAction) {
+        auto onHitEffect = parseOnHitEffect(oh, "on_hit");
+        if(!onHitEffect) {
             addError(parent, "failed to parse on_hit action");
             return std::unexpected(SpellLoaderError::PARSE);
         }
-        action.actions.emplace_back(onHitAction.value());
+        action.actions.emplace_back(onHitEffect.value());
     }
 
     return action;
@@ -191,15 +191,9 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
 
 
 
-auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& parent) -> std::expected<OnHitAction, SpellLoaderError> {
+auto SpellLoader::parseOnHitEffect(const json& onHitData, const std::string& parent) -> std::expected<SpellEffectOnHit, SpellLoaderError> {
 
-    std::unordered_map<std::string, std::string> effectMap;
-    effectMap.emplace("DAMAGE", "damage_range");
-    effectMap.emplace("DOT", "dot");
-    effectMap.emplace("SLOW", "slow");
-    effectMap.emplace("STUN", "stun");
-
-    OnHitAction onHitAction;
+    SpellEffectOnHit onHitEffect;
     std::string effectType;
     std::string damageType;
 
@@ -211,66 +205,62 @@ auto SpellLoader::parseOnHitAction(const json& onHitData, const std::string& par
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    onHitAction.type = magic_enum::enum_cast<EffectType>(effectType).value_or(EffectType::UNKNOWN);
-    onHitAction.damageType = magic_enum::enum_cast<DamageType>(damageType).value_or(DamageType::UNKNOWN);
+    onHitEffect.damageType = magic_enum::enum_cast<DamageType>(damageType).value_or(DamageType::UNKNOWN);
 
-    // make sure coresponding key based on effect type is found
-    if(auto emIt = effectMap.find(effectType); emIt != effectMap.end()) {
-        json::const_iterator it = onHitData.find(emIt->second);
-        if(it == onHitData.end()) {
-            addError(parent, it.key() + " not found");
-            return std::unexpected(SpellLoaderError::PARSE);
-        }
-
-        // individual effects - honestly this should be broken to functions
-        if(it.key() == "damage_range") {
-            Damage dmgRange;
-            if(!get<s32>(it.value(), "min", true, dmgRange.damageRange.min, "damage_range")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            if(!get<s32>(it.value(), "max", true, dmgRange.damageRange.max, "damage_range")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            onHitAction.effect.damage.damageRange = dmgRange.damageRange;
-        }
-
-        if(it.key() == "dot") {
-            Damage dot;
-            if(!get<s32>(it.value(), "periodic_damage", true, dot.damageOverTime.periodicDamage, "dot")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            if(!get<f32>(it.value(), "duration_in_sec", true, dot.damageOverTime.duration, "dot")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            onHitAction.effect.damage.damageOverTime = dot.damageOverTime;
-        }
-
-        if(it.key() == "slow") {
-            Debuff debuff;
-            if(!get<s32>(it.value(), "magnitude", true, debuff.slow.magnitude, "slow")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            if(!get<f32>(it.value(), "duration_in_sec", true, debuff.slow.duration, "slow")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            onHitAction.effect.debuff.slow = debuff.slow;
-        }
-
-        if(it.key() == "stun") {
-            Debuff debuff;
-            if(!get<f32>(it.value(), "duration_in_sec", true, debuff.stun.duration, "stun")) {
-                return std::unexpected(SpellLoaderError::PARSE);
-            }
-            onHitAction.effect.debuff.stun = debuff.stun;
-        }
-
-    }
-    else {
-        addError(parent, "associated data to effect type not found");
+    json::const_iterator it = onHitData.find(effectType);
+    if(it == onHitData.end()) {
+        addError(parent, "has no " + effectType);
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    return onHitAction;
+    // individual effects - honestly this should be broken to functions
+    if(effectType == "direct_damage") {
+        DirectDamage dd;
+        if(!get<s32>(it.value(), "min", true, dd.min, "direct_damage")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        if(!get<s32>(it.value(), "max", true, dd.max, "direct_damage")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        onHitEffect.effect = dd;
+    }
+
+    else if(effectType == "dot") {
+        DamageOverTime dot;
+        if(!get<s32>(it.value(), "periodic_damage", true, dot.periodicDamage, "dot")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        if(!get<f32>(it.value(), "duration_in_sec", true, dot.duration, "dot")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        onHitEffect.effect = dot;
+    }
+
+    else if(effectType == "slow") {
+        Slow slow;
+        if(!get<s32>(it.value(), "magnitude", true, slow.magnitude, "slow")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        if(!get<f32>(it.value(), "duration_in_sec", true, slow.duration, "slow")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        onHitEffect.effect = slow;
+    }
+
+    else if(effectType == "stun") {
+        Stun stun;
+        if(!get<f32>(it.value(), "duration_in_sec", true, stun.duration, "stun")) {
+            return std::unexpected(SpellLoaderError::PARSE);
+        }
+        onHitEffect.effect = stun;
+    }
+
+    else {
+        addError(parent, "associated key to effect_type value: " + effectType);
+        return std::unexpected(SpellLoaderError::PARSE);
+    }
+
+    return onHitEffect;
 }
 
 

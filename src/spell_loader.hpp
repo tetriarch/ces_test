@@ -25,7 +25,7 @@ private:
     auto parseSpells(const std::string& source) -> std::expected<std::vector<Spell>, SpellLoaderError>;
     auto parseBasicStats(const json& spellData, const std::string& parent) -> std::expected<Spell, SpellLoaderError>;
     auto parseAction(const json& actionData, const std::string& parent) -> std::expected<SpellAction, SpellLoaderError>;
-    auto parseOnHitAction(const json& onHitData, const std::string& parent) -> std::expected<OnHitAction, SpellLoaderError>;
+    auto parseOnHitEffect(const json& onHitData, const std::string& parent) -> std::expected<SpellEffectOnHit, SpellLoaderError>;
 
     template<typename T>
     bool get(const json& object, std::string key, bool required, T& result, const std::string& parent = "");
