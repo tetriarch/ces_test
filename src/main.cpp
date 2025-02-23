@@ -54,23 +54,25 @@ int main(int argc, char const* argv[]) {
 	auto wolfTag = std::make_shared<TagComponent>();
 	wolfTag->setTag(TagType::ENEMY);
 
-	auto playerResources = std::make_shared<LifeManaComponent>();
-	playerResources->setLife(100);
-	playerResources->setMana(200);
+	auto playerLife = std::make_shared<LifeComponent>();
+	playerLife->setLife({100, 100});
 
-	auto wolfResources = std::make_shared<LifeManaComponent>();
-	wolfResources->setLife(200);
-	wolfResources->setMana(0);
+	auto playerMana = std::make_shared<ManaComponent>();
+	playerMana->setMana({200, 200});
+
+	auto wolfLife = std::make_shared<LifeComponent>();
+	wolfLife->setLife({200, 200});
+
+	auto wolfMana = std::make_shared<ManaComponent>();
+	wolfMana->setMana({0, 0});
 
 	player->addComponent(std::make_shared<SpellBookComponent>(&sm));
-	player->addComponent(std::make_shared<AttackComponent>());
 	player->addComponent(playerTag);
-	player->addComponent(playerResources);
+	player->addComponent(playerLife);
+	player->addComponent(playerMana);
 
-	wolf->addComponent(std::make_shared<AttackComponent>());
-	wolf->addComponent(std::make_shared<AbilityComponent>());
-	wolf->addComponent(wolfTag);
-	wolf->addComponent(wolfResources);
+	wolf->addComponent(wolfLife);
+	wolf->addComponent(wolfMana);
 
 	scene->addChild(player);
 	scene->addChild(wolf);

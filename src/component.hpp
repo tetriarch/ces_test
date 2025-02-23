@@ -31,7 +31,6 @@ public:
     }
 
 private:
-    // NEW THING: final says it can't be overriden further - check happens on compile time
     bool hasUpdate() const final {
         return !std::is_same_v<decltype(&TDerived::update), decltype(&ComponentBase::update)>;
     }

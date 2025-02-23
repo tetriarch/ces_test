@@ -6,6 +6,8 @@ SpellManager::SpellManager(EntityPtr scene) {
     scene_ = scene;
 }
 
+
+
 EntityPtr SpellManager::cast(const std::string& spellName, Entity* caster) {
 
     auto it = spells_.find(spellName);
