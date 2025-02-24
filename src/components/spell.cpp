@@ -1,20 +1,24 @@
 #include "spell.hpp"
+#include "components.hpp"
 
-Spell::Spell(std::string name, f32 castTime, f32 interruptTime, s32 manaCost, f32 cooldown) :
-    name_(name),
-    castTime_(castTime),
-    interruptTime_(interruptTime),
-    manaCost_(manaCost),
-    cooldown_(cooldown) {}
-
-void Spell::addAction(const SpellAction& action) {
-    actions_.emplace_back(action);
+SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData) {
+    spellData_ = spellData;
 }
 
-auto Spell::describe() -> std::string {
-    return "Name: " + name_ + "\n -" +
-        " Cast Time: " + std::to_string(castTime_) +
-        " Interrupt Time: " + std::to_string(interruptTime_) +
-        " Mana Cost: " + std::to_string(manaCost_) +
-        " Cooldown:" + std::to_string(cooldown_);
+void SpellComponent::cast(EntityPtr& source, Vec2 target) {
+
+    EntityPtr spell = Entity::create(spellData_->name);
+    spell->setTransform(source->getTransform());
+    spell->addComponent(std::make_shared<CollisionComponent>());
+    // need to make sure that the spell flying has it's own data.
+    spell->addComponent(std::make_shared<SpellComponent>(*this));
+    source->addChild(spell);
+}
+
+auto SpellComponent::describe() -> std::string {
+    return "Name: " + spellData_->name + "\n -" +
+        " Cast Time: " + std::to_string(spellData_->castTime) +
+        " Interrupt Time: " + std::to_string(spellData_->interruptTime) +
+        " Mana Cost: " + std::to_string(spellData_->manaCost) +
+        " Cooldown:" + std::to_string(spellData_->cooldown);
 }

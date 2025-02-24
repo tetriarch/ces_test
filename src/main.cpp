@@ -6,7 +6,7 @@
 
 void indent(std::ostream& out, u32 depth) {
 
-	for(u32 i = 0; i < depth * 1; ++i) {
+	for(u32 i = 0; i < depth * 1; i++) {
 		out << "\t";
 	}
 	out << ">";
@@ -78,10 +78,6 @@ int main(int argc, char const* argv[]) {
 	scene->addChild(wolf);
 
 	print(std::cout, scene, 0);
-
-	for(auto& s : spells.value()) {
-		std::cout << s.describe() << std::endl;
-	}
 
 	return 0;
 }

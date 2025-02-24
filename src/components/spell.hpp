@@ -80,18 +80,24 @@ struct SpellAction {
 };
 
 
-class Spell : public Component<Spell> {
+struct SpellData {
+    std::string name;
+    f32 castTime;
+    f32 interruptTime;
+    s32 manaCost;
+    f32 cooldown;
+    std::vector<SpellAction> actions;
+};
+
+
+
+class SpellComponent : public Component<SpellComponent> {
 public:
-    Spell() = default;
-    Spell(std::string name, f32 castTime, f32 interruptTime, s32 manaCost, f32 cooldown);
-    void addAction(const SpellAction& action);
+    SpellComponent(std::shared_ptr<SpellData> spellData);
+
+    void cast(EntityPtr& source, Vec2 target);
     auto describe() -> std::string;
 
 private:
-    std::string name_;
-    f32 castTime_;
-    f32 interruptTime_;
-    s32 manaCost_;
-    f32 cooldown_;
-    std::vector<SpellAction> actions_;
+    std::shared_ptr<SpellData> spellData_;
 };

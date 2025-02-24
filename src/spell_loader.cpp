@@ -18,7 +18,7 @@ std::string SpellLoader::getError(SpellLoaderError error) {
 
 
 
-auto SpellLoader::load(const std::string& fileName) -> std::expected<std::vector<Spell>, SpellLoaderError> {
+auto SpellLoader::load(const std::string& fileName) -> std::expected<std::vector<SpellData>, SpellLoaderError> {
 
     // load source
     auto spellsSource = FileIO::readTextFile(fileName);
@@ -49,19 +49,19 @@ void SpellLoader::addError(const std::string& layer, const std::string& message)
 
 
 
-auto SpellLoader::parseSpells(const std::string& source) -> std::expected<std::vector<Spell>, SpellLoaderError> {
+auto SpellLoader::parseSpells(const std::string& source) -> std::expected<std::vector<SpellData>, SpellLoaderError> {
 
-    json spellData;
+    json spellJSON;
     try {
-        spellData = json::parse(source);
+        spellJSON = json::parse(source);
     }
     catch(json::exception& e) {
         addError("json", e.what());
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    std::vector<Spell> spells;
-    for(auto& [spell, spellDescription] : spellData.items()) {
+    std::vector<SpellData> spells;
+    for(auto& [spell, spellDescription] : spellJSON.items()) {
         auto s = parseBasicStats(spellDescription, spell);
         if(!s) {
             addError(spell, "failed to parse spell basic stats");
@@ -81,7 +81,7 @@ auto SpellLoader::parseSpells(const std::string& source) -> std::expected<std::v
                 addError(spell, "failed to parse action");
                 return std::unexpected(a.error());
             }
-            s->addAction(a.value());
+            s->actions.emplace_back(a.value());
         }
         spells.emplace_back(s.value());
     }
@@ -90,40 +90,36 @@ auto SpellLoader::parseSpells(const std::string& source) -> std::expected<std::v
 
 
 
-auto SpellLoader::parseBasicStats(const json& spellData, const std::string& parent) -> std::expected<Spell, SpellLoaderError> {
+auto SpellLoader::parseBasicStats(const json& spellJSON, const std::string& parent) -> std::expected<SpellData, SpellLoaderError> {
 
-    std::string name;
-    f32 castTime;
-    f32 interruptTime;
-    s32 manaCost;
-    f32 cooldown;
+    SpellData spellData;
 
-    if(!get<std::string>(spellData, "name", true, name, parent)) {
+    if(!get<std::string>(spellJSON, "name", true, spellData.name, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<f32>(spellData, "cast_time", true, castTime, parent)) {
+    if(!get<f32>(spellJSON, "cast_time", true, spellData.castTime, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<f32>(spellData, "interrupt_time", true, interruptTime, parent)) {
+    if(!get<f32>(spellJSON, "interrupt_time", true, spellData.interruptTime, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<s32>(spellData, "mana_cost", true, manaCost, parent)) {
+    if(!get<s32>(spellJSON, "mana_cost", true, spellData.manaCost, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<f32>(spellData, "cooldown", true, cooldown, parent)) {
+    if(!get<f32>(spellJSON, "cooldown", true, spellData.cooldown, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    return Spell(name, castTime, interruptTime, manaCost, cooldown);
+    return std::move(spellData);
 }
 
 
 
-auto SpellLoader::parseAction(const json& actionData, const std::string& parent) -> std::expected<SpellAction, SpellLoaderError> {
+auto SpellLoader::parseAction(const json& actionJSON, const std::string& parent) -> std::expected<SpellAction, SpellLoaderError> {
 
     SpellAction action;
 
@@ -131,11 +127,11 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
     bool pierce;
     std::string movementType;
 
-    if(!get<std::string>(actionData, "type", true, actionType, parent)) {
+    if(!get<std::string>(actionJSON, "type", true, actionType, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<bool>(actionData, "pierce", true, pierce, parent)) {
+    if(!get<bool>(actionJSON, "pierce", true, pierce, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
@@ -143,8 +139,8 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
     action.pierce = pierce;
 
     // movement
-    json::const_iterator it = actionData.find("movement");
-    if(it == actionData.end()) {
+    json::const_iterator it = actionJSON.find("movement");
+    if(it == actionJSON.end()) {
         addError(parent, "has no movement");
         return std::unexpected(SpellLoaderError::PARSE);
     }
@@ -171,8 +167,8 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
     }
 
     // on hit
-    it = actionData.find("on_hit");
-    if(it == actionData.end()) {
+    it = actionJSON.find("on_hit");
+    if(it == actionJSON.end()) {
         addError(parent, "has no on_hit");
         return std::unexpected(SpellLoaderError::PARSE);
     }
@@ -191,24 +187,24 @@ auto SpellLoader::parseAction(const json& actionData, const std::string& parent)
 
 
 
-auto SpellLoader::parseOnHitEffect(const json& onHitData, const std::string& parent) -> std::expected<SpellEffectOnHit, SpellLoaderError> {
+auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& parent) -> std::expected<SpellEffectOnHit, SpellLoaderError> {
 
     SpellEffectOnHit onHitEffect;
     std::string effectType;
     std::string damageType;
 
-    if(!get<std::string>(onHitData, "effect_type", true, effectType, "on_hit")) {
+    if(!get<std::string>(onHitJSON, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<std::string>(onHitData, "type", true, damageType, "on_hit")) {
+    if(!get<std::string>(onHitJSON, "type", true, damageType, "on_hit")) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
     onHitEffect.damageType = magic_enum::enum_cast<DamageType>(damageType).value_or(DamageType::UNKNOWN);
 
-    json::const_iterator it = onHitData.find(effectType);
-    if(it == onHitData.end()) {
+    json::const_iterator it = onHitJSON.find(effectType);
+    if(it == onHitJSON.end()) {
         addError(parent, "has no " + effectType);
         return std::unexpected(SpellLoaderError::PARSE);
     }
