@@ -17,9 +17,10 @@ void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, Entit
     EntityPtr spellEntity = Entity::create(spell->name);
     spellEntity->setTransform(caster->getTransform());
     spellEntity->addComponent(std::make_shared<CollisionComponent>());
-    // need to make sure that the spellEntity flying has it's own data.
     spellEntity->addComponent(std::make_shared<SpellComponent>(spell));
-    caster->addChild(spellEntity);
+    // cstyle cast to get rid of const
+    Entity* root = (Entity*)caster->getRoot();
+    root->addChild(spellEntity);
 }
 
 auto SpellBookComponent::getSpells() const -> const std::vector<std::shared_ptr<SpellData>> {

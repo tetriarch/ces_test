@@ -9,10 +9,11 @@ public:
     Entity(const std::string& name);
     static EntityPtr create(const std::string& name);
     void addChild(EntityPtr child);
+    void removeChild(const EntityPtr& child);
+
     void addComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
 
-    u32 getID();
     auto getChildren() const->std::span<EntityPtr const>;
 
     template<typename T>
@@ -20,13 +21,14 @@ public:
 
     auto getComponents() const->std::span<ComponentPtr const>;
     auto getParent() const->Entity*;
+    auto getRoot() const -> const Entity*;
     const Transform& getTransform() const;
     const std::string& getName() const;
 
 private:
     std::string name_;
     Transform transform_;
-    Entity* parent_;
+    Entity* parent_{nullptr};
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
 };

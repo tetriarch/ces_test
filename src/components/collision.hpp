@@ -9,7 +9,7 @@ class CollisionComponent : public Component<CollisionComponent> {
 public:
     void setCollisionBox(const Rect& rect) { rect_ = rect; }
     const Rect getCollisionBox() const { return rect_; }
-
+    auto describe() -> std::string override { return "I handle collisions"; };
     bool checkCollision(EntityPtr target) {
         auto components = target->getComponents();
         for(auto& c : components) {

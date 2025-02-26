@@ -74,14 +74,21 @@ int main(int argc, char const* argv[]) {
 
 	scene->addChild(player);
 	scene->addChild(wolf);
+	player = nullptr;
 
-	// quick spellBook test
-	auto playerSpellBook = player->getComponent<SpellBookComponent>();
-	playerSpellBook->addSpell(std::make_shared<SpellData>(spells.value()[0]));
-	playerSpellBook->addSpell(std::make_shared<SpellData>(spells.value()[1]));
-	playerSpellBook->addSpell(std::make_shared<SpellData>(spells.value()[2]));
+	auto children = scene->getChildren();
+	for(const auto& c : children) {
+		if(c->getName() == "player") {
+			player = c;
+		}
+	}
+	auto spellBook = player->getComponent<SpellBookComponent>();
+	spellBook->addSpell(std::make_shared<SpellData>(spells.value()[0]));
+	spellBook->addSpell(std::make_shared<SpellData>(spells.value()[1]));
+	spellBook->addSpell(std::make_shared<SpellData>(spells.value()[2]));
+	spellBook->castSpell(std::make_shared<SpellData>(spells.value()[0]), player, Vec2(0, 0));
+	scene->removeChild(player);
 
-	playerSpellBook->castSpell(std::make_shared<SpellData>(spells.value()[0]), player, Vec2(0, 0));
 	print(std::cout, scene, 0);
 
 	return 0;
