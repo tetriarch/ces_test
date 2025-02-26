@@ -1,6 +1,5 @@
 #include "components/components.hpp"
 #include "entity.hpp"
-#include "spell_manager.hpp"
 #include "spell_loader.hpp"
 
 
@@ -15,9 +14,10 @@ void indent(std::ostream& out, u32 depth) {
 
 
 void print(std::ostream& out, const EntityPtr& e, u32 depth) {
+
 	indent(out, depth);
 
-	out << e->getName() << " (" << e.get() << ")" << " [" << typeid(e).name() << "]" << std::endl;
+	out << e->getName() << " (" << e.get() << ")" << " [" << typeid(e).name() << " ID: " << e->getID() << "]" << std::endl;
 
 	for(auto&& comp : e->getComponents()) {
 		indent(out, depth);
@@ -46,8 +46,6 @@ int main(int argc, char const* argv[]) {
 	EntityPtr player = Entity::create("player");
 	EntityPtr wolf = Entity::create("wolf");
 
-	SpellManager sm(scene);
-
 	auto playerTag = std::make_shared<TagComponent>();
 	playerTag->setTag(TagType::PLAYER);
 
@@ -66,7 +64,7 @@ int main(int argc, char const* argv[]) {
 	auto wolfMana = std::make_shared<ManaComponent>();
 	wolfMana->setMana({0, 0});
 
-	player->addComponent(std::make_shared<SpellBookComponent>(&sm));
+	player->addComponent(std::make_shared<SpellBookComponent>());
 	player->addComponent(playerTag);
 	player->addComponent(playerLife);
 	player->addComponent(playerMana);
@@ -77,6 +75,13 @@ int main(int argc, char const* argv[]) {
 	scene->addChild(player);
 	scene->addChild(wolf);
 
+	// quick spellBook test
+	auto playerSpellBook = player->getComponent<SpellBookComponent>();
+	playerSpellBook->addSpell(std::make_shared<SpellData>(spells.value()[0]));
+	playerSpellBook->addSpell(std::make_shared<SpellData>(spells.value()[1]));
+	playerSpellBook->addSpell(std::make_shared<SpellData>(spells.value()[2]));
+
+	playerSpellBook->castSpell(std::make_shared<SpellData>(spells.value()[0]), player, Vec2(0, 0));
 	print(std::cout, scene, 0);
 
 	return 0;

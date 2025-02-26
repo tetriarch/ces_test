@@ -6,22 +6,43 @@
 class Entity {
 
 public:
-    Entity(const std::string& name) { name_ = name; }
-    static EntityPtr create(const std::string& name) { return std::make_shared<Entity>(name); }
-    void addChild(EntityPtr child) { children_.emplace_back(child); child->parent_ = this; }
-    void addComponent(ComponentPtr component) { components_.emplace_back(component); component->parent_ = this; }
-    void setTransform(const Transform& transform) { transform_ = transform; }
+    static u32 nextID;
+    Entity(const std::string& name);
+    static EntityPtr create(const std::string& name);
+    void addChild(EntityPtr child);
+    void addComponent(ComponentPtr component);
+    void setTransform(const Transform& transform);
 
-    auto getChildren() const -> std::span<EntityPtr const> { return children_; }
-    auto getComponents() const -> std::span<ComponentPtr const> { return components_; }
-    auto getParent() const -> const Entity* { return parent_; }
-    const Transform& getTransform() const { return transform_; }
-    const std::string& getName() const { return name_; }
+    u32 getID();
+    auto getChildren() const->std::span<EntityPtr const>;
+
+    template<typename T>
+    auto getComponent() -> std::shared_ptr<T>;
+
+    auto getComponents() const->std::span<ComponentPtr const>;
+    auto getParent() const -> const Entity*;
+    const Transform& getTransform() const;
+    const std::string& getName() const;
 
 private:
+    u32 ID_;
     std::string name_;
     Transform transform_;
     Entity* parent_{nullptr};
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
 };
+
+template<typename T>
+inline auto Entity::getComponent() -> std::shared_ptr<T> {
+
+    static_assert(std::is_base_of<ComponentBase, T>::value, "T must be derived from ComponentBase");
+
+    for(const auto& c : components_) {
+        if(auto casted = std::dynamic_pointer_cast<T>(c)) {
+            return casted;
+        }
+    }
+    std::cerr << "[ENTITY]: required component not found" << std::endl;
+    return nullptr;
+}

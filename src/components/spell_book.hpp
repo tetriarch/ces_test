@@ -1,22 +1,18 @@
 #pragma once
 
 #include "../component.hpp"
-#include "../spell_manager.hpp"
+#include "../math.hpp"
+#include "../utils.hpp"
+class SpellData;
 
 class SpellBookComponent : public Component<SpellBookComponent> {
+
 public:
-    SpellBookComponent(SpellManager* spellManager) { spellManager_ = spellManager; }
-    auto describe() -> std::string override { return "I cast spells"; }
-    void addSpell(const std::string& spellName) { spells_.push_back(spellName); }
-    void castSpell(const std::string& spellName) {
-        for(auto& s : spells_) {
-            if(s == spellName) {
-                spellManager_->cast(spellName, getParent());
-            }
-        }
-    }
-    auto getSpells() const -> const std::vector<std::string>* { return &spells_; }
+    auto describe() -> std::string override;
+    void addSpell(const std::shared_ptr<SpellData> spellData);
+    void castSpell(const std::shared_ptr<SpellData> spell, EntityPtr caster, const Vec2& target);
+    auto getSpells() const -> const std::vector<std::shared_ptr<SpellData>>;
+
 private:
-    std::vector<std::string> spells_;
-    SpellManager* spellManager_;
+    std::vector<std::shared_ptr<SpellData>> spells_;
 };

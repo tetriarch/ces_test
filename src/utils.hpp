@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <expected>
@@ -20,4 +21,5 @@ using u32 = uint32_t;
 class Entity;
 class ComponentBase;
 using EntityPtr = std::shared_ptr<Entity>;
+using EntityHandle = std::weak_ptr<Entity>;
 using ComponentPtr = std::shared_ptr<ComponentBase>;

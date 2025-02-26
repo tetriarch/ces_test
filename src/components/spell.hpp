@@ -52,7 +52,9 @@ struct SpellEffectOnHit {
     SpellEffect effect;
 };
 
-struct Motion {};
+struct Motion {
+    virtual ~Motion() = default;
+};
 
 struct ConstantMotion : Motion {
     f32 speed;
@@ -94,9 +96,7 @@ struct SpellData {
 class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent(std::shared_ptr<SpellData> spellData);
-
-    void cast(EntityPtr& source, Vec2 target);
-    auto describe() -> std::string;
+    auto describe() -> std::string override;
 
 private:
     std::shared_ptr<SpellData> spellData_;
