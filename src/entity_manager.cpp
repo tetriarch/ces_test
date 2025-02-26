@@ -16,7 +16,7 @@ EntityManager::~EntityManager() {
 
 void EntityManager::addEntity(EntityPtr entity) {
     assert(entity);
-    entities_.emplace(entity->getID(), entity);
+    entities_.emplace(entity->getName(), entity);
 }
 
 
@@ -25,13 +25,13 @@ void EntityManager::removeEntity(EntityPtr entity) {
     if(!entity) {
         return;
     }
-    entities_.erase(entity->getID());
+    entities_.erase(entity->getName());
 }
 
 
 
-auto EntityManager::find(u32 id) -> EntityPtr {
-    if(auto it = entities_.find(id); it != entities_.end()) {
+auto EntityManager::find(const std::string& name) -> EntityPtr {
+    if(auto it = entities_.find(name); it != entities_.end()) {
         auto e = it->second.lock();
         return e;
     }

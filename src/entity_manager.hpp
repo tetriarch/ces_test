@@ -10,10 +10,10 @@ public:
 
     void addEntity(EntityPtr entity);
     void removeEntity(EntityPtr entity);
-    auto find(u32 id) -> EntityPtr;
+    auto find(const std::string& name) -> EntityPtr;
 
 private:
-    std::unordered_map<u32, EntityHandle> entities_;
+    std::unordered_map<std::string, EntityHandle> entities_;
 
 private:
     EntityManager() = default;

@@ -3,10 +3,9 @@
 #include "component.hpp"
 #include "math.hpp"
 
-class Entity {
+class Entity : public std::enable_shared_from_this<Entity> {
 
 public:
-    static u32 nextID;
     Entity(const std::string& name);
     static EntityPtr create(const std::string& name);
     void addChild(EntityPtr child);
@@ -20,15 +19,14 @@ public:
     auto getComponent() -> std::shared_ptr<T>;
 
     auto getComponents() const->std::span<ComponentPtr const>;
-    auto getParent() const -> const Entity*;
+    auto getParent() const->Entity*;
     const Transform& getTransform() const;
     const std::string& getName() const;
 
 private:
-    u32 ID_;
     std::string name_;
     Transform transform_;
-    Entity* parent_{nullptr};
+    Entity* parent_;
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
 };

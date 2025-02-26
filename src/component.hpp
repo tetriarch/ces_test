@@ -5,14 +5,14 @@
 class ComponentBase {
 
 public:
-    auto getParent() const -> Entity* { return parent_; }
+    auto getParent() const -> EntityPtr { return parent_.lock(); }
     virtual auto getComponentType() const->std::type_index = 0;
     virtual auto describe() -> std::string { return ""; }
     virtual void update() {}
     virtual void render() {}
 
 private:
-    Entity* parent_{nullptr};
+    EntityHandle parent_;
     template <class T>
     friend class Component;
 

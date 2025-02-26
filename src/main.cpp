@@ -1,7 +1,7 @@
 #include "components/components.hpp"
 #include "entity.hpp"
+#include "entity_manager.hpp"
 #include "spell_loader.hpp"
-
 
 void indent(std::ostream& out, u32 depth) {
 
@@ -17,7 +17,7 @@ void print(std::ostream& out, const EntityPtr& e, u32 depth) {
 
 	indent(out, depth);
 
-	out << e->getName() << " (" << e.get() << ")" << " [" << typeid(e).name() << " ID: " << e->getID() << "]" << std::endl;
+	out << e->getName() << " (" << e.get() << ")" << " [" << typeid(e).name() << "]" << std::endl;
 
 	for(auto&& comp : e->getComponents()) {
 		indent(out, depth);

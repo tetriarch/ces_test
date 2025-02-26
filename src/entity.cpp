@@ -1,12 +1,9 @@
 #include "entity.hpp"
 #include "entity_manager.hpp"
 
-//NOTE: GUID would be better for this
-u32 Entity::nextID = 0;
 
 Entity::Entity(const std::string& name)
-    : ID_(nextID++),
-    name_(name) {
+    : name_(name) {
 
 }
 
@@ -26,7 +23,9 @@ void Entity::addChild(EntityPtr child) {
 
 
 void Entity::addComponent(ComponentPtr component) {
-    components_.emplace_back(component); component->parent_ = this;
+    assert(component->parent_.expired());
+    component->parent_ = shared_from_this();
+    components_.push_back(component);
 }
 
 
@@ -35,11 +34,6 @@ void Entity::setTransform(const Transform& transform) {
     transform_ = transform;
 }
 
-
-
-u32 Entity::getID() {
-    return ID_;
-}
 
 
 
@@ -55,7 +49,7 @@ auto Entity::getComponents() const -> std::span<ComponentPtr const> {
 
 
 
-auto Entity::getParent() const -> const Entity* {
+auto Entity::getParent() const -> Entity* {
     return parent_;
 }
 
