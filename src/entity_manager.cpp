@@ -16,7 +16,7 @@ EntityManager::~EntityManager() {
 
 void EntityManager::addEntity(EntityPtr entity) {
     assert(entity);
-    entities_.emplace(entity->getName(), entity);
+    entities_.emplace(entity->name(), entity);
 }
 
 
@@ -25,7 +25,7 @@ void EntityManager::removeEntity(EntityPtr entity) {
     if(!entity) {
         return;
     }
-    entities_.erase(entity->getName());
+    entities_.erase(entity->name());
 }
 
 

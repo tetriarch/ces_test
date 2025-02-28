@@ -1,0 +1,33 @@
+{
+    "name": "Zap",
+    "cast_time": 0.1,
+    "interrupt_time": 0.0,
+    "mana_cost": 35,
+    "cooldown": 5.0,
+    "action": [
+        {
+            "type": "BEAM",
+            "pierce": true,
+            "movement": {
+                "type": "instant"
+            },
+            "on_hit": [
+                {
+                    "effect_type": "direct_damage",
+                    "type": "LIGHTNING",
+                    "direct_damage": {
+                        "min": 5,
+                        "max": 10
+                    }
+                },
+                {
+                    "effect_type": "stun",
+                    "type": "LIGHTNING",
+                    "stun": {
+                        "duration_in_sec": 3.0
+                    }
+                }
+            ]
+        }
+    ]
+}

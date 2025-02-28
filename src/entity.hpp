@@ -14,16 +14,16 @@ public:
     void addComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
 
-    auto getChildren() const->std::span<EntityPtr const>;
+    auto children() const->std::span<EntityPtr const>;
 
     template<typename T>
-    auto getComponent() -> std::shared_ptr<T>;
+    auto component() -> std::shared_ptr<T>;
 
-    auto getComponents() const->std::span<ComponentPtr const>;
-    auto getParent() const->Entity*;
-    auto getRoot() const -> const Entity*;
-    const Transform& getTransform() const;
-    const std::string& getName() const;
+    auto components() const->std::span<ComponentPtr const>;
+    auto parent() const->Entity*;
+    auto root() const -> const Entity*;
+    const Transform& transform() const;
+    const std::string& name() const;
 
 private:
     std::string name_;
@@ -34,7 +34,7 @@ private:
 };
 
 template<typename T>
-inline auto Entity::getComponent() -> std::shared_ptr<T> {
+inline auto Entity::component() -> std::shared_ptr<T> {
 
     static_assert(std::is_base_of<ComponentBase, T>::value, "T must be derived from ComponentBase");
 

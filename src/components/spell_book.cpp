@@ -15,14 +15,14 @@ void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, Entit
     std::cout << "[SPELL BOOK]: casting " << spell->name << std::endl;
 
     EntityPtr spellEntity = Entity::create(spell->name);
-    spellEntity->setTransform(caster->getTransform());
+    spellEntity->setTransform(caster->transform());
     spellEntity->addComponent(std::make_shared<CollisionComponent>());
     spellEntity->addComponent(std::make_shared<SpellComponent>(spell));
     // cstyle cast to get rid of const
-    Entity* root = (Entity*)caster->getRoot();
+    Entity* root = (Entity*)caster->root();
     root->addChild(spellEntity);
 }
 
-auto SpellBookComponent::getSpells() const -> const std::vector<std::shared_ptr<SpellData>> {
+auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
     return spells_;
 }

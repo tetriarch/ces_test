@@ -18,7 +18,6 @@ FetchContent_MakeAvailable(nlohmann_json)
 FetchContent_MakeAvailable(magic_enum)
 
 set(CMAKE_CXX_STANDARD 23)
-
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS  src/**.cpp)
 
 
@@ -29,6 +28,11 @@ add_executable(ces_test ${SRC_FILES})
 target_link_libraries(ces_test PRIVATE 
     nlohmann_json::nlohmann_json
     magic_enum::magic_enum
+)
+
+target_compile_options(ces_test PRIVATE 
+    $<$<CONFIG:Debug>: -g -DDEBUG -m64 -Wall>
+    $<$<CONFIG:Release>: -O3 -DNDEBUG -m64 -Wall>
 )
 
 add_dependencies(ces_test copy_assets)

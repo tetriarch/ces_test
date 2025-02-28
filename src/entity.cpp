@@ -44,25 +44,25 @@ void Entity::setTransform(const Transform& transform) {
 
 
 
-auto Entity::getChildren() const -> std::span<EntityPtr const> {
+auto Entity::children() const -> std::span<EntityPtr const> {
     return children_;
 }
 
 
 
-auto Entity::getComponents() const -> std::span<ComponentPtr const> {
+auto Entity::components() const -> std::span<ComponentPtr const> {
     return components_;
 }
 
 
 
-auto Entity::getParent() const -> Entity* {
+auto Entity::parent() const -> Entity* {
     return parent_;
 }
 
 
 
-auto Entity::getRoot() const -> const Entity* {
+auto Entity::root() const -> const Entity* {
 
     auto current = this;
     while(current->parent_) {
@@ -73,13 +73,13 @@ auto Entity::getRoot() const -> const Entity* {
 
 
 
-const Transform& Entity::getTransform() const {
+const Transform& Entity::transform() const {
     return transform_;
 }
 
 
 
-const std::string& Entity::getName() const {
+const std::string& Entity::name() const {
     return name_;
 }
 

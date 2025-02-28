@@ -8,14 +8,14 @@ class CollisionComponent : public Component<CollisionComponent> {
 
 public:
     void setCollisionBox(const Rect& rect) { rect_ = rect; }
-    const Rect getCollisionBox() const { return rect_; }
+    const Rect collisionBox() const { return rect_; }
     auto describe() -> std::string override { return "I handle collisions"; };
     bool checkCollision(EntityPtr target) {
-        auto components = target->getComponents();
+        auto components = target->components();
         for(auto& c : components) {
-            if(c->getComponentType() == typeid(CollisionComponent)) {
+            if(c->componentType() == typeid(CollisionComponent)) {
                 auto targetCollisionComp = dynamic_cast<CollisionComponent*>(c.get());
-                if(checkAABBIntersection(rect_, targetCollisionComp->getCollisionBox())) {
+                if(checkAABBIntersection(rect_, targetCollisionComp->collisionBox())) {
                     return true;
                 }
             }

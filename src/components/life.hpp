@@ -10,7 +10,7 @@ struct Life {
 class LifeComponent : public Component<LifeComponent> {
 
 public:
-    const Life& getLife() const;
+    const Life& life() const;
     void setLife(const Life& life);
     void update();
     auto describe() -> std::string override;

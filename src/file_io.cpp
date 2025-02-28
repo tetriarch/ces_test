@@ -1,6 +1,5 @@
 #include "file_io.hpp"
 
-#include <filesystem>
 #include <fstream>
 
 namespace FileIO {

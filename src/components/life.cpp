@@ -1,6 +1,6 @@
 #include "life.hpp"
 
-const Life& LifeComponent::getLife() const {
+const Life& LifeComponent::life() const {
     return life_;
 }
 

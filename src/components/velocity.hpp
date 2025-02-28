@@ -6,11 +6,11 @@
 class VelocityComponent : public Component<VelocityComponent> {
 
 public:
-    Vec2 getVelocity() const {
+    Vec2 velocity() const {
         return direction_.normalized() * speed_;
     }
-    Vec2 getDirection() const { return direction_; }
-    f32 getSpeed() const { return speed_; }
+    Vec2 direction() const { return direction_; }
+    f32 speed() const { return speed_; }
     void setDirection(const Vec2& direction) { direction_ = direction; }
     void setSpeed(f32 speed) { speed_ = speed; }
 

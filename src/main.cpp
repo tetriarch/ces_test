@@ -1,3 +1,4 @@
+#include "asset_manager.hpp"
 #include "components/components.hpp"
 #include "entity.hpp"
 #include "entity_manager.hpp"
@@ -11,35 +12,30 @@ void indent(std::ostream& out, u32 depth) {
 	out << ">";
 }
 
-
-
 void print(std::ostream& out, const EntityPtr& e, u32 depth) {
 
 	indent(out, depth);
 
-	out << e->getName() << " (" << e.get() << ")" << " [" << typeid(e).name() << "]" << std::endl;
+	out << e->name() << " (" << e.get() << ")" << " [" << typeid(e).name() << "]" << std::endl;
 
-	for(auto&& comp : e->getComponents()) {
+	for(auto&& comp : e->components()) {
 		indent(out, depth);
 		out << comp->describe() << " " << comp.get() << std::endl;
 	}
 
-	for(auto&& child : e->getChildren()) {
+	for(auto&& child : e->children()) {
 		print(out, child, depth + 1);
 	}
 }
 
-
-
 int main(int argc, char const* argv[]) {
 
-	// parse spells
-	SpellLoader spellLoader;
-	auto spells = spellLoader.load("assets/data/spells.json");
-	if(!spells) {
-		std::cout << spellLoader.getError(spells.error()) << std::endl;
-		return 1;
-	}
+	// init
+	AssetManager am("assets");
+	am.registerLoader<SpellData>(std::make_shared<SpellLoader>());
+	auto fireBall = am.load<SpellData>("data/spells/fireball.json");
+	auto iceLance = am.load<SpellData>("data/spells/ice_lance.json");
+	auto zap = am.load<SpellData>("data/spells/zap.json");
 
 	// hardcoded scene
 	EntityPtr scene = Entity::create("scene");
@@ -76,17 +72,17 @@ int main(int argc, char const* argv[]) {
 	scene->addChild(wolf);
 	player = nullptr;
 
-	auto children = scene->getChildren();
+	auto children = scene->children();
 	for(const auto& c : children) {
-		if(c->getName() == "player") {
+		if(c->name() == "player") {
 			player = c;
 		}
 	}
-	auto spellBook = player->getComponent<SpellBookComponent>();
-	spellBook->addSpell(std::make_shared<SpellData>(spells.value()[0]));
-	spellBook->addSpell(std::make_shared<SpellData>(spells.value()[1]));
-	spellBook->addSpell(std::make_shared<SpellData>(spells.value()[2]));
-	spellBook->castSpell(std::make_shared<SpellData>(spells.value()[0]), player, Vec2(0, 0));
+	auto spellBook = player->component<SpellBookComponent>();
+	spellBook->addSpell(fireBall);
+	spellBook->addSpell(iceLance);
+	spellBook->addSpell(zap);
+	spellBook->castSpell(fireBall, player, Vec2(0, 0));
 	scene->removeChild(player);
 
 	print(std::cout, scene, 0);

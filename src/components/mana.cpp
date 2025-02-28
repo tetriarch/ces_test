@@ -1,6 +1,6 @@
 #include "mana.hpp"
 
-const Mana& ManaComponent::getMana() const {
+const Mana& ManaComponent::mana() const {
     return mana_;
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "asset_manager.hpp"
 #include "utils.hpp"
 #include "components/spell.hpp"
 
@@ -10,22 +11,19 @@
 using namespace nlohmann;
 
 enum class SpellLoaderError {
-    LOAD,
     PARSE
 };
 
-class SpellLoader {
+class SpellLoader : public IAssetLoader {
 
 public:
-    std::string getError(SpellLoaderError error);
-    auto load(const std::string& fileName) -> std::expected<std::vector<SpellData>, SpellLoaderError>;
+    auto load(AssetManager& assetManager, const std::string& filePath) -> std::shared_ptr<void> override;
 
 private:
-    void addError(const std::string& layer, const std::string& message);
-    auto parseSpells(const std::string& source) -> std::expected<std::vector<SpellData>, SpellLoaderError>;
-    auto parseBasicStats(const json& spellJSON, const std::string& parent) -> std::expected<SpellData, SpellLoaderError>;
-    auto parseAction(const json& actionJSON, const std::string& parent) -> std::expected<SpellAction, SpellLoaderError>;
-    auto parseOnHitEffect(const json& onHitJSON, const std::string& parent) -> std::expected<SpellEffectOnHit, SpellLoaderError>;
+    auto parseSpell(const std::string& source) -> std::expected<SpellData, SpellLoaderError>;
+    auto parseBasicStats(const json& spellJSON, const std::string& parent = "") -> std::expected<SpellData, SpellLoaderError>;
+    auto parseAction(const json& actionJSON, const std::string& parent = "") -> std::expected<SpellAction, SpellLoaderError>;
+    auto parseOnHitEffect(const json& onHitJSON, const std::string& parent = "") -> std::expected<SpellEffectOnHit, SpellLoaderError>;
 
     template<typename T>
     bool get(const json& object, std::string key, bool required, T& result, const std::string& parent = "");
@@ -35,6 +33,5 @@ private:
 
     auto valueTypeToTypeID(const json& value) -> std::type_index;
 
-private:
-    std::stringstream errorMessage_;
+    void error(const std::string& msg, const std::string& parent = "");
 };

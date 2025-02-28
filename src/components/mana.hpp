@@ -10,7 +10,7 @@ struct Mana {
 class ManaComponent : public Component<ManaComponent> {
 
 public:
-    const Mana& getMana() const;
+    const Mana& mana() const;
     void setMana(const Mana& mana);
     void update();
     auto describe() -> std::string override;

@@ -5,8 +5,8 @@
 class ComponentBase {
 
 public:
-    auto getParent() const -> EntityPtr { return parent_.lock(); }
-    virtual auto getComponentType() const->std::type_index = 0;
+    auto parent() const -> EntityPtr { return parent_.lock(); }
+    virtual auto componentType() const->std::type_index = 0;
     virtual auto describe() -> std::string { return ""; }
     virtual void update() {}
     virtual void render() {}
@@ -26,7 +26,7 @@ template <class TDerived>
 class Component : public ComponentBase {
 public:
     Component() {};
-    auto getComponentType() const -> std::type_index override {
+    auto componentType() const -> std::type_index override {
         return typeid(TDerived);
     }
 

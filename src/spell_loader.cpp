@@ -3,89 +3,63 @@
 
 #include <magic_enum/magic_enum.hpp>
 
-std::string SpellLoader::getError(SpellLoaderError error) {
 
-    if(error == SpellLoaderError::LOAD) {
-        return "[SPELL LAODER]: failed to load spells\n" + errorMessage_.str();
+
+auto SpellLoader::load(AssetManager& assetManager, const std::string& filePath) -> std::shared_ptr<void> {
+
+    auto spellSource = FileIO::readTextFile((filePath));
+    if(!spellSource) {
+        ERROR("[SPELL LOADER]: " + filePath + " " + spellSource.error().message());
+        return nullptr;
     }
 
-    if(error == SpellLoaderError::PARSE) {
-        return "[SPELL LOADER]: failed to parse spells\n" + errorMessage_.str();
+    auto spell = parseSpell(spellSource.value());
+    if(!spell) {
+        ERROR("[SPELL LOADER]: " + filePath + " failed to parse");
+        return nullptr;
     }
 
-    return "";
+    return std::make_shared<SpellData>(spell.value());
 }
 
 
 
-auto SpellLoader::load(const std::string& fileName) -> std::expected<std::vector<SpellData>, SpellLoaderError> {
-
-    // load source
-    auto spellsSource = FileIO::readTextFile(fileName);
-    if(!spellsSource) {
-        addError("", fileName + " - " + spellsSource.error().message());
-        return std::unexpected(SpellLoaderError::LOAD);
-    }
-
-    auto spells = parseSpells(spellsSource.value());
-    if(!spells) {
-        return std::unexpected(spells.error());
-    }
-
-    return std::move(spells);
-}
-
-
-
-void SpellLoader::addError(const std::string& layer, const std::string& message) {
-
-    if(!layer.empty()) {
-        errorMessage_ << "[SPELL LOADER]: " << "<" << layer << ">: " << message << '\n';
-    }
-    else {
-        errorMessage_ << "[SPELL LOADER]: " << message << '\n';
-    }
-}
-
-
-
-auto SpellLoader::parseSpells(const std::string& source) -> std::expected<std::vector<SpellData>, SpellLoaderError> {
+auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellData, SpellLoaderError> {
 
     json spellJSON;
     try {
         spellJSON = json::parse(source);
     }
-    catch(json::exception& e) {
-        addError("json", e.what());
+    catch(const json::exception& e) {
+        error(std::string(e.what()));
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    std::vector<SpellData> spells;
-    for(auto& [spell, spellDescription] : spellJSON.items()) {
-        auto s = parseBasicStats(spellDescription, spell);
-        if(!s) {
-            addError(spell, "failed to parse spell basic stats");
-            return std::unexpected(s.error());
-        }
-
-        json::const_iterator it = spellDescription.find("action");
-        if(it == spellDescription.end()) {
-            addError(spell, "has no action");
-            return std::unexpected(SpellLoaderError::PARSE);
-        }
-
-        // parse actions and add them to spell
-        for(auto& action : it.value()) {
-            auto a = parseAction(action, "action");
-            if(!a) {
-                addError(spell, "failed to parse action");
-                return std::unexpected(a.error());
-            }
-            s->actions.emplace_back(a.value());
-        }
-        spells.emplace_back(s.value());
+    // parse basic stats
+    auto stats = parseBasicStats(spellJSON);
+    if(!stats) {
+        error("failed to parse basic stats");
+        return std::unexpected(stats.error());
     }
-    return std::move(spells);
+    auto spell = stats.value();
+
+    // parse actions
+    json::const_iterator it = spellJSON.find("action");
+    if(it == spellJSON.end()) {
+        error("failed to find action");
+        return std::unexpected(SpellLoaderError::PARSE);
+    }
+
+    for(auto& a : it.value()) {
+        auto action = parseAction(a, "action");
+        if(!action) {
+            error("failed to parse action");
+            return std::unexpected(action.error());
+        }
+        spell.actions.emplace_back(action.value());
+    }
+
+    return std::move(spell);
 }
 
 
@@ -141,7 +115,7 @@ auto SpellLoader::parseAction(const json& actionJSON, const std::string& parent)
     // movement
     json::const_iterator it = actionJSON.find("movement");
     if(it == actionJSON.end()) {
-        addError(parent, "has no movement");
+        error("has no movement", parent);
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
@@ -162,21 +136,21 @@ auto SpellLoader::parseAction(const json& actionJSON, const std::string& parent)
         action.motion = std::make_shared<InstantMotion>(motion);
     }
     else {
-        addError("movement", "invalid movement type");
+        error("invalid movement type", "movement");
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
     // on hit
     it = actionJSON.find("on_hit");
     if(it == actionJSON.end()) {
-        addError(parent, "has no on_hit");
+        error("has no on_hit", parent);
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
     for(auto& oh : it.value()) {
         auto onHitEffect = parseOnHitEffect(oh, "on_hit");
         if(!onHitEffect) {
-            addError(parent, "failed to parse on_hit action");
+            error("failed to parse on_hit action", parent);
             return std::unexpected(SpellLoaderError::PARSE);
         }
         action.actions.emplace_back(onHitEffect.value());
@@ -205,7 +179,7 @@ auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& par
 
     json::const_iterator it = onHitJSON.find(effectType);
     if(it == onHitJSON.end()) {
-        addError(parent, "has no " + effectType);
+        error("has no " + effectType, parent);
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
@@ -252,7 +226,7 @@ auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& par
     }
 
     else {
-        addError(parent, "associated key to effect_type value: " + effectType);
+        error("missing associated key to effect_type value: " + effectType, parent);
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
@@ -272,6 +246,15 @@ auto SpellLoader::valueTypeToTypeID(const json& value) -> std::type_index {
     return typeid(void);
 }
 
+void SpellLoader::error(const std::string& msg, const std::string& parent) {
+    if(parent.empty()) {
+        ERROR("[SPELL LOADER]: " + msg);
+    }
+    else {
+        ERROR("[SPELL_LOADER]: " + '(' + parent + ") " + msg);
+    }
+}
+
 
 
 template<typename T>
@@ -280,22 +263,22 @@ bool SpellLoader::get(const json& object, std::string key, bool required, T& res
     json::const_iterator it = object.find(key);
     if(it == object.end()) {
         if(required) {
-            std::string error = key + " not found";
+            std::string err = key + " not found";
             if(!parent.empty()) {
-                error += " in " + parent;
+                err += " in " + parent;
             }
-            addError(parent, error);
+            error(err, parent);
         }
         return false;
     }
 
     if(valueTypeToTypeID(it.value()) != typeid(T)) {
         if(required) {
-            std::string error = key + " is a " + it.value().type_name() + ", expected " + typeToString<T>();
+            std::string err = key + " is a " + it.value().type_name() + ", expected " + typeToString<T>();
             if(!parent.empty()) {
-                error = error + " in " + parent;
+                err = err + " in " + parent;
             }
-            addError(parent, error);
+            error(err, parent);
         }
         return false;
     }

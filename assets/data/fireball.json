@@ -1,0 +1,35 @@
+{
+    "name": "Fireball",
+    "cast_time": 2.0,
+    "interrupt_time": 1.5,
+    "mana_cost": 15,
+    "cooldown": 0.0,
+    "action": [
+        {
+            "type": "PROJECTILE",
+            "pierce": false,
+            "movement": {
+                "type": "constant_motion",
+                "speed": 1.5
+            },
+            "on_hit": [
+                {
+                    "effect_type": "direct_damage",
+                    "type": "FIRE",
+                    "direct_damage": {
+                        "min": 10,
+                        "max": 30
+                    }
+                },
+                {
+                    "effect_type": "dot",
+                    "type": "FIRE",
+                    "dot": {
+                        "periodic_damage": 5,
+                        "duration_in_sec": 5.0
+                    }
+                }
+            ]
+        }
+    ]
+}
