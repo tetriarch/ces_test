@@ -22,17 +22,17 @@ enum class DamageType {
 };
 
 struct DirectDamage {
-    s32 min;
-    s32 max;
+    u32 min;
+    u32 max;
 };
 
 struct DamageOverTime {
-    s32 periodicDamage;
+    u32 periodicDamage;
     f32 duration;
 };
 
 struct Slow {
-    s32 magnitude;
+    u32 magnitude;
     f32 duration;
 };
 
@@ -41,8 +41,8 @@ struct Stun {
 };
 
 struct Heal {
-    s32 min;
-    s32 max;
+    u32 min;
+    u32 max;
 };
 
 using SpellEffect = std::variant<DirectDamage, DamageOverTime, Slow, Stun, Heal>;
@@ -86,7 +86,7 @@ struct SpellData {
     std::string name;
     f32 castTime;
     f32 interruptTime;
-    s32 manaCost;
+    u32 manaCost;
     f32 cooldown;
     std::vector<SpellAction> actions;
 };

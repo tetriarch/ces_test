@@ -70,20 +70,12 @@ int main(int argc, char const* argv[]) {
 
 	scene->addChild(player);
 	scene->addChild(wolf);
-	player = nullptr;
 
-	auto children = scene->children();
-	for(const auto& c : children) {
-		if(c->name() == "player") {
-			player = c;
-		}
-	}
 	auto spellBook = player->component<SpellBookComponent>();
 	spellBook->addSpell(fireBall);
 	spellBook->addSpell(iceLance);
 	spellBook->addSpell(zap);
 	spellBook->castSpell(fireBall, player, Vec2(0, 0));
-	scene->removeChild(player);
 
 	print(std::cout, scene, 0);
 

@@ -80,7 +80,7 @@ auto SpellLoader::parseBasicStats(const json& spellJSON, const std::string& pare
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
-    if(!get<s32>(spellJSON, "mana_cost", true, spellData.manaCost, parent)) {
+    if(!get<u32>(spellJSON, "mana_cost", true, spellData.manaCost, parent)) {
         return std::unexpected(SpellLoaderError::PARSE);
     }
 
@@ -186,10 +186,10 @@ auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& par
     // individual effects - honestly this should be broken to functions
     if(effectType == "direct_damage") {
         DirectDamage dd;
-        if(!get<s32>(it.value(), "min", true, dd.min, "direct_damage")) {
+        if(!get<u32>(it.value(), "min", true, dd.min, "direct_damage")) {
             return std::unexpected(SpellLoaderError::PARSE);
         }
-        if(!get<s32>(it.value(), "max", true, dd.max, "direct_damage")) {
+        if(!get<u32>(it.value(), "max", true, dd.max, "direct_damage")) {
             return std::unexpected(SpellLoaderError::PARSE);
         }
         onHitEffect.effect = dd;
@@ -197,7 +197,7 @@ auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& par
 
     else if(effectType == "dot") {
         DamageOverTime dot;
-        if(!get<s32>(it.value(), "periodic_damage", true, dot.periodicDamage, "dot")) {
+        if(!get<u32>(it.value(), "periodic_damage", true, dot.periodicDamage, "dot")) {
             return std::unexpected(SpellLoaderError::PARSE);
         }
         if(!get<f32>(it.value(), "duration_in_sec", true, dot.duration, "dot")) {
@@ -208,7 +208,7 @@ auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& par
 
     else if(effectType == "slow") {
         Slow slow;
-        if(!get<s32>(it.value(), "magnitude", true, slow.magnitude, "slow")) {
+        if(!get<u32>(it.value(), "magnitude", true, slow.magnitude, "slow")) {
             return std::unexpected(SpellLoaderError::PARSE);
         }
         if(!get<f32>(it.value(), "duration_in_sec", true, slow.duration, "slow")) {
@@ -240,6 +240,7 @@ auto SpellLoader::valueTypeToTypeID(const json& value) -> std::type_index {
     if(value.is_null()) return typeid(nullptr);
     if(value.is_string()) return typeid(std::string);
     if(value.is_boolean()) return typeid(bool);
+    if(value.is_number_unsigned()) return typeid(u32);
     if(value.is_number_integer()) return typeid(s32);
     if(value.is_number_float()) return typeid(f32);
 
