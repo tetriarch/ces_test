@@ -61,14 +61,21 @@ auto SceneLoader::parseScene(AssetManager& assetManager, const std::string& sour
         }
 
         json transformJSON;
-        if(e.contains("transform")) {
-            transformJSON = e["transform"];
+        if(!e.contains("transform")) {
+            ERROR(error("has no trasform", "entitites"));
+            return std::unexpected(JSONParserError::PARSE);
         }
+        transformJSON = e["transform"];
 
         if(transformJSON.is_array() && transformJSON.size() == 3) {
             transform.position.x = transformJSON[0];
             transform.position.y = transformJSON[1];
             transform.rotationInDegrees = transformJSON[2];
+        }
+        else {
+            ERROR(error("transform is invalid", "entitites"));
+            return std::unexpected(JSONParserError::PARSE);
+
         }
 
         auto entitySource = FileIO::readTextFile(assetManager.getAssetPath(prefab).generic_string());
