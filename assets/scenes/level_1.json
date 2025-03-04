@@ -1,0 +1,32 @@
+{
+    "name": "Level 1",
+    "entities": [
+        {
+            "name": "Hero",
+            "prefab": "characters/playable/player.json",
+            "transform": [
+                50.0,
+                50.0,
+                0.0
+            ]
+        },
+        {
+            "name": "Big Bad Wolf",
+            "prefab": "characters/monsters/wolf/wolf.json",
+            "transform": [
+                200.0,
+                200.0,
+                0.0
+            ]
+        },
+        {
+            "name": "Hephasto the Armorer",
+            "prefab": "characters/npc/hephasto/hephasto.json",
+            "transform": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ]
+}

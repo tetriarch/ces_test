@@ -13,6 +13,7 @@ public:
 
     void addComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
+    void setName(const std::string& name);
 
     auto children() const->std::span<EntityPtr const>;
 

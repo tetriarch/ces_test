@@ -1,0 +1,39 @@
+{
+    "components": [
+        {
+            "type": "life",
+            "current": 200,
+            "max": 200
+        },
+        {
+            "type": "mana",
+            "current": 50,
+            "max": 50
+        },
+        {
+            "type": "affiliation",
+            "to": "enemy"
+        },
+        {
+            "type": "collision",
+            "box": [
+                10,
+                10
+            ]
+        },
+        {
+            "type": "spellbook",
+            "spells": [
+                "spells/ice_lance.json"
+            ]
+        },
+        {
+            "type": "velocity",
+            "speed": 15
+        },
+        {
+            "type": "texture",
+            "path": "characters/monsters/wolf/textures/wolf_c.png"
+        }
+    ]
+}

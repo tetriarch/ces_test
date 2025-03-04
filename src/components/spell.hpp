@@ -2,6 +2,7 @@
 
 #include "../entity.hpp"
 #include "../utils.hpp"
+#include "../i_asset.hpp"
 
 enum class ActionType {
     AOE,
@@ -81,8 +82,7 @@ struct SpellAction {
     std::vector<SpellEffectOnHit> actions;
 };
 
-
-struct SpellData {
+struct SpellData : public IAsset {
     std::string name;
     f32 castTime;
     f32 interruptTime;
@@ -90,8 +90,6 @@ struct SpellData {
     f32 cooldown;
     std::vector<SpellAction> actions;
 };
-
-
 
 class SpellComponent : public Component<SpellComponent> {
 public:

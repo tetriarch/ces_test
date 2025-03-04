@@ -6,20 +6,14 @@ EntityManager& EntityManager::get() {
     return instance;
 }
 
-
-
 EntityManager::~EntityManager() {
     entities_.clear();
 }
-
-
 
 void EntityManager::addEntity(EntityPtr entity) {
     assert(entity);
     entities_.emplace(entity->name(), entity);
 }
-
-
 
 void EntityManager::removeEntity(EntityPtr entity) {
     if(!entity) {
@@ -27,8 +21,6 @@ void EntityManager::removeEntity(EntityPtr entity) {
     }
     entities_.erase(entity->name());
 }
-
-
 
 auto EntityManager::find(const std::string& name) -> EntityPtr {
     if(auto it = entities_.find(name); it != entities_.end()) {

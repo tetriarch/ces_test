@@ -1,5 +1,7 @@
-#include "spell_book.hpp"
+#include "../log.hpp"
+
 #include "components.hpp"
+#include "spell_book.hpp"
 
 auto SpellBookComponent::describe() -> std::string {
     return "I cast spells";
@@ -11,6 +13,11 @@ void SpellBookComponent::addSpell(const std::shared_ptr<SpellData> spellData) {
 }
 
 void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, EntityPtr caster, const Vec2& target) {
+
+    if(!spell) {
+        ERROR("spell is nullptr");
+        return;
+    }
 
     std::cout << "[SPELL BOOK]: casting " << spell->name << std::endl;
 

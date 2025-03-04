@@ -2,6 +2,8 @@
 #include "components/components.hpp"
 #include "entity.hpp"
 #include "entity_manager.hpp"
+#include "scene.hpp"
+#include "scene_loader.hpp"
 #include "spell_loader.hpp"
 
 void indent(std::ostream& out, u32 depth) {
@@ -33,49 +35,55 @@ int main(int argc, char const* argv[]) {
 	// init
 	AssetManager am("assets");
 	am.registerLoader<SpellData>(std::make_shared<SpellLoader>());
-	auto fireBall = am.load<SpellData>("data/spells/fireball.json");
-	auto iceLance = am.load<SpellData>("data/spells/ice_lance.json");
-	auto zap = am.load<SpellData>("data/spells/zap.json");
+	am.registerLoader<Scene>(std::make_shared<SceneLoader>());
 
-	// hardcoded scene
-	EntityPtr scene = Entity::create("scene");
-	EntityPtr player = Entity::create("player");
-	EntityPtr wolf = Entity::create("wolf");
+	auto scene = am.load<Scene>("scenes/level_1.json");
+	if(!scene) {
+		return 1;
+	}
 
-	auto playerTag = std::make_shared<TagComponent>();
-	playerTag->setTag(TagType::PLAYER);
+	// auto fireBall = am.load<SpellData>("spells/fireball.json");
+	// auto iceLance = am.load<SpellData>("spells/ice_lance.json");
+	// auto zap = am.load<SpellData>("spells/zap.json");
 
-	auto wolfTag = std::make_shared<TagComponent>();
-	wolfTag->setTag(TagType::ENEMY);
+	// // hardcoded scene
+	// EntityPtr player = Entity::create("player");
+	// EntityPtr wolf = Entity::create("wolf");
 
-	auto playerLife = std::make_shared<LifeComponent>();
-	playerLife->setLife({100, 100});
+	// auto playerTag = std::make_shared<TagComponent>();
+	// playerTag->setTag(TagType::PLAYER);
 
-	auto playerMana = std::make_shared<ManaComponent>();
-	playerMana->setMana({200, 200});
+	// auto wolfTag = std::make_shared<TagComponent>();
+	// wolfTag->setTag(TagType::ENEMY);
 
-	auto wolfLife = std::make_shared<LifeComponent>();
-	wolfLife->setLife({200, 200});
+	// auto playerLife = std::make_shared<LifeComponent>();
+	// playerLife->setLife({100, 100});
 
-	auto wolfMana = std::make_shared<ManaComponent>();
-	wolfMana->setMana({0, 0});
+	// auto playerMana = std::make_shared<ManaComponent>();
+	// playerMana->setMana({200, 200});
 
-	player->addComponent(std::make_shared<SpellBookComponent>());
-	player->addComponent(playerTag);
-	player->addComponent(playerLife);
-	player->addComponent(playerMana);
+	// auto wolfLife = std::make_shared<LifeComponent>();
+	// wolfLife->setLife({200, 200});
 
-	wolf->addComponent(wolfLife);
-	wolf->addComponent(wolfMana);
+	// auto wolfMana = std::make_shared<ManaComponent>();
+	// wolfMana->setMana({0, 0});
 
-	scene->addChild(player);
-	scene->addChild(wolf);
+	// player->addComponent(std::make_shared<SpellBookComponent>());
+	// player->addComponent(playerTag);
+	// player->addComponent(playerLife);
+	// player->addComponent(playerMana);
 
-	auto spellBook = player->component<SpellBookComponent>();
-	spellBook->addSpell(fireBall);
-	spellBook->addSpell(iceLance);
-	spellBook->addSpell(zap);
-	spellBook->castSpell(fireBall, player, Vec2(0, 0));
+	// wolf->addComponent(wolfLife);
+	// wolf->addComponent(wolfMana);
+
+	// scene->addChild(player);
+	// scene->addChild(wolf);
+
+	// auto spellBook = player->component<SpellBookComponent>();
+	// spellBook->addSpell(fireBall);
+	// spellBook->addSpell(iceLance);
+	// spellBook->addSpell(zap);
+	// spellBook->castSpell(fireBall, player, Vec2(0, 0));
 
 	print(std::cout, scene, 0);
 

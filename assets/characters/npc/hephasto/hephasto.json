@@ -1,0 +1,19 @@
+{
+    "components": [
+        {
+            "type": "affiliation",
+            "to": "npc"
+        },
+        {
+            "type": "collision",
+            "box": [
+                10,
+                10
+            ]
+        },
+        {
+            "type": "texture",
+            "path": "characters/npc/hephasto/textures/hephasto_c.png"
+        }
+    ]
+}

@@ -21,6 +21,9 @@ using u32 = uint32_t;
 
 class Entity;
 class ComponentBase;
+class IAsset;
+
+using IAssetPtr = std::shared_ptr<IAsset>;
 using EntityPtr = std::shared_ptr<Entity>;
 using EntityHandle = std::weak_ptr<Entity>;
 using ComponentPtr = std::shared_ptr<ComponentBase>;

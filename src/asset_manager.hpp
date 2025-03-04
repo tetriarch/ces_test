@@ -20,7 +20,7 @@ public:
 
 private:
     std::string assetRoot_;
-    std::unordered_map<std::string, std::shared_ptr<void>> assets_;
+    std::unordered_map<std::string, IAssetPtr> assets_;
     std::unordered_map<std::type_index, std::shared_ptr<IAssetLoader>> assetLoaders_;
 };
 

@@ -1,0 +1,44 @@
+{
+    "components": [
+        {
+            "type": "life",
+            "current": 100,
+            "max": 100
+        },
+        {
+            "type": "mana",
+            "current": 200,
+            "max": 200
+        },
+        {
+            "type": "affiliation",
+            "to": "player"
+        },
+        {
+            "type": "control",
+            "direct": true
+        },
+        {
+            "type": "collision",
+            "box": [
+                10,
+                10
+            ]
+        },
+        {
+            "type": "spellbook",
+            "spells": [
+                "spells/fireball.json",
+                "spells/zap.json"
+            ]
+        },
+        {
+            "type": "velocity",
+            "speed": 10
+        },
+        {
+            "type": "texture",
+            "path": "characters/playable/textures/player_c.png"
+        }
+    ]
+}
