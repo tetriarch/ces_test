@@ -53,6 +53,14 @@ target_compile_options(ces_test PRIVATE
     $<$<CONFIG:Release>: -O3 -DNDEBUG -m64 -Wall>
 )
 
+if (CMAKE_HOST_WIN32)
+        add_custom_command(TARGET ces_test POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:ces_test> $<TARGET_FILE_DIR:ces_test>
+                COMMAND_EXPAND_LISTS
+        )
+endif()
+
+
 if(CMAKE_HOST_WIN32)
 target_link_options(ces_test PRIVATE
     $<$<CONFIG:Release>: -static -Wl,-Bstatic -lstdc++ -lgcc -lgcc_eh -lwinpthread>
