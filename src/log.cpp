@@ -61,8 +61,13 @@ std::string Log::logTypeToString(LogType type) {
 
     switch(type) {
         case LogType::INFO: return "INFO";
+        #ifdef DEBUG
+        case LogType::ERROR: return "\033[31mERROR]\033[0m";
+        case LogType::FATAL_ERROR: return "\033[31mFATAL_ERROR\033[0m";
+        #else
         case LogType::ERROR: return "ERROR";
-        case LogType::FATAL_ERROR: return "FATAL_ERROR";
+        case LogType::FATAL_ERROR: return "FATAL ERROR";
+        #endif
         default: break;
     }
     return "";
