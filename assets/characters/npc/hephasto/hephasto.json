@@ -1,19 +1,19 @@
 {
     "components": [
         {
-            "type": "affiliation",
-            "to": "npc"
+            "type": "tag",
+            "to": "NPC"
         },
         {
             "type": "collision",
-            "box": [
-                10,
-                10
-            ]
+            "box": {
+                "width": 10.0,
+                "height": 10.0
+            }
         },
         {
             "type": "texture",
-            "path": "characters/npc/hephasto/textures/hephasto_c.png"
+            "file_path": "characters/npc/hephasto/textures/hephasto_c.png"
         }
     ]
 }

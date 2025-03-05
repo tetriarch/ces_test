@@ -11,15 +11,15 @@
             "max": 50
         },
         {
-            "type": "affiliation",
-            "to": "enemy"
+            "type": "tag",
+            "to": "ENEMY"
         },
         {
             "type": "collision",
-            "box": [
-                10,
-                10
-            ]
+            "box": {
+                "width": 10.0,
+                "height": 10.0
+            }
         },
         {
             "type": "spellbook",
@@ -29,11 +29,11 @@
         },
         {
             "type": "velocity",
-            "speed": 15
+            "speed": 15.0
         },
         {
             "type": "texture",
-            "path": "characters/monsters/wolf/textures/wolf_c.png"
+            "file_path": "characters/monsters/wolf/textures/wolf_c.png"
         }
     ]
 }

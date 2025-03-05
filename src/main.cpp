@@ -42,50 +42,5 @@ int main(int argc, char const* argv[]) {
 		return 1;
 	}
 
-	// auto fireBall = am.load<SpellData>("spells/fireball.json");
-	// auto iceLance = am.load<SpellData>("spells/ice_lance.json");
-	// auto zap = am.load<SpellData>("spells/zap.json");
-
-	// // hardcoded scene
-	// EntityPtr player = Entity::create("player");
-	// EntityPtr wolf = Entity::create("wolf");
-
-	// auto playerTag = std::make_shared<TagComponent>();
-	// playerTag->setTag(TagType::PLAYER);
-
-	// auto wolfTag = std::make_shared<TagComponent>();
-	// wolfTag->setTag(TagType::ENEMY);
-
-	// auto playerLife = std::make_shared<LifeComponent>();
-	// playerLife->setLife({100, 100});
-
-	// auto playerMana = std::make_shared<ManaComponent>();
-	// playerMana->setMana({200, 200});
-
-	// auto wolfLife = std::make_shared<LifeComponent>();
-	// wolfLife->setLife({200, 200});
-
-	// auto wolfMana = std::make_shared<ManaComponent>();
-	// wolfMana->setMana({0, 0});
-
-	// player->addComponent(std::make_shared<SpellBookComponent>());
-	// player->addComponent(playerTag);
-	// player->addComponent(playerLife);
-	// player->addComponent(playerMana);
-
-	// wolf->addComponent(wolfLife);
-	// wolf->addComponent(wolfMana);
-
-	// scene->addChild(player);
-	// scene->addChild(wolf);
-
-	// auto spellBook = player->component<SpellBookComponent>();
-	// spellBook->addSpell(fireBall);
-	// spellBook->addSpell(iceLance);
-	// spellBook->addSpell(zap);
-	// spellBook->castSpell(fireBall, player, Vec2(0, 0));
-
 	print(std::cout, scene, 0);
-
-	return 0;
 }

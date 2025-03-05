@@ -1,8 +1,46 @@
 #include "asset_manager.hpp"
 #include "file_io.hpp"
+#include "math.hpp"
 #include "scene.hpp"
 #include "scene_loader.hpp"
+#include "components/components.hpp"
 
+#include <magic_enum/magic_enum.hpp>
+
+SceneLoader::SceneLoader() {
+
+    registerComponent("life", [this](const json& JSONData) {
+        return parseLifeComponent(JSONData);
+    });
+
+    registerComponent("mana", [this](const json& JSONData) {
+        return parseManaComponent(JSONData);
+    });
+
+    registerComponent("tag", [this](const json& JSONData) {
+        return parseTagComponent(JSONData);
+    });
+
+    registerComponent("control", [this](const json& JSONData) {
+        return parseControlComponent(JSONData);
+    });
+
+    registerComponent("collision", [this](const json& JSONData) {
+        return parseCollisionComponent(JSONData);
+    });
+
+    registerComponent("spellbook", [this](const json& JSONData) {
+        return parseSpellBookComponent(JSONData);
+    });
+
+    registerComponent("velocity", [this](const json& JSONData) {
+        return parseVelocityComponent(JSONData);
+    });
+
+    registerComponent("texture", [this](const json& JSONData) {
+        return parseTextureComponent(JSONData);
+    });
+}
 
 auto SceneLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
 
@@ -20,6 +58,11 @@ auto SceneLoader::load(AssetManager& assetManager, const std::string& filePath) 
 
     return scene.value();
 
+}
+
+void SceneLoader::registerComponent(const std::string& type, ComponentParseMethod parser) {
+
+    componentParsers_[type] = parser;
 }
 
 auto SceneLoader::parseScene(AssetManager& assetManager, const std::string& source)->std::expected<std::shared_ptr<Scene>, JSONParserError> {
@@ -86,7 +129,7 @@ auto SceneLoader::parseScene(AssetManager& assetManager, const std::string& sour
 
         auto entity = parseEntity(entitySource.value(), entityName);
         if(!entity) {
-            ERROR(error("failed to parse entity"));
+            ERROR(error("failed to parse entity " + prefab));
             return nullptr;
         }
 
@@ -109,10 +152,176 @@ auto SceneLoader::parseEntity(const std::string& source, const std::string& name
     }
     auto entity = Entity::create(name);
 
-    //TODO: parse components
+    auto components = parseComponents(entityJSON);
+    if(!components) {
+        ERROR(error("failed to parse components"));
+        return nullptr;
+    }
 
+    for(auto& c : components.value()) {
+        entity->addComponent(c);
+    }
 
     return entity;
+}
+
+auto SceneLoader::parseComponents(const json& entityJSON) -> std::expected<std::vector<ComponentPtr>, JSONParserError> {
+
+    // get components array
+    json::const_iterator componentsJSON = entityJSON.find("components");
+    if(componentsJSON == entityJSON.end()) {
+        ERROR(error("components not found", ""));
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    std::vector<ComponentPtr> components;
+
+    // iterate through array and get type
+    for(auto& c : componentsJSON.value()) {
+        std::string type;
+        if(!get<std::string>(c, "type", true, type, "components")) {
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        // look for designated component parser and parse the component
+        auto it = componentParsers_.find(type);
+        if(it == componentParsers_.end()) {
+            ERROR("cannot find component parser for " + type);
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        auto component = it->second(c);
+        if(!component) {
+            ERROR(error("failed to parse " + type, "components"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+        components.push_back(component);
+    }
+    return components;
+}
+
+auto SceneLoader::parseLifeComponent(const json& o) -> ComponentPtr {
+
+    Life life;
+    if(!get<u32>(o, "current", true, life.current, "components")) {
+        return nullptr;
+    }
+    if(!get<u32>(o, "max", true, life.max, "components")) {
+        return nullptr;
+    }
+    LifeComponent lifeComponent;
+    lifeComponent.setLife(life);
+    return std::make_shared<LifeComponent>(lifeComponent);
+}
+
+auto SceneLoader::parseManaComponent(const json& o) -> ComponentPtr {
+
+    Mana mana;
+    if(!get<u32>(o, "current", true, mana.current, "components")) {
+        return nullptr;
+    }
+    if(!get<u32>(o, "max", true, mana.max, "components")) {
+        return nullptr;
+    }
+    ManaComponent manaComponent;
+    manaComponent.setMana(mana);
+
+    return std::make_shared<ManaComponent>(manaComponent);
+}
+
+auto SceneLoader::parseTagComponent(const json& o) -> ComponentPtr {
+
+    TagType tag;
+    std::string to;
+    if(!get<std::string>(o, "to", true, to, "components")) {
+        return nullptr;
+    }
+    tag = magic_enum::enum_cast<TagType>(to).value_or(TagType::UNKNOWN);
+    TagComponent tagComponent;
+    tagComponent.setTag(tag);
+
+    return std::make_shared<TagComponent>(tagComponent);
+}
+
+auto SceneLoader::parseControlComponent(const json& o) -> ComponentPtr {
+
+    std::string controller;
+    if(!get<std::string>(o, "controller", true, controller, "components")) {
+        return nullptr;
+    }
+
+    if(controller == "player") {
+        return std::make_shared<PlayerControlComponent>();
+    }
+
+    return nullptr;
+}
+
+auto SceneLoader::parseCollisionComponent(const json& o) -> ComponentPtr {
+
+    Rect rect;
+    rect.x = 0.0f;
+    rect.y = 0.0f;
+
+    json::const_iterator box = o.find("box");
+    if(box == o.end()) {
+        ERROR(error("failed to find box", "components"));
+        return nullptr;
+    }
+
+    if(!get<f32>(box.value(), "width", true, rect.w, "components")) {
+        return nullptr;
+    }
+    if(!get<f32>(box.value(), "height", true, rect.h, "components")) {
+        return nullptr;
+    }
+
+    CollisionComponent collisionComponent;
+    collisionComponent.setCollisionBox(rect);
+    return std::make_shared<CollisionComponent>(collisionComponent);
+}
+
+auto SceneLoader::parseSpellBookComponent(const json& o) -> ComponentPtr {
+
+    SpellBookComponent spellBookComponent;
+    json::const_iterator spells = o.find("spells");
+    if(spells == o.end()) {
+        ERROR(error("spells not found", "components"));
+        return nullptr;
+    }
+
+    if(!spells->is_array()) {
+        ERROR(error("spells is not array", "components"));
+        return nullptr;
+    }
+
+    for(auto& s : spells.value()) {
+        spellBookComponent.addSpellFile(s);
+    }
+    return std::make_shared<SpellBookComponent>(spellBookComponent);
+}
+
+auto SceneLoader::parseVelocityComponent(const json& o) -> ComponentPtr {
+
+    f32 speed;
+    if(!get<f32>(o, "speed", true, speed, "components")) {
+        return nullptr;
+    }
+
+    VelocityComponent velocityComponent;
+    velocityComponent.setSpeed(speed);
+    return std::make_shared<VelocityComponent>(velocityComponent);
+}
+
+auto SceneLoader::parseTextureComponent(const json& o) -> ComponentPtr {
+
+    std::string filePath;
+    if(!get<std::string>(o, "file_path", true, filePath, "components")) {
+        return nullptr;
+    }
+    TextureComponent textureComponent;
+    textureComponent.setFilePath(filePath);
+    return std::make_shared<TextureComponent>(textureComponent);
 }
 
 auto SceneLoader::error(const std::string& msg, const std::string& parent) -> std::string {

@@ -4,12 +4,21 @@
 #include "spell_book.hpp"
 
 auto SpellBookComponent::describe() -> std::string {
-    return "I cast spells";
+    std::string spells = "";
+    for(auto& s : spellFiles_) {
+        spells += s + " ";
+    }
+
+    return "I cast these spells: " + spells;
 }
 
 void SpellBookComponent::addSpell(const std::shared_ptr<SpellData> spellData) {
 
     spells_.push_back(spellData);
+}
+
+void SpellBookComponent::addSpellFile(const std::string& filePath) {
+    spellFiles_.push_back(filePath);
 }
 
 void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, EntityPtr caster, const Vec2& target) {

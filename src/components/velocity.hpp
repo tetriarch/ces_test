@@ -6,13 +6,12 @@
 class VelocityComponent : public Component<VelocityComponent> {
 
 public:
-    Vec2 velocity() const {
-        return direction_.normalized() * speed_;
-    }
-    Vec2 direction() const { return direction_; }
-    f32 speed() const { return speed_; }
-    void setDirection(const Vec2& direction) { direction_ = direction; }
-    void setSpeed(f32 speed) { speed_ = speed; }
+    auto describe() -> std::string override;
+    Vec2 velocity() const;
+    Vec2 direction() const;
+    f32 speed() const;
+    void setDirection(const Vec2& direction);
+    void setSpeed(f32 speed);
 
 private:
     Vec2 direction_;

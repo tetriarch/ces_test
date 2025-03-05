@@ -5,7 +5,8 @@
 enum class TagType {
     NPC,
     PLAYER,
-    ENEMY
+    ENEMY,
+    UNKNOWN
 };
 
 class TagComponent : public Component<TagComponent> {
