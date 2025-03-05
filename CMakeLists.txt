@@ -1,32 +1,42 @@
 cmake_minimum_required(VERSION 3.28)
 project(ces_test VERSION 0.1.0 LANGUAGES C CXX)
 
-include(FetchContent)
+set(CMAKE_CXX_STANDARD 23)
 
+include(FetchContent)
+FetchContent_Declare(FetchDependency
+  GIT_REPOSITORY https://github.com/jpetrie/fetch-dependency.git
+  GIT_TAG origin/main
+)
+
+FetchContent_MakeAvailable(FetchDependency)
+include(${fetchdependency_SOURCE_DIR}/FetchDependency.cmake)
+
+# header only
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
 )
 
+# header only
 FetchContent_Declare(
     magic_enum
     GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
     GIT_TAG v0.9.7
 )
 
-FetchContent_Declare(
+fetch_dependency(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.2.8
+    CONFIGURATION ${CMAKE_BUILD_TYPE}
 )
 
-FetchContent_MakeAvailable(nlohmann_json)
 FetchContent_MakeAvailable(magic_enum)
-FetchContent_MakeAvailable(SDL3)
+FetchContent_MakeAvailable(nlohmann_json)
 
-set(CMAKE_CXX_STANDARD 23)
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS  src/**.cpp)
-
 
 add_custom_target(copy_assets ALL COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:ces_test>/assets)
 
