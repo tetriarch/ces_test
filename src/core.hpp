@@ -14,6 +14,7 @@ public:
 
 private:
     bool init();
+    bool initSDL();
     void handleEvents(SDL_Event& event);
     void update();
     void render();

@@ -47,7 +47,29 @@ Core::~Core() {
 
 bool Core::init() {
 
-    // system init
+    if(!initSDL()) {
+        ERROR("failed to init SDL");
+        return false;
+    }
+
+    // game init
+    AssetManager am("assets");
+    am.registerLoader<SpellData>(std::make_shared<SpellLoader>());
+    am.registerLoader<Scene>(std::make_shared<SceneLoader>());
+
+    auto scene = am.load<Scene>("scenes/level_1.json");
+    if(!scene) {
+        return 1;
+    }
+
+    // output scene hierarchy
+    print(std::cout, scene, 0);
+
+    return true;
+}
+
+bool Core::initSDL() {
+
     if(!SDL_Init(SDL_INIT_VIDEO)) {
         ERROR(SDL_GetError());
         return false;
@@ -64,19 +86,6 @@ bool Core::init() {
         ERROR(SDL_GetError());
         return false;
     }
-
-    // game init
-    AssetManager am("assets");
-    am.registerLoader<SpellData>(std::make_shared<SpellLoader>());
-    am.registerLoader<Scene>(std::make_shared<SceneLoader>());
-
-    auto scene = am.load<Scene>("scenes/level_1.json");
-    if(!scene) {
-        return 1;
-    }
-
-    // output scene hierarchy
-    print(std::cout, scene, 0);
 
     return true;
 }
