@@ -15,8 +15,10 @@ public:
 private:
     bool init();
     bool initSDL();
+    bool initImGui();
     void handleEvents(SDL_Event& event);
     void update();
+    void renderImGui();
     void render();
 
 private:

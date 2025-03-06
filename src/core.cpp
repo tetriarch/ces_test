@@ -8,6 +8,10 @@
 #include "scene_loader.hpp"
 #include "spell_loader.hpp"
 
+#include <imgui.h>
+#include <backends/imgui_impl_sdl3.h>
+#include <backends/imgui_impl_sdlrenderer3.h>
+
 constexpr std::string gameTitle = "CES_test";
 constexpr s32 startWindowWidth = 1280;
 constexpr s32 startWindowHeight = 720;
@@ -41,8 +45,13 @@ Core::Core() : running_(true) {
 }
 
 Core::~Core() {
+    ImGui_ImplSDLRenderer3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
+
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
+    SDL_Quit();
 }
 
 bool Core::init() {
@@ -81,9 +90,33 @@ bool Core::initSDL() {
         return false;
     }
 
+    SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
     renderer_ = SDL_CreateRenderer(window_, nullptr);
     if(!renderer_) {
         ERROR(SDL_GetError());
+        return false;
+    }
+
+    return true;
+}
+
+bool Core::initImGui() {
+
+    // Setup Dear ImGui context
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.DisplaySize = ImVec2(startWindowWidth, startWindowHeight);
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    ImGui::StyleColorsDark();
+
+    if(!ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_)) {
+        ERROR("failed to init imgui for SDL renderer");
+        return false;
+    }
+    if(!ImGui_ImplSDLRenderer3_Init(renderer_)) {
+        ERROR("failed to init imgui for SDL renderer");
         return false;
     }
 
@@ -96,12 +129,17 @@ s32 Core::run() {
         return 1;
     }
 
+    if(!initImGui()) {
+        return 1;
+    }
+
     SDL_Event event;
     while(running_) {
         while(SDL_PollEvent(&event)) {
             handleEvents(event);
         }
         update();
+        renderImGui();
         render();
     }
     return 0;
@@ -109,10 +147,9 @@ s32 Core::run() {
 
 void Core::handleEvents(SDL_Event& event) {
 
-    if(event.type == SDL_EVENT_KEY_DOWN) {
-        if(event.key.key == SDLK_ESCAPE) {
-            running_ = false;
-        }
+    ImGui_ImplSDL3_ProcessEvent(&event);
+    if(event.type == SDL_EVENT_QUIT) {
+        running_ = false;
     }
 
 }
@@ -121,8 +158,34 @@ void Core::update() {
 
 }
 
+void Core::renderImGui() {
+
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Dockspace", 0, ImGuiWindowFlags_NoResize
+        | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoCollapse
+        | ImGuiWindowFlags_NoTitleBar);
+
+    ImGui::SetWindowPos(ImVec2(0, 0));
+    ImGui::SetWindowSize(ImVec2(startWindowWidth, startWindowHeight));
+    ImGuiID dockspaceID = ImGui::GetID("Dockspace");
+    ImGui::DockSpace(dockspaceID);
+    ImGui::End();
+
+    ImGui::Begin("Scene");
+    ImGui::Text("Scene hierarchy");
+    ImGui::End();
+
+    ImGui::Render();
+}
+
 void Core::render() {
+
     SDL_RenderClear(renderer_);
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer_);
     SDL_RenderPresent(renderer_);
 
 }

@@ -3,7 +3,9 @@ project(ces_test VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 
+include(ExternalProject)
 include(FetchContent)
+
 FetchContent_Declare(FetchDependency
   GIT_REPOSITORY https://github.com/jpetrie/fetch-dependency.git
   GIT_TAG origin/main
@@ -20,7 +22,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
-
 # header only
 FetchContent_Declare(
     magic_enum
@@ -35,17 +36,18 @@ fetch_dependency(
     GIT_TAG release-3.2.8
 )
 
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
 
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS  src/**.cpp)
+add_subdirectory(vendor/imgui)
 
 add_executable(ces_test ${SRC_FILES})
-
 add_custom_target(copy_assets ALL COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:ces_test>/assets)
 
 target_link_libraries(ces_test PRIVATE 
     nlohmann_json::nlohmann_json
     magic_enum::magic_enum
     SDL3::SDL3
+    imgui
 )
 
 target_compile_options(ces_test PRIVATE 
