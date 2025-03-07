@@ -7,10 +7,7 @@
 #include "scene.hpp"
 #include "scene_loader.hpp"
 #include "spell_loader.hpp"
-
-#include <imgui.h>
-#include <backends/imgui_impl_sdl3.h>
-#include <backends/imgui_impl_sdlrenderer3.h>
+#include "ui.hpp"
 
 constexpr std::string gameTitle = "CES_test";
 constexpr s32 startWindowWidth = 1280;
@@ -42,12 +39,11 @@ void print(std::ostream& out, const EntityPtr& e, u32 depth) {
 
 Core::Core() : running_(true) {
 
+    ui_ = std::make_unique<UI>();
+
 }
 
 Core::~Core() {
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
 
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
@@ -58,6 +54,11 @@ bool Core::init() {
 
     if(!initSDL()) {
         ERROR("failed to init SDL");
+        return false;
+    }
+
+    if(!ui_->init(window_, renderer_)) {
+        ERROR("failed to init UI");
         return false;
     }
 
@@ -101,35 +102,9 @@ bool Core::initSDL() {
     return true;
 }
 
-bool Core::initImGui() {
-
-    // Setup Dear ImGui context
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.DisplaySize = ImVec2(startWindowWidth, startWindowHeight);
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-    ImGui::StyleColorsDark();
-
-    if(!ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_)) {
-        ERROR("failed to init imgui for SDL renderer");
-        return false;
-    }
-    if(!ImGui_ImplSDLRenderer3_Init(renderer_)) {
-        ERROR("failed to init imgui for SDL renderer");
-        return false;
-    }
-
-    return true;
-}
-
 s32 Core::run() {
 
     if(!init()) {
-        return 1;
-    }
-
-    if(!initImGui()) {
         return 1;
     }
 
@@ -139,7 +114,6 @@ s32 Core::run() {
             handleEvents(event);
         }
         update();
-        renderImGui();
         render();
     }
     return 0;
@@ -147,7 +121,7 @@ s32 Core::run() {
 
 void Core::handleEvents(SDL_Event& event) {
 
-    ImGui_ImplSDL3_ProcessEvent(&event);
+    ui_->handleEvents(event);
     if(event.type == SDL_EVENT_QUIT) {
         running_ = false;
     }
@@ -158,35 +132,10 @@ void Core::update() {
 
 }
 
-void Core::renderImGui() {
-
-    ImGui_ImplSDLRenderer3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::Begin("Dockspace", 0, ImGuiWindowFlags_NoResize
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoCollapse
-        | ImGuiWindowFlags_NoTitleBar);
-
-    ImGui::SetWindowPos(ImVec2(0, 0));
-    ImGui::SetWindowSize(ImVec2(startWindowWidth, startWindowHeight));
-    ImGuiID dockspaceID = ImGui::GetID("Dockspace");
-    ImGui::DockSpace(dockspaceID);
-    ImGui::End();
-
-    ImGui::Begin("Scene");
-    ImGui::Text("Scene hierarchy");
-    ImGui::End();
-
-    ImGui::Render();
-}
-
 void Core::render() {
 
     SDL_RenderClear(renderer_);
-    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer_);
+    ui_->render(renderer_);
     SDL_RenderPresent(renderer_);
-
 }
 

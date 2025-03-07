@@ -4,6 +4,7 @@
 
 #include <SDL3/SDL.h>
 
+class UI;
 class Core {
 
 public:
@@ -15,14 +16,13 @@ public:
 private:
     bool init();
     bool initSDL();
-    bool initImGui();
     void handleEvents(SDL_Event& event);
     void update();
-    void renderImGui();
     void render();
 
 private:
     SDL_Window* window_;
     SDL_Renderer* renderer_;
+    std::unique_ptr<UI> ui_;
     bool running_;
 };
