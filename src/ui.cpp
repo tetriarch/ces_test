@@ -6,7 +6,15 @@
 #include <backends/imgui_impl_sdl3.h>
 #include <backends/imgui_impl_sdlrenderer3.h>
 
-UI::UI() : firstTime_(true) {}
+UI::UI() :
+    firstTime_(true) {
+
+#ifdef DEBUG
+    showScene_ = true;
+#endif
+
+}
+
 
 UI::~UI() {
 
@@ -76,18 +84,19 @@ void UI::setupDockSpace() {
         ImGui::DockBuilderSetNodeSize(dockspaceID, viewport->Size);
 
         ImGuiID dockMain = dockspaceID;
-        ImGuiID dockLeft = ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Left, 0.2f, nullptr, &dockMain);
         ImGuiID dockBottom = ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Down, 0.15f, nullptr, &dockMain);
 
+    #ifdef DEBUG
+        ImGuiID dockLeft = ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Left, 0.2f, nullptr, &dockMain);
         ImGui::DockBuilderDockWindow("scene", dockLeft);
-        ImGui::DockBuilderDockWindow("hud", dockBottom);
-
         ImGuiDockNode* nodeLeft = ImGui::DockBuilderGetNode(dockLeft);
         if(nodeLeft) {
             //NOTE: Ignore the warnings about combo of flag types
             nodeLeft->LocalFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
         }
+    #endif
 
+        ImGui::DockBuilderDockWindow("hud", dockBottom);
         ImGuiDockNode* nodeBottom = ImGui::DockBuilderGetNode(dockBottom);
         if(nodeBottom) {
             nodeBottom->LocalFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
@@ -116,10 +125,13 @@ void UI::render(SDL_Renderer* renderer) {
         | ImGuiWindowFlags_NoTitleBar
         | ImGuiWindowFlags_NoDecoration;
 
-
-    ImGui::Begin("scene", nullptr, windowFlags);
-    ImGui::Text("Scene hierarchy");
-    ImGui::End();
+#ifdef DEBUG
+    if(showScene_) {
+        ImGui::Begin("scene", nullptr, windowFlags);
+        ImGui::Text("Scene hierarchy");
+        ImGui::End();
+    }
+#endif
 
     ImGui::Begin("hud", nullptr, windowFlags);
     ImGui::Text("This is where hud will be");
@@ -128,5 +140,11 @@ void UI::render(SDL_Renderer* renderer) {
     ImGui::Render();
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
 }
+
+#ifdef DEBUG
+void UI::toggleSceneHierarchyView() {
+    showScene_ = !showScene_;
+}
+#endif
 
 

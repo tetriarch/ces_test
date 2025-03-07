@@ -125,6 +125,13 @@ void Core::handleEvents(SDL_Event& event) {
     if(event.type == SDL_EVENT_QUIT) {
         running_ = false;
     }
+#ifdef DEBUG
+    if(event.type == SDL_EVENT_KEY_DOWN) {
+        if(event.key.key == SDLK_F12) {
+            ui_->toggleSceneHierarchyView();
+        }
+    }
+#endif
 
 }
 

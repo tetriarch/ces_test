@@ -15,6 +15,11 @@ public:
     void handleEvents(SDL_Event& event);
     void render(SDL_Renderer* renderer);
 
+#ifdef DEBUG
+public:
+    void toggleSceneHierarchyView();
+#endif
+
 private:
     void setupDockSpace();
 
@@ -23,4 +28,8 @@ private:
     bool imguiSDL3InitResult_;
     bool imguiSDL3RendererInitResult_;
     bool firstTime_;
+
+#ifdef DEBUG
+    bool showScene_;
+#endif 
 };
