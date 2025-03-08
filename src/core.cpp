@@ -13,30 +13,6 @@ constexpr std::string gameTitle = "CES_test";
 constexpr s32 startWindowWidth = 1280;
 constexpr s32 startWindowHeight = 720;
 
-void indent(std::ostream& out, u32 depth) {
-
-    for(u32 i = 0; i < depth * 1; i++) {
-        out << "\t";
-    }
-    out << ">";
-}
-
-void print(std::ostream& out, const EntityPtr& e, u32 depth) {
-
-    indent(out, depth);
-
-    out << e->name() << " (" << e.get() << ")" << " [" << typeid(e).name() << "]" << std::endl;
-
-    for(auto&& comp : e->components()) {
-        indent(out, depth);
-        out << comp->describe() << " " << comp.get() << std::endl;
-    }
-
-    for(auto&& child : e->children()) {
-        print(out, child, depth + 1);
-    }
-}
-
 Core::Core() : running_(true) {
 
     ui_ = std::make_unique<UI>();
@@ -63,17 +39,11 @@ bool Core::init() {
     }
 
     // game init
-    AssetManager am("assets");
-    am.registerLoader<SpellData>(std::make_shared<SpellLoader>());
-    am.registerLoader<Scene>(std::make_shared<SceneLoader>());
+    am_ = std::make_shared<AssetManager>("assets");
+    am_->registerLoader<SpellData>(std::make_shared<SpellLoader>());
+    am_->registerLoader<Scene>(std::make_shared<SceneLoader>());
 
-    auto scene = am.load<Scene>("scenes/level_1.json");
-    if(!scene) {
-        return 1;
-    }
-
-    // output scene hierarchy
-    print(std::cout, scene, 0);
+    root_ = am_->load<Scene>("scenes/level_1.json");
 
     return true;
 }
@@ -142,7 +112,7 @@ void Core::update() {
 void Core::render() {
 
     SDL_RenderClear(renderer_);
-    ui_->render(renderer_);
+    ui_->render(renderer_, root_.lock());
     SDL_RenderPresent(renderer_);
 }
 

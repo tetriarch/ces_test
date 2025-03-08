@@ -1,4 +1,5 @@
 #include "log.hpp"
+#include "scene.hpp"
 #include "ui.hpp"
 
 #include <imgui.h>
@@ -14,7 +15,6 @@ UI::UI() :
 #endif
 
 }
-
 
 UI::~UI() {
 
@@ -108,7 +108,7 @@ void UI::setupDockSpace() {
     ImGui::End();
 }
 
-void UI::render(SDL_Renderer* renderer) {
+void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
 
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
@@ -116,29 +116,40 @@ void UI::render(SDL_Renderer* renderer) {
 
     setupDockSpace();
 
-    ImGuiWindowFlags windowFlags;
-    windowFlags = ImGuiWindowFlags_NoCollapse
-        | ImGuiWindowFlags_NoResize
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoBringToFrontOnFocus
-        | ImGuiWindowFlags_NoNavFocus
-        | ImGuiWindowFlags_NoTitleBar
-        | ImGuiWindowFlags_NoDecoration;
-
 #ifdef DEBUG
     if(showScene_) {
-        ImGui::Begin("scene", nullptr, windowFlags);
-        ImGui::Text("Scene hierarchy");
-        ImGui::End();
+        renderSceneHierarchy(scene);
     }
 #endif
 
-    ImGui::Begin("hud", nullptr, windowFlags);
+    ImGui::Begin("hud", nullptr, 0);
     ImGui::Text("This is where hud will be");
     ImGui::End();
 
+    // ImGui::ShowDemoWindow();
+
     ImGui::Render();
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+}
+
+void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
+
+    ImGui::Begin("scene", nullptr, 0);
+    ImGui::SeparatorText("Scene Hierarchy");
+    if(ImGui::TreeNode(scene->name().c_str())) {
+
+        for(auto& c : scene->children()) {
+            if(ImGui::TreeNode(c->name().c_str())) {
+                for(auto& comp : c->components()) {
+                    ImGui::Text("%s", comp->componentType().name());
+                }
+                ImGui::TreePop();
+            }
+        }
+        ImGui::TreePop();
+    }
+
+    ImGui::End();
 }
 
 #ifdef DEBUG

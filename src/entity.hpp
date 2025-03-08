@@ -24,7 +24,7 @@ public:
     auto parent() const->Entity*;
     auto root() const -> const Entity*;
     const Transform& transform() const;
-    const std::string& name() const;
+    constexpr auto  name() -> std::string const& { return name_; }
 
 private:
     std::string name_;

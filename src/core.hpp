@@ -4,6 +4,8 @@
 
 #include <SDL3/SDL.h>
 
+class AssetManager;
+class Scene;
 class UI;
 class Core {
 
@@ -25,4 +27,6 @@ private:
     SDL_Renderer* renderer_;
     std::unique_ptr<UI> ui_;
     bool running_;
+    std::shared_ptr<AssetManager> am_;
+    std::weak_ptr<Scene> root_;
 };

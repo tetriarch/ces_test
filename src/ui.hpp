@@ -5,6 +5,7 @@
 #include <SDL3/SDL.h>
 
 class ImGuiContext;
+class Scene;
 class UI {
 
 public:
@@ -13,7 +14,8 @@ public:
 
     bool init(SDL_Window* window, SDL_Renderer* renderer);
     void handleEvents(SDL_Event& event);
-    void render(SDL_Renderer* renderer);
+    void render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene);
+    void renderSceneHierarchy(std::shared_ptr<Scene> scene);
 
 #ifdef DEBUG
 public:

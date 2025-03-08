@@ -48,4 +48,6 @@ inline Vec2 directionFromAngle(f32 angleInDegrees) {
 /// @param b max value
 /// @param t 0.0 - 1.0 to interpolate min and max value with
 /// @return result of interpolation
-inline f32 lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+namespace math {
+    inline f32 lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+}

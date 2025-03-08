@@ -61,8 +61,3 @@ auto Entity::root() const -> const Entity* {
 const Transform& Entity::transform() const {
     return transform_;
 }
-
-const std::string& Entity::name() const {
-    return name_;
-}
-
