@@ -6,7 +6,8 @@
 class AssetManager {
 
 public:
-    AssetManager(const std::string& assetRoot);
+    static AssetManager* get();
+    void setAssetRoot(const std::string& assetRoot);
 
 public:
     template<class T>
@@ -22,6 +23,13 @@ private:
     std::string assetRoot_;
     std::unordered_map<std::string, IAssetPtr> assets_;
     std::unordered_map<std::type_index, std::shared_ptr<IAssetLoader>> assetLoaders_;
+
+private:
+    AssetManager() = default;
+    AssetManager(const AssetManager&) = delete;
+    AssetManager& operator=(const AssetManager&) = delete;
+    AssetManager(AssetManager&&) = delete;
+    AssetManager& operator=(const AssetManager&&) = delete;
 };
 
 template<class T>

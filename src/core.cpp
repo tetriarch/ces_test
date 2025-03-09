@@ -1,12 +1,11 @@
 #include "asset_manager.hpp"
 #include "core.hpp"
 #include "components/components.hpp"
-#include "entity.hpp"
 #include "entity_manager.hpp"
 #include "log.hpp"
-#include "scene.hpp"
 #include "scene_loader.hpp"
 #include "spell_loader.hpp"
+#include "texture_loader.hpp"
 #include "ui.hpp"
 
 constexpr std::string gameTitle = "CES_test";
@@ -39,11 +38,16 @@ bool Core::init() {
     }
 
     // game init
-    am_ = std::make_shared<AssetManager>("assets");
-    am_->registerLoader<SpellData>(std::make_shared<SpellLoader>());
-    am_->registerLoader<Scene>(std::make_shared<SceneLoader>());
+    auto am = AssetManager::get();
+    am->setAssetRoot("assets");
+    am->registerLoader<SpellData>(std::make_shared<SpellLoader>());
+    am->registerLoader<Scene>(std::make_shared<SceneLoader>());
+    am->registerLoader<Texture>(std::make_shared<TextureLoader>(renderer_));
 
-    root_ = am_->load<Scene>("scenes/level_1.json");
+    root_ = am->load<Scene>("scenes/level_1.json");
+
+    assert(!root_.expired());
+    root_.lock()->executeAttached();
 
     return true;
 }
@@ -69,6 +73,10 @@ bool Core::initSDL() {
         return false;
     }
 
+    if(!SDL_SetRenderVSync(renderer_, 1)) {
+        INFO("failed to set v-sync");
+    }
+
     return true;
 }
 
@@ -89,29 +97,31 @@ s32 Core::run() {
     return 0;
 }
 
-void Core::handleEvents(SDL_Event& event) {
+void Core::handleEvents(const SDL_Event& event) {
+
+    assert(!root_.expired());
+    root_.lock()->handleEvents(event);
 
     ui_->handleEvents(event);
+
     if(event.type == SDL_EVENT_QUIT) {
         running_ = false;
     }
-#ifdef DEBUG
-    if(event.type == SDL_EVENT_KEY_DOWN) {
-        if(event.key.key == SDLK_F12) {
-            ui_->toggleSceneHierarchyView();
-        }
-    }
-#endif
-
 }
 
 void Core::update() {
 
+    assert(!root_.expired());
+    root_.lock()->update();
 }
 
 void Core::render() {
-
+    SDL_SetRenderDrawColor(renderer_, 0, 35, 0, 255);
     SDL_RenderClear(renderer_);
+    assert(!root_.expired());
+    root_.lock()->render(renderer_);
+
+
     ui_->render(renderer_, root_.lock());
     SDL_RenderPresent(renderer_);
 }

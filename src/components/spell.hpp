@@ -58,7 +58,7 @@ struct Motion {
 };
 
 struct ConstantMotion : Motion {
-    f32 speed;
+    f32 speed{0};
     void apply(const EntityPtr& target, f32 deltaTime) {
         Transform targetTransform = target->transform();
         Vec2 direction = directionFromAngle(targetTransform.rotationInDegrees);

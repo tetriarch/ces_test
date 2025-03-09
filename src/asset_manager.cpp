@@ -1,8 +1,13 @@
 #include "asset_manager.hpp"
 #include "log.hpp"
 
-AssetManager::AssetManager(const std::string& assetRoot) : assetRoot_(assetRoot) {
+AssetManager* AssetManager::get() {
+    static AssetManager instance;
+    return &instance;
+}
 
+void AssetManager::setAssetRoot(const std::string& assetRoot) {
+    assetRoot_ = assetRoot;
 }
 
 void AssetManager::unload(const std::string& assetPath) {

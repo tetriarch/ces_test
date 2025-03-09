@@ -36,6 +36,12 @@ fetch_dependency(
     GIT_TAG release-3.2.8
 )
 
+fetch_dependency(
+    SDL3_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+    GIT_TAG release-3.2.4
+)
+
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
 
 add_subdirectory(vendor/imgui)
@@ -47,6 +53,7 @@ target_link_libraries(ces_test PRIVATE
     nlohmann_json::nlohmann_json
     magic_enum::magic_enum
     SDL3::SDL3
+    SDL3_image::SDL3_image
     imgui
 )
 

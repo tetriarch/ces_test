@@ -18,8 +18,14 @@ struct Vec2 {
         return {x * scale, y * scale};
     }
 
-    Vec2 operator+=(Vec2 addition) {
-        return {x + addition.x, y + addition.y};
+    Vec2& operator+=(const Vec2& addition) {
+        x += addition.x;
+        y += addition.y;
+        return *this;
+    }
+
+    Vec2 operator+(Vec2 addition) {
+        return{x + addition.x, y + addition.y};
     }
 };
 

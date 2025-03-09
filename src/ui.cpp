@@ -12,6 +12,7 @@ UI::UI() :
 
 #ifdef DEBUG
     showScene_ = true;
+    showDemoWindow_ = false;
 #endif
 
 }
@@ -32,6 +33,8 @@ bool UI::init(SDL_Window* window, SDL_Renderer* renderer) {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui::StyleColorsDark();
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_WindowBg] = {0.0f, 0.0f, 0.0f, 0.0f};
 
     imguiSDL3InitResult_ = ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     if(!imguiSDL3InitResult_) {
@@ -47,8 +50,18 @@ bool UI::init(SDL_Window* window, SDL_Renderer* renderer) {
     return true;
 }
 
-void UI::handleEvents(SDL_Event& event) {
+void UI::handleEvents(const SDL_Event& event) {
     ImGui_ImplSDL3_ProcessEvent(&event);
+#ifdef DEBUG
+    if(event.type == SDL_EVENT_KEY_DOWN) {
+        if(event.key.key == SDLK_F12 && event.key.mod & SDL_KMOD_LCTRL) {
+            showScene_ = !showScene_;
+        }
+        if(event.key.key == SDLK_F11 && event.key.mod & SDL_KMOD_LCTRL) {
+            showDemoWindow_ = !showDemoWindow_;
+        }
+    }
+#endif
 }
 
 void UI::setupDockSpace() {
@@ -65,7 +78,8 @@ void UI::setupDockSpace() {
         | ImGuiWindowFlags_NoResize
         | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoBringToFrontOnFocus
-        | ImGuiWindowFlags_NoNavFocus;
+        | ImGuiWindowFlags_NoNavFocus
+        | ImGuiWindowFlags_NoInputs;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -74,7 +88,7 @@ void UI::setupDockSpace() {
     ImGui::PopStyleVar(2);
 
     ImGuiID dockspaceID = ImGui::GetID("dockspace");
-    ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    ImGui::DockSpaceOverViewport(dockspaceID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
     if(firstTime_) {
 
@@ -117,16 +131,15 @@ void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
     setupDockSpace();
 
 #ifdef DEBUG
-    if(showScene_) {
-        renderSceneHierarchy(scene);
-    }
+    if(showScene_) renderSceneHierarchy(scene);
+    if(showDemoWindow_) ImGui::ShowDemoWindow();
 #endif
 
     ImGui::Begin("hud", nullptr, 0);
-    ImGui::Text("This is where hud will be");
-    ImGui::End();
 
-    // ImGui::ShowDemoWindow();
+    ImGui::Text("This is where hud will be");
+
+    ImGui::End();
 
     ImGui::Render();
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
@@ -135,6 +148,7 @@ void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
 void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
 
     ImGui::Begin("scene", nullptr, 0);
+
     ImGui::SeparatorText("Scene Hierarchy");
     if(ImGui::TreeNode(scene->name().c_str())) {
 
@@ -151,11 +165,5 @@ void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
 
     ImGui::End();
 }
-
-#ifdef DEBUG
-void UI::toggleSceneHierarchyView() {
-    showScene_ = !showScene_;
-}
-#endif
 
 

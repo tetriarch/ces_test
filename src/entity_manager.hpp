@@ -19,4 +19,6 @@ private:
     EntityManager() = default;
     EntityManager(const EntityManager&) = delete;
     EntityManager& operator=(const EntityManager&) = delete;
+    EntityManager(EntityManager&&) = delete;
+    EntityManager& operator=(EntityManager&&) = delete;
 };

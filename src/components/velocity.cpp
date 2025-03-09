@@ -1,4 +1,5 @@
 #include "velocity.hpp"
+#include "../entity.hpp"
 
 auto VelocityComponent::describe() -> std::string {
     return "I move";
@@ -6,6 +7,14 @@ auto VelocityComponent::describe() -> std::string {
 
 Vec2 VelocityComponent::velocity() const {
     return direction_.normalized() * speed_;
+}
+
+void VelocityComponent::update() {
+
+    auto transform = entity()->transform();
+    std::string name = entity()->name();
+    transform.position += velocity();
+    entity()->setTransform(transform);
 }
 
 Vec2 VelocityComponent::direction() const {
@@ -17,7 +26,7 @@ f32 VelocityComponent::speed() const {
 }
 
 void VelocityComponent::setDirection(const Vec2& direction) {
-    direction_ = direction;
+    direction_ += direction;
 }
 
 void VelocityComponent::setSpeed(f32 speed) {

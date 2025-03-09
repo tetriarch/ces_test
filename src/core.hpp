@@ -18,7 +18,7 @@ public:
 private:
     bool init();
     bool initSDL();
-    void handleEvents(SDL_Event& event);
+    void handleEvents(const SDL_Event& event);
     void update();
     void render();
 
@@ -27,6 +27,5 @@ private:
     SDL_Renderer* renderer_;
     std::unique_ptr<UI> ui_;
     bool running_;
-    std::shared_ptr<AssetManager> am_;
     std::weak_ptr<Scene> root_;
 };

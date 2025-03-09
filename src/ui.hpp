@@ -13,14 +13,11 @@ public:
     ~UI();
 
     bool init(SDL_Window* window, SDL_Renderer* renderer);
-    void handleEvents(SDL_Event& event);
+    void handleEvents(const SDL_Event& event);
     void render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene);
     void renderSceneHierarchy(std::shared_ptr<Scene> scene);
 
-#ifdef DEBUG
-public:
-    void toggleSceneHierarchyView();
-#endif
+
 
 private:
     void setupDockSpace();
@@ -33,5 +30,6 @@ private:
 
 #ifdef DEBUG
     bool showScene_;
+    bool showDemoWindow_;
 #endif 
 };

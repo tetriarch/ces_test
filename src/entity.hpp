@@ -26,12 +26,20 @@ public:
     const Transform& transform() const;
     constexpr auto  name() -> std::string const& { return name_; }
 
+    void executeAttached();
+    void handleEvents(const SDL_Event& event);
+    void update();
+    void render(SDL_Renderer* renderer);
+
 private:
     std::string name_;
     Transform transform_;
     Entity* parent_{nullptr};
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
+    std::unordered_set<ComponentBase*> controllable_;
+    std::unordered_set<ComponentBase*> updatable_;
+    std::unordered_set<ComponentBase*> renderable_;
 };
 
 template<typename T>
