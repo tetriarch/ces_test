@@ -6,27 +6,43 @@ auto VelocityComponent::describe() -> std::string {
 }
 
 Vec2 VelocityComponent::velocity() const {
-    return direction_.normalized() * speed_;
+
+    Vec2 velocityVector = {0,0};
+    if((movementDirection_ & static_cast<u8>(MovementDirection::NORTH)) != 0) {
+        velocityVector += {0, -1};
+    }
+    if((movementDirection_ & static_cast<u8>(MovementDirection::EAST)) != 0) {
+        velocityVector += {1, 0};
+    }
+    if((movementDirection_ & static_cast<u8>(MovementDirection::SOUTH)) != 0) {
+        velocityVector += {0, 1};
+    }
+    if((movementDirection_ & static_cast<u8>(MovementDirection::WEST)) != 0) {
+        velocityVector += {-1, 0};
+    }
+    return velocityVector.normalized() * speed_;
 }
 
 void VelocityComponent::update() {
 
     auto transform = entity()->transform();
-    std::string name = entity()->name();
     transform.position += velocity();
     entity()->setTransform(transform);
 }
 
-Vec2 VelocityComponent::direction() const {
-    return direction_;
-}
-
 f32 VelocityComponent::speed() const {
+
     return speed_;
 }
 
-void VelocityComponent::setDirection(const Vec2& direction) {
-    direction_ += direction;
+void VelocityComponent::setMotion(MovementDirection direction) {
+
+    movementDirection_ |= static_cast<u8>(direction);
+}
+
+void VelocityComponent::stopMotion(MovementDirection direction) {
+
+    movementDirection_ &= ~static_cast<u8>(direction);
 }
 
 void VelocityComponent::setSpeed(f32 speed) {

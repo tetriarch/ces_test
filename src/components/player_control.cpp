@@ -11,37 +11,37 @@ void PlayerControlComponent::handleEvents(const SDL_Event& event) {
     if(event.type == SDL_EVENT_KEY_DOWN) {
         if(event.key.key == SDLK_W) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection(Vec2(0, -1));
+            if(velocity) velocity->setMotion(MovementDirection::NORTH);
         }
         if(event.key.key == SDLK_A) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection(Vec2(-1, 0));
+            if(velocity) velocity->setMotion(MovementDirection::WEST);
         }
         if(event.key.key == SDLK_S) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection(Vec2(0, 1));
+            if(velocity) velocity->setMotion(MovementDirection::SOUTH);
         }
         if(event.key.key == SDLK_D) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection(Vec2(1, 0));
+            if(velocity) velocity->setMotion(MovementDirection::EAST);
         }
     }
     if(event.type == SDL_EVENT_KEY_UP) {
         if(event.key.key == SDLK_W) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection(Vec2(0, 1));
+            if(velocity) velocity->stopMotion(MovementDirection::NORTH);
         }
         if(event.key.key == SDLK_A) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection((Vec2(1, 0)));
+            if(velocity) velocity->stopMotion(MovementDirection::WEST);
         }
         if(event.key.key == SDLK_S) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection((Vec2(0, -1)));
+            if(velocity) velocity->stopMotion(MovementDirection::SOUTH);
         }
         if(event.key.key == SDLK_D) {
             auto velocity = entity()->component<VelocityComponent>();
-            if(velocity) velocity->setDirection((Vec2(-1, 0)));
+            if(velocity) velocity->stopMotion(MovementDirection::EAST);
         }
     }
 }

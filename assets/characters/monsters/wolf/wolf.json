@@ -29,7 +29,7 @@
         },
         {
             "type": "velocity",
-            "speed": 15.0
+            "speed": 1.5
         },
         {
             "type": "texture",

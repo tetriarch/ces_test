@@ -15,6 +15,7 @@
 #include <variant>
 #include <vector>
 
+using u8 = uint8_t;
 using f32 = float;
 using s32 = int32_t;
 using u32 = uint32_t;
