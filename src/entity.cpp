@@ -65,7 +65,7 @@ auto Entity::parent() const -> Entity* {
     return parent_;
 }
 
-auto Entity::root() const -> const Entity* {
+auto Entity::root() -> Entity* {
 
     auto current = this;
     while(current->parent_) {
@@ -75,6 +75,7 @@ auto Entity::root() const -> const Entity* {
 }
 
 const Transform& Entity::transform() const {
+
     return transform_;
 }
 
@@ -90,12 +91,13 @@ void Entity::executeAttached() {
 }
 
 void Entity::handleEvents(const SDL_Event& event) {
-
-    for(auto& c : controllable_) {
+    std::cout << "controllable_ size: " << controllable_.size() << std::endl;
+    for(auto&& c : controllable_) {
         c->handleEvents(event);
     }
 
-    for(auto& c : children_) {
+
+    for(auto&& c : children_) {
         c->handleEvents(event);
     }
 }
@@ -117,7 +119,7 @@ void Entity::render(SDL_Renderer* renderer) {
         r->render(renderer);
     }
 
-    for(auto& c : children_) {
+    for(auto&& c : children_) {
         c->render(renderer);
     }
 }

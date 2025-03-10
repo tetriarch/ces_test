@@ -1,6 +1,9 @@
 #include "log.hpp"
 #include "scene.hpp"
 #include "ui.hpp"
+#include "components/spell.hpp"
+#include "components/spell_book.hpp"
+#include "components/tag.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -14,6 +17,10 @@ UI::UI() :
     showScene_ = true;
     showDemoWindow_ = false;
 #endif
+    selectedSpell0_ = "";
+    selectedSpell1_ = "";
+    selectedSpell2_ = "";
+    selectedSpell3_ = "";
 
 }
 
@@ -135,9 +142,52 @@ void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
     if(showDemoWindow_) ImGui::ShowDemoWindow();
 #endif
 
+    // go through children and find player's spellbook
+    std::shared_ptr<SpellBookComponent> spellBook = nullptr;
+    for(auto& c : scene->children()) {
+        auto tag = c->component<TagComponent>();
+        if(tag && tag->tag() == TagType::PLAYER) {
+            spellBook = c->component<SpellBookComponent>();
+        }
+    }
+
     ImGui::Begin("hud", nullptr, 0);
 
-    ImGui::Text("This is where hud will be");
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, 250);
+    if(ImGui::BeginCombo("slot 1", selectedSpell0_.c_str())) {
+        if(spellBook) {
+            for(auto& spell : spellBook->spells()) {
+                bool selected = spell->name == selectedSpell0_;
+                if(ImGui::Selectable(spell->name.c_str(), &selected)) {
+                    selectedSpell0_ = spell->name;
+                }
+                if(selected) {
+                    ImGui::SetItemDefaultFocus();
+                    spellBook->setSlot(0, spell);
+                }
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::NextColumn();
+    ImGui::SetColumnWidth(1, 250);
+
+    if(ImGui::BeginCombo("slot 2", selectedSpell1_.c_str())) {
+        if(spellBook) {
+            for(auto& spell : spellBook->spells()) {
+                bool selected = spell->name == selectedSpell1_;
+                if(ImGui::Selectable(spell->name.c_str(), &selected)) {
+                    selectedSpell1_ = spell->name;
+                }
+                if(selected) {
+                    ImGui::SetItemDefaultFocus();
+                    spellBook->setSlot(1, spell);
+                }
+            }
+        }
+        ImGui::EndCombo();
+    }
 
     ImGui::End();
 

@@ -27,5 +27,5 @@ private:
     SDL_Renderer* renderer_;
     std::unique_ptr<UI> ui_;
     bool running_;
-    std::weak_ptr<Scene> root_;
+    std::shared_ptr<Scene> root_;
 };

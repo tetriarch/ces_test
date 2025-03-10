@@ -2,6 +2,7 @@
 
 #include "component.hpp"
 #include "math.hpp"
+#include "log.hpp"
 
 class Entity : public std::enable_shared_from_this<Entity> {
 
@@ -22,7 +23,7 @@ public:
 
     auto components() const->std::span<ComponentPtr const>;
     auto parent() const->Entity*;
-    auto root() const -> const Entity*;
+    auto root() -> Entity*;
     const Transform& transform() const;
     constexpr auto  name() -> std::string const& { return name_; }
 
@@ -52,6 +53,6 @@ inline auto Entity::component() -> std::shared_ptr<T> {
             return casted;
         }
     }
-    std::cerr << "[ENTITY]: required component not found" << std::endl;
+    // ERROR_ONCE("[ENTITY]: required component not found");
     return nullptr;
 }

@@ -27,6 +27,10 @@ private:
     bool imguiSDL3InitResult_;
     bool imguiSDL3RendererInitResult_;
     bool firstTime_;
+    std::string selectedSpell0_;
+    std::string selectedSpell1_;
+    std::string selectedSpell2_;
+    std::string selectedSpell3_;
 
 #ifdef DEBUG
     bool showScene_;

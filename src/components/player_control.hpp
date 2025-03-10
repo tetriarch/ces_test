@@ -7,4 +7,6 @@ class PlayerControlComponent : public Component<PlayerControlComponent> {
 
 public:
     void handleEvents(const SDL_Event& event);
+private:
+    Vec2 mousePosition_;
 };

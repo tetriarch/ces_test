@@ -46,8 +46,7 @@ bool Core::init() {
 
     root_ = am->load<Scene>("scenes/level_1.json");
 
-    assert(!root_.expired());
-    root_.lock()->executeAttached();
+    root_->executeAttached();
 
     return true;
 }
@@ -99,9 +98,7 @@ s32 Core::run() {
 
 void Core::handleEvents(const SDL_Event& event) {
 
-    assert(!root_.expired());
-    root_.lock()->handleEvents(event);
-
+    root_->handleEvents(event);
     ui_->handleEvents(event);
 
     if(event.type == SDL_EVENT_QUIT) {
@@ -111,18 +108,17 @@ void Core::handleEvents(const SDL_Event& event) {
 
 void Core::update() {
 
-    assert(!root_.expired());
-    root_.lock()->update();
+    root_->update();
 }
 
 void Core::render() {
+
     SDL_SetRenderDrawColor(renderer_, 0, 35, 0, 255);
     SDL_RenderClear(renderer_);
-    assert(!root_.expired());
-    root_.lock()->render(renderer_);
 
+    root_->render(renderer_);
+    ui_->render(renderer_, root_);
 
-    ui_->render(renderer_, root_.lock());
     SDL_RenderPresent(renderer_);
 }
 

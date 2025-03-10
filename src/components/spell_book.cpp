@@ -22,8 +22,11 @@ void SpellBookComponent::addSpellFile(const std::string& filePath) {
     spellFiles_.push_back(filePath);
 }
 
-void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, EntityPtr caster, const Vec2& target) {
+void SpellBookComponent::castSpell(u32 index, EntityPtr caster, const Vec2& target) {
 
+    assert(index > 0 || index < spellSlots_.size());
+
+    auto spell = spellSlots_[index];
     if(!spell) {
         ERROR("spell is nullptr");
         return;
@@ -36,11 +39,16 @@ void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, Entit
     spellEntity->addComponent(std::make_shared<CollisionComponent>());
     spellEntity->addComponent(std::make_shared<SpellComponent>(spell));
     // cstyle cast to get rid of const
-    Entity* root = (Entity*)caster->root();
-    root->addChild(spellEntity);
+    caster->root()->addChild(spellEntity);
 }
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
 
     return spells_;
+}
+
+void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
+
+    assert(index > 0 || index < spellSlots_.size());
+    spellSlots_[index] = spell;
 }
