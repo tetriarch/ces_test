@@ -1,10 +1,6 @@
 #include "velocity.hpp"
 #include "../entity.hpp"
 
-auto VelocityComponent::describe() -> std::string {
-    return "I move";
-}
-
 Vec2 VelocityComponent::velocity() const {
 
     Vec2 velocityVector = {0,0};

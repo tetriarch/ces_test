@@ -8,7 +8,6 @@ class SpellData;
 class SpellBookComponent : public Component<SpellBookComponent> {
 
 public:
-    auto describe() -> std::string override;
     void attach() override;
     void addSpell(const std::shared_ptr<SpellData> spellData);
     void addSpellFile(const std::string& filePath);

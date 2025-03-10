@@ -94,7 +94,6 @@ struct SpellData : public IAsset {
 class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent(std::shared_ptr<SpellData> spellData);
-    auto describe() -> std::string override;
 
 private:
     std::shared_ptr<SpellData> spellData_;

@@ -1,11 +1,6 @@
 #include "player_control.hpp"
 #include "components.hpp"
 
-auto PlayerControlComponent::describe() -> std::string {
-
-    return "I handle input from keyboard and mouse to control the player";
-}
-
 void PlayerControlComponent::handleEvents(const SDL_Event& event) {
 
     if(event.type == SDL_EVENT_KEY_DOWN) {

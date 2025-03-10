@@ -9,7 +9,6 @@
 class TextureComponent : public Component<TextureComponent> {
 
 public:
-    auto describe() -> std::string override;
     void attach() override;
     void setFilePath(const std::string& filePath);
     void render(SDL_Renderer* renderer) override;

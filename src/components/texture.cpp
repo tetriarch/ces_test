@@ -2,10 +2,6 @@
 #include "../asset_manager.hpp"
 #include "../entity.hpp"
 
-auto TextureComponent::describe() -> std::string {
-    return "I hold texture - " + filePath_;
-}
-
 void TextureComponent::attach() {
     auto am = AssetManager::get();
     texture_ = am->load<Texture>(filePath_);

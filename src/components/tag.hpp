@@ -12,7 +12,6 @@ enum class TagType {
 class TagComponent : public Component<TagComponent> {
 
 public:
-    auto describe() -> std::string override { return "I am " + tagToString(tag_); }
     void setTag(TagType tag) { tag_ = tag; }
 private:
     TagType tag_{TagType::NPC};

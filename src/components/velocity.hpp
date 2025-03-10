@@ -15,7 +15,6 @@ enum class MovementDirection : u8 {
 class VelocityComponent : public Component<VelocityComponent> {
 
 public:
-    auto describe() -> std::string override;
     void update() override;
     Vec2 velocity() const;
     f32 speed() const;

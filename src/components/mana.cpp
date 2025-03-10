@@ -7,7 +7,3 @@ const Mana& ManaComponent::mana() const {
 void ManaComponent::setMana(const Mana& mana) {
     mana_ = mana;
 }
-
-auto ManaComponent::describe() -> std::string {
-    return "I have " + std::to_string(mana_.current) + "/" + std::to_string(mana_.max) + " mana";
-}

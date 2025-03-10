@@ -12,7 +12,6 @@ class LifeComponent : public Component<LifeComponent> {
 public:
     const Life& life() const;
     void setLife(const Life& life);
-    auto describe() -> std::string override;
 
 private:
     Life life_;

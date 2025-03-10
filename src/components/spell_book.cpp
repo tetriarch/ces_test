@@ -4,15 +4,6 @@
 #include "spell_book.hpp"
 #include "../asset_manager.hpp"
 
-auto SpellBookComponent::describe() -> std::string {
-    std::string spells = "";
-    for(auto& s : spellFiles_) {
-        spells += s + " ";
-    }
-
-    return "I cast these spells: " + spells;
-}
-
 void SpellBookComponent::attach() {
 
     auto am = AssetManager::get();

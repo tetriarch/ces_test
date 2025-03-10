@@ -8,7 +8,6 @@ class ComponentBase {
 public:
     auto entity() const -> EntityPtr { return entity_.lock(); }
     virtual auto componentType() const->std::type_index = 0;
-    virtual auto describe() -> std::string { return ""; }
     virtual void attach() {}
     virtual void handleEvents(const SDL_Event& event) {}
     virtual void update() {}
