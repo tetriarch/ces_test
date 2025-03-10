@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "spell_book.hpp"
+#include "../asset_manager.hpp"
 
 auto SpellBookComponent::describe() -> std::string {
     std::string spells = "";
@@ -10,6 +11,15 @@ auto SpellBookComponent::describe() -> std::string {
     }
 
     return "I cast these spells: " + spells;
+}
+
+void SpellBookComponent::attach() {
+
+    auto am = AssetManager::get();
+    for(auto& it : spellFiles_) {
+        auto s = am->load<SpellData>(it);
+        addSpell(s);
+    }
 }
 
 void SpellBookComponent::addSpell(const std::shared_ptr<SpellData> spellData) {
@@ -40,5 +50,6 @@ void SpellBookComponent::castSpell(const std::shared_ptr<SpellData> spell, Entit
 }
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
+
     return spells_;
 }
