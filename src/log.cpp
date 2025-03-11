@@ -1,7 +1,6 @@
 #include "log.hpp"
 
-#include <ctime>
-#include <iomanip>
+#include <chrono>
 
 Log& Log::getInstance() {
     static Log instance;
@@ -47,14 +46,9 @@ void Log::log(LogType type, const std::string& msg, const std::string& file, con
 }
 
 std::string Log::currentDateTime() {
-    time_t rawTime = time(nullptr);
-    tm timeSpan;
-    localtime_s(&timeSpan, &rawTime);
 
-    std::stringstream timeDate;
-    timeDate << std::put_time(&timeSpan, "%d/%m/%Y %H:%M:%S");
-
-    return timeDate.str();
+    auto tp = std::chrono::system_clock::now();
+    return std::format("{:%d/%m/%Y %H:%M:%S}", tp);
 }
 
 std::string Log::logTypeToString(LogType type) {

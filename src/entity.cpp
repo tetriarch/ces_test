@@ -3,9 +3,7 @@
 
 
 Entity::Entity(const std::string& name)
-    : name_(name) {
-
-}
+    : name_(name) {}
 
 EntityPtr Entity::create(const std::string& name) {
     auto e = std::make_shared<Entity>(name);
@@ -14,7 +12,9 @@ EntityPtr Entity::create(const std::string& name) {
 }
 
 void Entity::addChild(EntityPtr child) {
-    children_.emplace_back(child); child->parent_ = this;
+
+    child->parent_ = this;
+    children_.emplace_back(child);
 }
 
 void Entity::removeChild(const EntityPtr& child) {
@@ -30,7 +30,6 @@ void Entity::addComponent(ComponentPtr component) {
     assert(component->entity_.expired());
 
     component->entity_ = shared_from_this();
-    components_.push_back(component);
 
     if(component->hasHandleEvents()) {
         controllable_.insert(component.get());
@@ -43,6 +42,8 @@ void Entity::addComponent(ComponentPtr component) {
     if(component->hasRender()) {
         renderable_.insert(component.get());
     }
+
+    components_.push_back(component);
 }
 
 void Entity::setTransform(const Transform& transform) {
@@ -91,7 +92,7 @@ void Entity::executeAttached() {
 }
 
 void Entity::handleEvents(const SDL_Event& event) {
-    std::cout << "controllable_ size: " << controllable_.size() << std::endl;
+
     for(auto&& c : controllable_) {
         c->handleEvents(event);
     }

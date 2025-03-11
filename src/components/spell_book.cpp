@@ -24,7 +24,7 @@ void SpellBookComponent::addSpellFile(const std::string& filePath) {
 
 void SpellBookComponent::castSpell(u32 index, EntityPtr caster, const Vec2& target) {
 
-    assert(index > 0 || index < spellSlots_.size());
+    assert(index >= 0 && index < spellSlots_.size());
 
     auto spell = spellSlots_[index];
     if(!spell) {
@@ -32,13 +32,12 @@ void SpellBookComponent::castSpell(u32 index, EntityPtr caster, const Vec2& targ
         return;
     }
 
-    std::cout << "[SPELL BOOK]: casting " << spell->name << std::endl;
+    INFO("[SPELL BOOK]: casting " + spell->name);
 
     EntityPtr spellEntity = Entity::create(spell->name);
     spellEntity->setTransform(caster->transform());
     spellEntity->addComponent(std::make_shared<CollisionComponent>());
     spellEntity->addComponent(std::make_shared<SpellComponent>(spell));
-    // cstyle cast to get rid of const
     caster->root()->addChild(spellEntity);
 }
 
@@ -49,6 +48,6 @@ auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<Spe
 
 void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
 
-    assert(index > 0 || index < spellSlots_.size());
+    assert(index >= 0 && index < spellSlots_.size());
     spellSlots_[index] = spell;
 }
