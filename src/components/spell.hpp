@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../component.hpp"
 #include "../entity.hpp"
 #include "../utils.hpp"
 #include "../i_asset.hpp"

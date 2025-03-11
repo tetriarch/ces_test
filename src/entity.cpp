@@ -1,6 +1,7 @@
 #include "entity.hpp"
 #include "entity_manager.hpp"
-
+#include "scoped.hpp"
+#include "component.hpp"
 
 Entity::Entity(const std::string& name)
     : name_(name) {}
@@ -13,8 +14,16 @@ EntityPtr Entity::create(const std::string& name) {
 
 void Entity::addChild(EntityPtr child) {
 
+    if(updateState_ == UpdateState::UPDATE) {
+        postUpdateActions_.push_back([child = std::move(child)](Entity* self) {
+            self->addChild(std::move(child));
+        });
+        return;
+    }
+
     child->parent_ = this;
-    children_.emplace_back(child);
+
+    children_.push_back(std::move(child));
 }
 
 void Entity::removeChild(const EntityPtr& child) {
@@ -26,6 +35,14 @@ void Entity::removeChild(const EntityPtr& child) {
 }
 
 void Entity::addComponent(ComponentPtr component) {
+
+    if(updateState_ == UpdateState::UPDATE) {
+        postUpdateActions_.push_back(
+            [component = std::move(component)](Entity* self) {
+            self->addComponent(std::move(component));
+        });
+        return;
+    }
 
     assert(component->entity_.expired());
 
@@ -93,25 +110,65 @@ void Entity::executeAttached() {
 
 void Entity::handleEvents(const SDL_Event& event) {
 
-    for(auto&& c : controllable_) {
-        c->handleEvents(event);
-    }
+    {
+        updateState_ = UpdateState::UPDATE;
+        SCOPED([this]() { updateState_ = UpdateState::IDLE;});
+        for(auto&& c : controllable_) {
+            c->handleEvents(event);
+        }
 
 
-    for(auto&& c : children_) {
-        c->handleEvents(event);
+        for(auto&& c : children_) {
+            c->handleEvents(event);
+        }
     }
+    applyPostUpdateActions();
+
 }
 
 void Entity::update() {
 
-    for(auto& u : updatable_) {
-        u->update();
+    {
+        updateState_ = UpdateState::UPDATE;
+        SCOPED([this]() { updateState_ = UpdateState::IDLE;});
+        for(auto& u : updatable_) {
+            u->update();
+        }
+
+        for(auto& c : children_) {
+            c->update();
+        }
+    }
+    applyPostUpdateActions();
+}
+
+void Entity::postUpdate() {
+
+    {
+        updateState_ = UpdateState::UPDATE;
+        SCOPED([this]() { updateState_ = UpdateState::IDLE;});
+
+        for(auto&& component : postUpdatable_) {
+            component->postUpdate();
+        }
+
+        for(auto&& child : children_) {
+            child->postUpdate();
+        }
     }
 
-    for(auto& c : children_) {
-        c->update();
+    applyPostUpdateActions();
+}
+
+void Entity::applyPostUpdateActions() {
+
+    if(updateState_ != UpdateState::IDLE) {
+        FATAL_ERROR("[ENTITY]: update state is not idle");
     }
+    for(auto&& action : postUpdateActions_) {
+        action(this);
+    }
+    postUpdateActions_ = {};
 }
 
 void Entity::render(SDL_Renderer* renderer) {

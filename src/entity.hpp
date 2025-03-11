@@ -1,8 +1,9 @@
 #pragma once
 
-#include "component.hpp"
 #include "math.hpp"
 #include "log.hpp"
+
+#include <SDL3/SDL.h>
 
 class Entity : public std::enable_shared_from_this<Entity> {
 
@@ -30,17 +31,28 @@ public:
     void executeAttached();
     void handleEvents(const SDL_Event& event);
     void update();
+    void postUpdate();
+    void applyPostUpdateActions();
     void render(SDL_Renderer* renderer);
+
+private:
+    enum class UpdateState {
+        IDLE,
+        UPDATE
+    };
 
 private:
     std::string name_;
     Transform transform_;
     Entity* parent_{nullptr};
+    UpdateState updateState_{UpdateState::IDLE};
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
     std::unordered_set<ComponentBase*> controllable_;
     std::unordered_set<ComponentBase*> updatable_;
+    std::unordered_set<ComponentBase*> postUpdatable_;
     std::unordered_set<ComponentBase*> renderable_;
+    std::vector<std::function<void(Entity*)>> postUpdateActions_;
 };
 
 template<typename T>
