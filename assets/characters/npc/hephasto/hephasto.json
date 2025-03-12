@@ -7,8 +7,8 @@
         {
             "type": "collision",
             "box": {
-                "width": 10.0,
-                "height": 10.0
+                "width": 32.0,
+                "height": 32.0
             }
         },
         {

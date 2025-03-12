@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <expected>

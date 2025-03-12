@@ -143,18 +143,20 @@ void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
 #endif
 
     // go through children and find player's spellbook
-    std::shared_ptr<SpellBookComponent> spellBook = nullptr;
+    EntityPtr player = nullptr;
     for(auto& c : scene->children()) {
         auto tag = c->component<TagComponent>();
         if(tag && tag->tag() == TagType::PLAYER) {
-            spellBook = c->component<SpellBookComponent>();
+            player = c;
         }
     }
 
     ImGui::Begin("hud", nullptr, 0);
-
     ImGui::Columns(2);
     ImGui::SetColumnWidth(0, 250);
+
+    auto spellBook = player ? player->component<SpellBookComponent>() : nullptr;
+
     if(ImGui::BeginCombo("slot 1", selectedSpell0_.c_str())) {
         if(spellBook) {
             for(auto& spell : spellBook->spells()) {

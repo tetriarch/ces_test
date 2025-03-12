@@ -46,11 +46,11 @@ void PlayerControlComponent::handleEvents(const SDL_Event& event) {
         }
         if(event.key.key == SDLK_Q) {
             auto spellBook = entity()->component<SpellBookComponent>();
-            if(spellBook) spellBook->castSpell(0, entity(), mousePosition_);
+            if(spellBook) spellBook->castSpell(0, mousePosition_);
         }
         if(event.key.key == SDLK_E) {
             auto spellBook = entity()->component<SpellBookComponent>();
-            if(spellBook) spellBook->castSpell(1, entity(), mousePosition_);
+            if(spellBook) spellBook->castSpell(1, mousePosition_);
         }
     }
 }
