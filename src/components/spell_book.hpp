@@ -14,6 +14,7 @@ public:
     void addSpell(const std::shared_ptr<SpellData> spellData);
     void addSpellFile(const std::string& filePath);
     void castSpell(u32 index, const Vec2& target);
+    void interruptCasting();
     auto spells() const -> const std::vector<std::shared_ptr<SpellData>>;
     void setSlot(u32 index, std::shared_ptr<SpellData> spell);
 

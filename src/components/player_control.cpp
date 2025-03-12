@@ -25,6 +25,10 @@ void PlayerControlComponent::handleEvents(const SDL_Event& event) {
             auto velocity = entity()->component<VelocityComponent>();
             if(velocity) velocity->setMotion(MovementDirection::EAST);
         }
+        if(event.key.key == SDLK_SPACE) {
+            auto spellBook = entity()->component<SpellBookComponent>();
+            if(spellBook) spellBook->interruptCasting();
+        }
 
     }
     if(event.type == SDL_EVENT_KEY_UP) {
