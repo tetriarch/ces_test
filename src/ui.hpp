@@ -16,6 +16,7 @@ public:
     void handleEvents(const SDL_Event& event);
     void render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene);
     void renderSceneHierarchy(std::shared_ptr<Scene> scene);
+    void renderHUD(EntityPtr player);
 
 
 
