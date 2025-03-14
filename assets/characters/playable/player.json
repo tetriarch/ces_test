@@ -29,7 +29,8 @@
             "type": "spellbook",
             "spells": [
                 "spells/fireball.json",
-                "spells/zap.json"
+                "spells/zap.json",
+                "spells/ice_lance.json"
             ]
         },
         {

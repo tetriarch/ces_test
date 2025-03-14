@@ -17,12 +17,13 @@ void SpellBookComponent::update() {
 
     if(castedSpell_) {
         auto currentTime = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<f32> elapsed = currentTime - castStart_;
-
+        castDuration_ = currentTime - castStart_;
+        castProgress_ = castDuration_.count() / castedSpell_->castTime;
         //TODO: Implement on status effect interruption(stun, freeze...)
 
-        if(elapsed.count() >= castedSpell_->castTime) {
-            INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(elapsed.count()) + "s");
+        if(castDuration_.count() >= castedSpell_->castTime) {
+            castProgress_ = 0.0f;
+            INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(castDuration_.count()) + "s");
 
             EntityPtr spellEntity = Entity::create(castedSpell_->name);
             spellEntity->setTransform(entity()->transform());
@@ -55,8 +56,10 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
 
     assert(index < spellSlots_.size());
 
-    // if allready casting, interrupt if possible
     if(castedSpell_) {
+        if(!interruptible()) {
+            return;
+        }
         interruptCasting();
     }
 
@@ -85,14 +88,10 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
 
 void SpellBookComponent::interruptCasting() {
 
-    std::chrono::high_resolution_clock::time_point current = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<f32> elapsed = current - castStart_;
-    if(elapsed.count() <= castedSpell_->interruptTime) {
-        INFO("[SPELL BOOK]: interrupting casting " + castedSpell_->name + "...");
-        castedSpell_ = nullptr;
-        castStart_ = std::chrono::high_resolution_clock::time_point();
-    }
+    INFO("[SPELL BOOK]: interrupting casting " + castedSpell_->name + "...");
+    castedSpell_ = nullptr;
+    castDuration_.zero();
+    castStart_ = std::chrono::high_resolution_clock::time_point();
 }
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
@@ -104,4 +103,22 @@ void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
 
     assert(index < spellSlots_.size());
     spellSlots_[index] = spell;
+}
+
+bool SpellBookComponent::interruptible() const {
+
+    if(!castedSpell_) {
+        return false;
+    }
+    else {
+        return castDuration_.count() <= castedSpell_->interruptTime;
+    }
+}
+
+f32 SpellBookComponent::castProgress() const {
+    return castProgress_;
+}
+
+auto SpellBookComponent::castedSpell() -> std::shared_ptr<SpellData const> const {
+    return castedSpell_;
 }

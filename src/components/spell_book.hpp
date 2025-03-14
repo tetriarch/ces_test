@@ -17,6 +17,9 @@ public:
     void interruptCasting();
     auto spells() const -> const std::vector<std::shared_ptr<SpellData>>;
     void setSlot(u32 index, std::shared_ptr<SpellData> spell);
+    bool interruptible() const;
+    f32 castProgress() const;
+    auto castedSpell() -> std::shared_ptr<SpellData const> const;
 
 private:
     std::array<std::shared_ptr<SpellData>, 4> spellSlots_;
@@ -24,4 +27,6 @@ private:
     std::vector<std::string> spellFiles_;
     std::shared_ptr<SpellData> castedSpell_{nullptr};
     std::chrono::high_resolution_clock::time_point castStart_;
+    f32 castProgress_{0.0f};
+    std::chrono::duration<f32> castDuration_{0.0f};
 };

@@ -19,11 +19,7 @@ UI::UI() :
     showScene_ = true;
     showDemoWindow_ = false;
 #endif
-    selectedSpell0_ = "";
-    selectedSpell1_ = "";
-    selectedSpell2_ = "";
-    selectedSpell3_ = "";
-
+    selectedSpells_ = {"", "", "", ""};
 }
 
 UI::~UI() {
@@ -122,6 +118,7 @@ void UI::setupDockSpace() {
         ImGui::DockBuilderDockWindow("hud", dockBottom);
         ImGuiDockNode* nodeBottom = ImGui::DockBuilderGetNode(dockBottom);
         if(nodeBottom) {
+            //NOTE: Ignore the warnings about combo of flag types
             nodeBottom->LocalFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
         }
 
@@ -214,9 +211,24 @@ void UI::renderHUD(EntityPtr player) {
 
     // render cast bar
     ImGui::SetCursorPosX(horizontalCenter);
-    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.73f, 0.73f, 1.0f));
-    ImGui::ProgressBar(1.0f, castBarSize, "There will be cast progression");
-    ImGui::PopStyleColor();
+    if(spellBook && spellBook->castedSpell()) {
+        if(spellBook->interruptible()) {
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.39f, 0.00f, 0.39f, 1.0f));
+        }
+        else {
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+        }
+        auto spellName = spellBook->castedSpell() ? spellBook->castedSpell()->name.c_str() : "";
+        ImVec2 spellTextSize = ImGui::CalcTextSize(spellName);
+        ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+        ImVec2 spellTextPosition = ImVec2(cursorPos.x + (castBarSize.x - spellTextSize.x) * 0.5f, cursorPos.y + (castBarSize.y - spellTextSize.y) * 0.5f);
+        ImGui::ProgressBar(spellBook->castProgress(), castBarSize, "");
+        ImGui::GetWindowDrawList()->AddText(spellTextPosition, IM_COL32(255, 255, 255, 255), spellName);
+        ImGui::PopStyleColor();
+    }
+    else {
+        ImGui::Dummy(castBarSize);
+    }
 
     // render xp bar
     ImGui::SetCursorPosX(horizontalCenter);
@@ -243,24 +255,25 @@ void UI::renderHUD(EntityPtr player) {
     ImVec2 manaTextSize = ImGui::CalcTextSize(manaText.c_str());
 
     // render resources
-    f32 resourceHorizontalCenter = (windowWidth - uiWidth - lifeTextSize.x - manaTextSize.x) * 0.5;
-    ImGui::SetCursorPosX(resourceHorizontalCenter);
+    ImGui::SetCursorPosX(horizontalCenter);
     if(life && mana) {
-
-        ImGui::Text(lifeText.c_str());
+        {
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+            ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+            ImVec2 lifeTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
+            ImGui::ProgressBar(static_cast<f32>(lifeValue.current) / static_cast<f32>(lifeValue.max), resourceBarSize, "");
+            ImGui::GetWindowDrawList()->AddText(lifeTextPosition, IM_COL32(255, 255, 255, 255), lifeText.c_str());
+            ImGui::PopStyleColor();
+        }
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-        ImGui::ProgressBar(static_cast<f32>(lifeValue.current) / static_cast<f32>(lifeValue.max), resourceBarSize, "");
-        ImGui::PopStyleColor();
-
-        ImGui::SameLine();
-
-        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
-        ImGui::ProgressBar(static_cast<f32>(manaValue.current) / static_cast<f32>(manaValue.max), resourceBarSize, "");
-        ImGui::PopStyleColor();
-        ImGui::SameLine();
-
-        ImGui::Text(manaText.c_str());
+        {
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+            ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+            ImVec2 manaTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
+            ImGui::ProgressBar(static_cast<f32>(manaValue.current) / static_cast<f32>(manaValue.max), resourceBarSize, "");
+            ImGui::GetWindowDrawList()->AddText(manaTextPosition, IM_COL32(255, 255, 255, 255), manaText.c_str());
+            ImGui::PopStyleColor();
+        }
     }
 
     // render spell slots
@@ -276,10 +289,7 @@ void UI::renderHUD(EntityPtr player) {
         for(u32 i = 0; i < 4; i++) {
             ImGui::TableSetColumnIndex(i);
             std::string slotLabel = "##slot " + std::to_string(i + 1);
-            auto& selectedSpell = (i == 0) ? selectedSpell0_ :
-                (i == 1) ? selectedSpell1_ :
-                (i == 2) ? selectedSpell2_ :
-                selectedSpell3_;
+            auto& selectedSpell = selectedSpells_[i];
 
             ImGui::SetNextItemWidth(uiWidth / 4.0);
             if(ImGui::BeginCombo(slotLabel.c_str(), selectedSpell.c_str())) {
