@@ -15,7 +15,7 @@ enum class MovementDirection : u8 {
 class VelocityComponent : public Component<VelocityComponent> {
 
 public:
-    void update() override;
+    void update(const f32 dt) override;
     Vec2 velocity() const;
     f32 speed() const;
     void setMotion(MovementDirection direction);

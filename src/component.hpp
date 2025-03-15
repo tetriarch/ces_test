@@ -11,8 +11,8 @@ public:
     virtual auto componentType() const->std::type_index = 0;
     virtual void attach() {}
     virtual void handleEvents(const SDL_Event& event) {}
-    virtual void update() {}
-    virtual void postUpdate() {}
+    virtual void update(const f32 dt) {}
+    virtual void postUpdate(const f32 dt) {}
     virtual void render(SDL_Renderer* renderer) {}
 
 private:

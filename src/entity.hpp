@@ -30,8 +30,8 @@ public:
 
     void executeAttached();
     void handleEvents(const SDL_Event& event);
-    void update();
-    void postUpdate();
+    void update(const f32 dt);
+    void postUpdate(const f32 dt);
     void applyPostUpdateActions();
     void render(SDL_Renderer* renderer);
 

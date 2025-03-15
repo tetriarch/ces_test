@@ -13,17 +13,16 @@ void SpellBookComponent::attach() {
     }
 }
 
-void SpellBookComponent::update() {
+void SpellBookComponent::update(f32 dt) {
 
     if(castedSpell_) {
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        castDuration_ = currentTime - castStart_;
-        castProgress_ = castDuration_.count() / castedSpell_->castTime;
+        castDuration_ += dt;
+        castProgress_ = castDuration_ / castedSpell_->castTime;
         //TODO: Implement on status effect interruption(stun, freeze...)
 
-        if(castDuration_.count() >= castedSpell_->castTime) {
+        if(castDuration_ >= castedSpell_->castTime) {
             castProgress_ = 0.0f;
-            INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(castDuration_.count()) + "s");
+            INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(castDuration_) + "s");
 
             EntityPtr spellEntity = Entity::create(castedSpell_->name);
             spellEntity->setTransform(entity()->transform());
@@ -38,6 +37,7 @@ void SpellBookComponent::update() {
 
             castedSpell_ = nullptr;
             entity()->root()->addChild(spellEntity);
+            castDuration_ = 0.0f;
         }
     }
 }
@@ -83,15 +83,13 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
     INFO("[SPELL BOOK]: caster " + entity()->name() + " casting " + spell->name + " at target [" + std::to_string(target.x) + "," + std::to_string(target.y) + "]");
 
     castedSpell_ = spell;
-    castStart_ = std::chrono::high_resolution_clock::now();
 }
 
 void SpellBookComponent::interruptCasting() {
 
     INFO("[SPELL BOOK]: interrupting casting " + castedSpell_->name + "...");
     castedSpell_ = nullptr;
-    castDuration_.zero();
-    castStart_ = std::chrono::high_resolution_clock::time_point();
+    castDuration_ = 0.0f;
 }
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
@@ -111,7 +109,7 @@ bool SpellBookComponent::interruptible() const {
         return false;
     }
     else {
-        return castDuration_.count() <= castedSpell_->interruptTime;
+        return castDuration_ <= castedSpell_->interruptTime;
     }
 }
 

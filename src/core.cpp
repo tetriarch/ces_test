@@ -1,11 +1,11 @@
 #include "asset_manager.hpp"
 #include "core.hpp"
-#include "components/components.hpp"
 #include "entity_manager.hpp"
 #include "log.hpp"
 #include "scene_loader.hpp"
 #include "spell_loader.hpp"
 #include "texture_loader.hpp"
+#include "time.hpp"
 #include "ui.hpp"
 
 constexpr std::string gameTitle = "CES_test";
@@ -72,9 +72,9 @@ bool Core::initSDL() {
         return false;
     }
 
-    if(!SDL_SetRenderVSync(renderer_, 1)) {
-        INFO("failed to set v-sync");
-    }
+    // if(!SDL_SetRenderVSync(renderer_, 1)) {
+    //     INFO("failed to set v-sync");
+    // }
 
     return true;
 }
@@ -90,7 +90,10 @@ s32 Core::run() {
         while(SDL_PollEvent(&event)) {
             handleEvents(event);
         }
-        update();
+        Time::get().update();
+        while(Time::get().isTimeToUpdate()) {
+            update(Time::get().DELTA_TIME);
+        }
         render();
     }
     return 0;
@@ -106,9 +109,9 @@ void Core::handleEvents(const SDL_Event& event) {
     }
 }
 
-void Core::update() {
+void Core::update(const f32 dt) {
 
-    root_->update();
+    root_->update(dt);
 }
 
 void Core::render() {

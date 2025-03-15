@@ -10,7 +10,7 @@ class SpellBookComponent : public Component<SpellBookComponent> {
 
 public:
     void attach() override;
-    void update() override;
+    void update(const f32 dt) override;
     void addSpell(const std::shared_ptr<SpellData> spellData);
     void addSpellFile(const std::string& filePath);
     void castSpell(u32 index, const Vec2& target);
@@ -26,7 +26,6 @@ private:
     std::vector<std::shared_ptr<SpellData>> spells_;
     std::vector<std::string> spellFiles_;
     std::shared_ptr<SpellData> castedSpell_{nullptr};
-    std::chrono::high_resolution_clock::time_point castStart_;
     f32 castProgress_{0.0f};
-    std::chrono::duration<f32> castDuration_{0.0f};
+    f32 castDuration_{0.0f};
 };

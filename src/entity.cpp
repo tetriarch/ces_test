@@ -126,34 +126,34 @@ void Entity::handleEvents(const SDL_Event& event) {
 
 }
 
-void Entity::update() {
+void Entity::update(const f32 dt) {
 
     {
         updateState_ = UpdateState::UPDATE;
         SCOPED([this]() { updateState_ = UpdateState::IDLE;});
         for(auto& u : updatable_) {
-            u->update();
+            u->update(dt);
         }
 
         for(auto& c : children_) {
-            c->update();
+            c->update(dt);
         }
     }
     applyPostUpdateActions();
 }
 
-void Entity::postUpdate() {
+void Entity::postUpdate(const f32 dt) {
 
     {
         updateState_ = UpdateState::UPDATE;
         SCOPED([this]() { updateState_ = UpdateState::IDLE;});
 
         for(auto&& component : postUpdatable_) {
-            component->postUpdate();
+            component->postUpdate(dt);
         }
 
         for(auto&& child : children_) {
-            child->postUpdate();
+            child->postUpdate(dt);
         }
     }
 

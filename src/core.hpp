@@ -19,7 +19,7 @@ private:
     bool init();
     bool initSDL();
     void handleEvents(const SDL_Event& event);
-    void update();
+    void update(const f32 dt);
     void render();
 
 private:

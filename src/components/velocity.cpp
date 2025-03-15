@@ -19,10 +19,10 @@ Vec2 VelocityComponent::velocity() const {
     return velocityVector.normalized() * speed_;
 }
 
-void VelocityComponent::update() {
+void VelocityComponent::update(const f32 dt) {
 
     auto transform = entity()->transform();
-    transform.position += velocity();
+    transform.position += velocity() * dt;
     entity()->setTransform(transform);
 }
 
