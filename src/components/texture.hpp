@@ -15,5 +15,5 @@ public:
 
 private:
     std::string filePath_;
-    std::weak_ptr<Texture> texture_;
+    std::shared_ptr<Texture> texture_;
 };

@@ -82,6 +82,8 @@ auto SpellLoader::parseBasicStats(const json& spellJSON, const std::string& pare
         return std::unexpected(JSONParserError::PARSE);
     }
 
+    get<std::string>(spellJSON, "texture_file_path", false, spellData.textureFilePath, parent);
+
     return std::move(spellData);
 }
 

@@ -277,13 +277,14 @@ void UI::renderHUD(EntityPtr player) {
     }
 
     // render spell slots
+    auto spellSlotWidth = uiWidth / 4.0f;
     ImGui::SetCursorPosX(horizontalCenter);
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
     if(ImGui::BeginTable("##SpellSlots", 4, ImGuiTableFlags_SizingFixedFit)) {
-        ImGui::TableSetupColumn("##Slot 1", ImGuiTableColumnFlags_WidthFixed, uiWidth / 4.0f);
-        ImGui::TableSetupColumn("##Slot 2", ImGuiTableColumnFlags_WidthFixed, uiWidth / 4.0f);
-        ImGui::TableSetupColumn("##Slot 3", ImGuiTableColumnFlags_WidthFixed, uiWidth / 4.0f);
-        ImGui::TableSetupColumn("##Slot 4", ImGuiTableColumnFlags_WidthFixed, uiWidth / 4.0f);
+        ImGui::TableSetupColumn("##Slot 1", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
+        ImGui::TableSetupColumn("##Slot 2", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
+        ImGui::TableSetupColumn("##Slot 3", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
+        ImGui::TableSetupColumn("##Slot 4", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
         ImGui::TableNextRow();
 
         for(u32 i = 0; i < 4; i++) {
@@ -291,7 +292,7 @@ void UI::renderHUD(EntityPtr player) {
             std::string slotLabel = "##slot " + std::to_string(i + 1);
             auto& selectedSpell = selectedSpells_[i];
 
-            ImGui::SetNextItemWidth(uiWidth / 4.0);
+            ImGui::SetNextItemWidth(spellSlotWidth);
             if(ImGui::BeginCombo(slotLabel.c_str(), selectedSpell.c_str())) {
                 if(spellBook) {
                     for(auto& spell : spellBook->spells()) {

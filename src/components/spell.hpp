@@ -60,10 +60,10 @@ struct Motion {
 
 struct ConstantMotion : Motion {
     f32 speed{0};
-    void apply(const EntityPtr& target, f32 deltaTime) {
+    void apply(const EntityPtr& target, f32 dt) {
         Transform targetTransform = target->transform();
         Vec2 direction = directionFromAngle(targetTransform.rotationInDegrees);
-        Vec2 velocity = direction * speed * deltaTime;
+        Vec2 velocity = direction * speed * dt;
         targetTransform.position += velocity;
         target->setTransform(targetTransform);
     }
@@ -89,6 +89,7 @@ struct SpellData : public IAsset {
     f32 interruptTime;
     u32 manaCost;
     f32 cooldown;
+    std::string textureFilePath;
     std::vector<SpellAction> actions;
 };
 

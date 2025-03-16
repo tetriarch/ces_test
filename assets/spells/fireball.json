@@ -4,6 +4,7 @@
     "interrupt_time": 1.5,
     "mana_cost": 15,
     "cooldown": 0.0,
+    "texture_file_path": "spells/textures/fireball.png",
     "action": [
         {
             "type": "PROJECTILE",

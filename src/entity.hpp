@@ -8,12 +8,13 @@
 class Entity : public std::enable_shared_from_this<Entity> {
 
 public:
-    Entity(const std::string& name);
-    static EntityPtr create(const std::string& name);
+    Entity(const std::string& name, bool lazyAttach);
+    static EntityPtr create(const std::string& name, bool lazyAttach = false);
     void addChild(EntityPtr child);
     void removeChild(const EntityPtr& child);
 
     void addComponent(ComponentPtr component);
+    void removeComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
     void setName(const std::string& name);
 
@@ -53,6 +54,7 @@ private:
     std::unordered_set<ComponentBase*> postUpdatable_;
     std::unordered_set<ComponentBase*> renderable_;
     std::vector<std::function<void(Entity*)>> postUpdateActions_;
+    bool lazyAttach_;
 };
 
 template<typename T>

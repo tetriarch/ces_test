@@ -3,11 +3,14 @@
 #include "scoped.hpp"
 #include "component.hpp"
 
-Entity::Entity(const std::string& name)
-    : name_(name) {}
+Entity::Entity(const std::string& name, bool lazyAttach) :
+    name_(name),
+    lazyAttach_(lazyAttach) {
 
-EntityPtr Entity::create(const std::string& name) {
-    auto e = std::make_shared<Entity>(name);
+}
+
+EntityPtr Entity::create(const std::string& name, bool lazyAttach) {
+    auto e = std::make_shared<Entity>(name, lazyAttach);
     EntityManager::get().addEntity(e);
     return e;
 }
@@ -22,8 +25,13 @@ void Entity::addChild(EntityPtr child) {
     }
 
     child->parent_ = this;
-
+    auto childPtr = child.get();
     children_.push_back(std::move(child));
+
+    if(!lazyAttach_ && childPtr->lazyAttach_) {
+        childPtr->executeAttached();
+    }
+
 }
 
 void Entity::removeChild(const EntityPtr& child) {
@@ -61,6 +69,10 @@ void Entity::addComponent(ComponentPtr component) {
     }
 
     components_.push_back(component);
+
+    if(!lazyAttach_) {
+        component->attach();
+    }
 }
 
 void Entity::setTransform(const Transform& transform) {
@@ -98,6 +110,8 @@ const Transform& Entity::transform() const {
 }
 
 void Entity::executeAttached() {
+
+    lazyAttach_ = false;
 
     for(auto& c : components_) {
         c->attach();

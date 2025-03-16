@@ -72,9 +72,9 @@ bool Core::initSDL() {
         return false;
     }
 
-    // if(!SDL_SetRenderVSync(renderer_, 1)) {
-    //     INFO("failed to set v-sync");
-    // }
+    if(!SDL_SetRenderVSync(renderer_, 1)) {
+        INFO("failed to set v-sync");
+    }
 
     return true;
 }

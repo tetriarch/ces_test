@@ -4,6 +4,7 @@
     "interrupt_time": 2.0,
     "mana_cost": 25,
     "cooldown": 0.0,
+    "texture_file_path": "spells/textures/ice_lance.png",
     "action": [
         {
             "type": "PROJECTILE",

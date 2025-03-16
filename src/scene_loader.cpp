@@ -81,7 +81,7 @@ auto SceneLoader::parseScene(AssetManager& assetManager, const std::string& sour
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    auto scene = Scene::create(sceneName);
+    auto scene = Scene::create(sceneName, true /* lazyAttach */);
 
     // go through entities
     json::const_iterator entitiesJSON = sceneJSON.find("entities");
@@ -150,7 +150,9 @@ auto SceneLoader::parseEntity(const std::string& source, const std::string& name
         ERROR(error(std::string(e.what())));
         return nullptr;
     }
-    auto entity = Entity::create(name);
+
+    //NOTE: all initial entities in scene are lazy -> attached after they are all loaded
+    auto entity = Entity::create(name, true /* lazy attach*/);
 
     auto components = parseComponents(entityJSON);
     if(!components) {

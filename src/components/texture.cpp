@@ -14,14 +14,17 @@ void TextureComponent::setFilePath(const std::string& filePath) {
 
 void TextureComponent::render(SDL_Renderer* renderer) {
 
-    assert(!texture_.expired());
+    if(!texture_) {
+        ERROR_ONCE("[TEXTURE COMPONENT]: texture is empty");
+        return;
+    }
 
     Transform transform = entity()->transform();
     SDL_FRect rect;
     rect.x = transform.position.x;
     rect.y = transform.position.y;
-    rect.w = texture_.lock()->get()->w;
-    rect.h = texture_.lock()->get()->h;
+    rect.w = texture_->get()->w;
+    rect.h = texture_->get()->h;
 
-    SDL_RenderTexture(renderer, texture_.lock()->get(), nullptr, &rect);
+    SDL_RenderTexture(renderer, texture_->get(), nullptr, &rect);
 }

@@ -18,26 +18,36 @@ void SpellBookComponent::update(f32 dt) {
     if(castedSpell_) {
         castDuration_ += dt;
         castProgress_ = castDuration_ / castedSpell_->castTime;
-        //TODO: Implement on status effect interruption(stun, freeze...)
+        //TODO: Implement on status effect interruption(stun, freeze...), cooldown
 
         if(castDuration_ >= castedSpell_->castTime) {
-            castProgress_ = 0.0f;
             INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(castDuration_) + "s");
 
-            EntityPtr spellEntity = Entity::create(castedSpell_->name);
+            EntityPtr spellEntity = Entity::create(castedSpell_->name, true);
             spellEntity->setTransform(entity()->transform());
             spellEntity->addComponent(std::make_shared<CollisionComponent>());
             spellEntity->addComponent(std::make_shared<SpellComponent>(castedSpell_));
 
+            if(!castedSpell_->textureFilePath.empty()) {
+                std::shared_ptr<TextureComponent> textureComponent = std::make_shared<TextureComponent>();
+                textureComponent->setFilePath(castedSpell_->textureFilePath);
+                spellEntity->addComponent(textureComponent);
+            }
+
             // update mana
             auto mana = entity()->component<ManaComponent>();
+            if(!mana) {
+                ERROR("[SPELL BOOK]: missing mana component");
+                return;
+            }
             auto currentMana = mana->mana();
             currentMana.current -= castedSpell_->manaCost;
             mana->setMana(currentMana);
 
             castedSpell_ = nullptr;
-            entity()->root()->addChild(spellEntity);
+            castProgress_ = 0.0f;
             castDuration_ = 0.0f;
+            entity()->root()->addChild(spellEntity);
         }
     }
 }
