@@ -11,7 +11,7 @@
             "pierce": false,
             "movement": {
                 "type": "constant_motion",
-                "speed": 1.5
+                "speed": 250.0
             },
             "on_hit": [
                 {

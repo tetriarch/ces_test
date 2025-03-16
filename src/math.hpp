@@ -24,8 +24,18 @@ struct Vec2 {
         return *this;
     }
 
-    Vec2 operator+(Vec2 addition) {
+    Vec2 operator+(Vec2& addition) const {
         return{x + addition.x, y + addition.y};
+    }
+
+    Vec2& operator-=(const Vec2& substraction) {
+        x -= substraction.x;
+        y -= substraction.y;
+        return *this;
+    }
+
+    Vec2 operator-(Vec2& substraction) const {
+        return{x - substraction.x, y - substraction.y};
     }
 };
 
@@ -42,11 +52,11 @@ struct Transform {
 /// @param angleInDegrees 
 /// @return directional vector
 inline Vec2 directionFromAngle(f32 angleInDegrees) {
-    f32 angleInRadians = angleInDegrees * (M_PI / 180.0f);
+    f32 angleInRadians = angleInDegrees * (static_cast<f32>(M_PI) / 180.0f);
     Vec2 direction;
     direction.x = cos(angleInRadians);
     direction.y = sin(angleInRadians);
-    return direction.normalized();
+    return direction;
 }
 
 /// @brief Calculates linear interpolation between 2 values

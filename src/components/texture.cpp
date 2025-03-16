@@ -21,10 +21,10 @@ void TextureComponent::render(SDL_Renderer* renderer) {
 
     Transform transform = entity()->transform();
     SDL_FRect rect;
-    rect.x = transform.position.x;
-    rect.y = transform.position.y;
+    rect.x = transform.position.x - texture_->get()->w / 2.0;
+    rect.y = transform.position.y - texture_->get()->h / 2.0;
     rect.w = texture_->get()->w;
     rect.h = texture_->get()->h;
 
-    SDL_RenderTexture(renderer, texture_->get(), nullptr, &rect);
+    SDL_RenderTextureRotated(renderer, texture_->get(), nullptr, &rect, transform.rotationInDegrees, nullptr, SDL_FlipMode::SDL_FLIP_NONE);
 }

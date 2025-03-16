@@ -119,8 +119,7 @@ auto SpellLoader::parseAction(const json& actionJSON, const std::string& parent)
 
     if(movementType == "constant_motion") {
         ConstantMotion motion;
-        f32 speed;
-        if(!get<f32>(it.value(), "speed", true, speed, parent)) {
+        if(!get<f32>(it.value(), "speed", true, motion.speed, parent)) {
             return std::unexpected(JSONParserError::PARSE);
         }
         action.motion = std::make_shared<ConstantMotion>(motion);

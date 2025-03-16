@@ -90,7 +90,7 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
         return;
     }
 
-    INFO("[SPELL BOOK]: caster " + entity()->name() + " casting " + spell->name + " at target [" + std::to_string(target.x) + "," + std::to_string(target.y) + "]");
+    INFO("[SPELL BOOK]: caster " + entity()->name() + " casting " + spell->name);
 
     castedSpell_ = spell;
 }

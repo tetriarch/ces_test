@@ -10,7 +10,8 @@
             "type": "BEAM",
             "pierce": true,
             "movement": {
-                "type": "instant"
+                "type": "instant",
+                "length": 200
             },
             "on_hit": [
                 {

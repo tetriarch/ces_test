@@ -56,21 +56,23 @@ struct SpellEffectOnHit {
 
 struct Motion {
     virtual ~Motion() = default;
+    virtual void apply(const EntityPtr& target, f32 dt) {};
 };
 
 struct ConstantMotion : Motion {
     f32 speed{0};
     void apply(const EntityPtr& target, f32 dt) {
+
         Transform targetTransform = target->transform();
         Vec2 direction = directionFromAngle(targetTransform.rotationInDegrees);
-        Vec2 velocity = direction * speed * dt;
-        targetTransform.position += velocity;
+        Vec2 velocity = direction * speed;
+        targetTransform.position += velocity * dt;
         target->setTransform(targetTransform);
     }
 };
 
 struct InstantMotion : Motion {
-    void apply(const EntityPtr& target) {
+    void apply(const EntityPtr& target, f32 dt) {
         //TODO: Unsure of the logic here yet
         //for snap action abilities, beams like Zap
     }
@@ -96,6 +98,7 @@ struct SpellData : public IAsset {
 class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent(std::shared_ptr<SpellData> spellData);
+    void update(f32 dt) override;
 
 private:
     std::shared_ptr<SpellData> spellData_;
