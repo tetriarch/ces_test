@@ -19,7 +19,7 @@ UI::UI() :
     showScene_ = true;
     showDemoWindow_ = false;
 #endif
-    selectedSpells_ = {"", "", "", ""};
+    selectedSpells_ = {"Select Spell", "Select Spell", "Select Spell", "Select Spell"};
 }
 
 UI::~UI() {
@@ -213,7 +213,7 @@ void UI::renderHUD(EntityPtr player) {
     ImGui::SetCursorPosX(horizontalCenter);
     if(spellBook && spellBook->castedSpell()) {
         if(spellBook->interruptible()) {
-            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.39f, 0.00f, 0.39f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.4f, 0.00f, 0.4f, 1.0f));
         }
         else {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -232,7 +232,7 @@ void UI::renderHUD(EntityPtr player) {
 
     // render xp bar
     ImGui::SetCursorPosX(horizontalCenter);
-    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(1.0f, 0.73f, 0.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.73f, 0.43f, 0.0f, 1.0f));
     ImGui::ProgressBar(0.74f, xpBarSize, "");
     ImGui::PopStyleColor();
 
@@ -258,7 +258,7 @@ void UI::renderHUD(EntityPtr player) {
     ImGui::SetCursorPosX(horizontalCenter);
     if(life && mana) {
         {
-            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.4f, 0.0f, 0.0f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 lifeTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
             ImGui::ProgressBar(static_cast<f32>(lifeValue.current) / static_cast<f32>(lifeValue.max), resourceBarSize, "");
@@ -267,7 +267,7 @@ void UI::renderHUD(EntityPtr player) {
         }
         ImGui::SameLine();
         {
-            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.4f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 manaTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
             ImGui::ProgressBar(static_cast<f32>(manaValue.current) / static_cast<f32>(manaValue.max), resourceBarSize, "");
@@ -277,14 +277,14 @@ void UI::renderHUD(EntityPtr player) {
     }
 
     // render spell slots
-    auto spellSlotWidth = uiWidth / 4.0f;
+    ImVec2 spellSlotSize = {uiWidth / 4.0f, 20.0f};
     ImGui::SetCursorPosX(horizontalCenter);
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
     if(ImGui::BeginTable("##SpellSlots", 4, ImGuiTableFlags_SizingFixedFit)) {
-        ImGui::TableSetupColumn("##Slot 1", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
-        ImGui::TableSetupColumn("##Slot 2", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
-        ImGui::TableSetupColumn("##Slot 3", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
-        ImGui::TableSetupColumn("##Slot 4", ImGuiTableColumnFlags_WidthFixed, spellSlotWidth);
+        ImGui::TableSetupColumn("##Slot 1", ImGuiTableColumnFlags_WidthFixed, spellSlotSize.x);
+        ImGui::TableSetupColumn("##Slot 2", ImGuiTableColumnFlags_WidthFixed, spellSlotSize.x);
+        ImGui::TableSetupColumn("##Slot 3", ImGuiTableColumnFlags_WidthFixed, spellSlotSize.x);
+        ImGui::TableSetupColumn("##Slot 4", ImGuiTableColumnFlags_WidthFixed, spellSlotSize.x);
         ImGui::TableNextRow();
 
         for(u32 i = 0; i < 4; i++) {
@@ -292,21 +292,35 @@ void UI::renderHUD(EntityPtr player) {
             std::string slotLabel = "##slot " + std::to_string(i + 1);
             auto& selectedSpell = selectedSpells_[i];
 
-            ImGui::SetNextItemWidth(spellSlotWidth);
-            if(ImGui::BeginCombo(slotLabel.c_str(), selectedSpell.c_str())) {
-                if(spellBook) {
-                    for(auto& spell : spellBook->spells()) {
-                        bool selected = spell->name == selectedSpell;
-                        if(ImGui::Selectable(spell->name.c_str(), &selected)) {
-                            selectedSpell = spell->name;
-                        }
-                        if(selected) {
-                            ImGui::SetItemDefaultFocus();
-                            spellBook->setSlot(i, spell);
+            f32 cooldown;;
+            f32 cooldownProgress;
+            ImGui::SetNextItemWidth(spellSlotSize.x);
+            if(spellBook->isSpellSlotOnCooldown(i, &cooldown, &cooldownProgress)) {
+                ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
+                std::string cooldownText = std::format("{:.2f}s", cooldown);
+                ImVec2 cooldownTextSize = ImGui::CalcTextSize(cooldownText.c_str());
+                ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+                ImVec2 spellTextPosition = ImVec2(cursorPos.x + (spellSlotSize.x - cooldownTextSize.x) * 0.5f, cursorPos.y + (spellSlotSize.y - cooldownTextSize.y) * 0.5f);
+                ImGui::ProgressBar(cooldownProgress, spellSlotSize, "");
+                ImGui::GetWindowDrawList()->AddText(spellTextPosition, IM_COL32(255, 255, 255, 255), cooldownText.c_str());
+                ImGui::PopStyleColor();
+            }
+            else {
+                if(ImGui::BeginCombo(slotLabel.c_str(), selectedSpell.c_str())) {
+                    if(spellBook) {
+                        for(auto& spell : spellBook->spells()) {
+                            bool selected = spell->name == selectedSpell;
+                            if(ImGui::Selectable(spell->name.c_str(), &selected)) {
+                                selectedSpell = spell->name;
+                            }
+                            if(selected) {
+                                ImGui::SetItemDefaultFocus();
+                                spellBook->setSlot(i, spell);
+                            }
                         }
                     }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndCombo();
             }
         }
         ImGui::EndTable();
