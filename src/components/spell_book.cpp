@@ -65,7 +65,7 @@ void SpellBookComponent::update(f32 dt) {
 
             // put spell on cooldown if it has one
             if(castedSpell_->cooldown > 0.0f) {
-                cooldowns_.emplace(spellSlotIndex(castedSpell_), castedSpell_->cooldown);
+                cooldowns_.emplace(castedSpell_, castedSpell_->cooldown);
             }
 
             castedSpell_ = nullptr;
@@ -90,7 +90,7 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
 
     assert(index < spellSlots_.size());
 
-    if(isSpellSlotOnCooldown(index)) {
+    if(isSpellInSlotOnCooldown(index)) {
         INFO("[SPELL BOOK]: " + spellSlots_[index]->name + " on cooldown");
         return;
     }
@@ -170,16 +170,22 @@ auto SpellBookComponent::castedSpell() -> std::shared_ptr<SpellData const> const
     return castedSpell_;
 }
 
-bool SpellBookComponent::isSpellSlotOnCooldown(u32 index, f32* cooldown, f32* progress) {
+bool SpellBookComponent::isSpellInSlotOnCooldown(u32 index, f32* cooldown, f32* progress) {
 
-    if(auto it = cooldowns_.find(index); it != cooldowns_.end()) {
-        if(cooldown) {
-            *cooldown = it->second;
+    assert(index < spellSlots_.size());
+
+    auto spell = spellSlots_[index];
+    if(spell) {
+
+        if(auto it = cooldowns_.find(spell); it != cooldowns_.end()) {
+            if(cooldown) {
+                *cooldown = it->second;
+            }
+            if(progress) {
+                *progress = it->second / spellSlots_[index]->cooldown;
+            }
+            return true;
         }
-        if(progress) {
-            *progress = it->second / spellSlots_[it->first]->cooldown;
-        }
-        return true;
     }
     return false;
 }

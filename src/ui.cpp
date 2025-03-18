@@ -292,10 +292,11 @@ void UI::renderHUD(EntityPtr player) {
             std::string slotLabel = "##slot " + std::to_string(i + 1);
             auto& selectedSpell = selectedSpells_[i];
 
+            // render spell cooldown
             f32 cooldown;;
             f32 cooldownProgress;
             ImGui::SetNextItemWidth(spellSlotSize.x);
-            if(spellBook->isSpellSlotOnCooldown(i, &cooldown, &cooldownProgress)) {
+            if(spellBook->isSpellInSlotOnCooldown(i, &cooldown, &cooldownProgress)) {
                 ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
                 std::string cooldownText = std::format("{:.2f}s", cooldown);
                 ImVec2 cooldownTextSize = ImGui::CalcTextSize(cooldownText.c_str());
@@ -306,6 +307,7 @@ void UI::renderHUD(EntityPtr player) {
                 ImGui::PopStyleColor();
             }
             else {
+                // render spell selection
                 if(ImGui::BeginCombo(slotLabel.c_str(), selectedSpell.c_str())) {
                     if(spellBook) {
                         for(auto& spell : spellBook->spells()) {

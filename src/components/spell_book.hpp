@@ -19,9 +19,8 @@ public:
     bool interruptible() const;
     void interruptCasting();
     f32 castProgress() const;
-    f32 cooldownProgress(u32 index) const;
     auto castedSpell() -> std::shared_ptr<SpellData const> const;
-    bool isSpellSlotOnCooldown(u32 index, f32* cooldown = nullptr, f32* progress = nullptr);
+    bool isSpellInSlotOnCooldown(u32 index, f32* cooldown = nullptr, f32* progress = nullptr);
 
 private:
     s32 spellSlotIndex(std::shared_ptr<SpellData> spell);
@@ -31,7 +30,7 @@ private:
     std::vector<std::shared_ptr<SpellData>> spells_;
     std::vector<std::string> spellFiles_;
     std::shared_ptr<SpellData> castedSpell_;
-    std::unordered_map<u32, f32> cooldowns_;
+    std::unordered_map<std::shared_ptr<SpellData>, f32> cooldowns_;
     f32 castProgress_{0.0f};
     f32 castDuration_{0.0f};
 };
