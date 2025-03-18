@@ -142,16 +142,6 @@ void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
     spellSlots_[index] = spell;
 }
 
-s32 SpellBookComponent::spellSlotIndex(std::shared_ptr<SpellData> spell) {
-
-    for(u32 index = 0; index < spellSlots_.size(); index++) {
-        if(spell == spellSlots_[index]) {
-            return static_cast<s32>(index);
-        }
-    }
-    return -1;
-}
-
 bool SpellBookComponent::interruptible() const {
 
     if(!castedSpell_) {
@@ -175,17 +165,24 @@ bool SpellBookComponent::isSpellInSlotOnCooldown(u32 index, f32* cooldown, f32* 
     assert(index < spellSlots_.size());
 
     auto spell = spellSlots_[index];
-    if(spell) {
 
-        if(auto it = cooldowns_.find(spell); it != cooldowns_.end()) {
-            if(cooldown) {
-                *cooldown = it->second;
-            }
-            if(progress) {
-                *progress = it->second / spellSlots_[index]->cooldown;
-            }
-            return true;
+    if(auto it = cooldowns_.find(spell); it != cooldowns_.end()) {
+        if(cooldown) {
+            *cooldown = it->second;
         }
+        if(progress) {
+            *progress = it->second / spellSlots_[index]->cooldown;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool SpellBookComponent::isSpellOnCooldown(std::shared_ptr<SpellData> spell) {
+
+    if(auto it = cooldowns_.find(spell); it != cooldowns_.end()) {
+        return true;
     }
     return false;
 }

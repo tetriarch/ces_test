@@ -289,8 +289,6 @@ void UI::renderHUD(EntityPtr player) {
 
         for(u32 i = 0; i < 4; i++) {
             ImGui::TableSetColumnIndex(i);
-            std::string slotLabel = "##slot " + std::to_string(i + 1);
-            auto& selectedSpell = selectedSpells_[i];
 
             // render spell cooldown
             f32 cooldown;;
@@ -308,18 +306,46 @@ void UI::renderHUD(EntityPtr player) {
             }
             else {
                 // render spell selection
+                std::string slotLabel = "##slot " + std::to_string(i + 1);
+                auto& selectedSpell = selectedSpells_[i];
+                bool clearSelected = false;
                 if(ImGui::BeginCombo(slotLabel.c_str(), selectedSpell.c_str())) {
                     if(spellBook) {
                         for(auto& spell : spellBook->spells()) {
+                            bool onCooldown = spellBook->isSpellOnCooldown(spell);
                             bool selected = spell->name == selectedSpell;
-                            if(ImGui::Selectable(spell->name.c_str(), &selected)) {
-                                selectedSpell = spell->name;
+                            bool canSelect = true;
+                            // grey out unavailable spells
+                            for(u32 j = 0; j < selectedSpells_.size(); j++) {
+                                if(i != j && selectedSpells_[j] == spell->name) {
+                                    canSelect = false;
+                                    break;
+                                }
                             }
-                            if(selected) {
-                                ImGui::SetItemDefaultFocus();
-                                spellBook->setSlot(i, spell);
+                            if(onCooldown || !canSelect) {
+                                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5, 0.5, 0.5, 1.0f));
+                                ImGui::Selectable(spell->name.c_str(), &selected, ImGuiSelectableFlags_Disabled);
+                                ImGui::PopStyleColor();
+                            }
+                            // normal selection
+                            else {
+                                if(ImGui::Selectable(spell->name.c_str(), &selected)) {
+                                    selectedSpell = spell->name;
+                                }
+
+                                if(selected) {
+                                    ImGui::SetItemDefaultFocus();
+                                    spellBook->setSlot(i, spell);
+                                }
                             }
                         }
+                        // add clear slot option
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 0.0, 0.0, 1.0f));
+                        if(ImGui::Selectable("X Clear Slot X", &clearSelected)) {
+                            selectedSpell = "Select Spell";
+                            spellBook->setSlot(i, nullptr);
+                        }
+                        ImGui::PopStyleColor();
                     }
                     ImGui::EndCombo();
                 }

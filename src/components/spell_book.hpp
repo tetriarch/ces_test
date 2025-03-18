@@ -21,9 +21,7 @@ public:
     f32 castProgress() const;
     auto castedSpell() -> std::shared_ptr<SpellData const> const;
     bool isSpellInSlotOnCooldown(u32 index, f32* cooldown = nullptr, f32* progress = nullptr);
-
-private:
-    s32 spellSlotIndex(std::shared_ptr<SpellData> spell);
+    bool isSpellOnCooldown(std::shared_ptr<SpellData> spell);
 
 private:
     std::array<std::shared_ptr<SpellData>, 4> spellSlots_;
