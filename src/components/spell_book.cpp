@@ -46,12 +46,25 @@ void SpellBookComponent::update(f32 dt) {
             spellEntity->addComponent(std::make_shared<CollisionComponent>());
             spellEntity->addComponent(std::make_shared<SpellComponent>(castedSpell_));
 
-            // add texture if described
-            if(!castedSpell_->textureFilePath.empty()) {
-                std::shared_ptr<TextureComponent> textureComponent = std::make_shared<TextureComponent>();
-                textureComponent->setFilePath(castedSpell_->textureFilePath);
-                spellEntity->addComponent(textureComponent);
+            std::shared_ptr<GeometryComponent> geometryComponent = std::make_shared<GeometryComponent>();
+            Rect rect;
+            // resolve dynamic size 
+            if(castedSpell_->geometry.type == GeometryType::DYNAMIC) {
+                Vec2 castPosition = entity()->transform().position;
+                f32 length = Vec2(castPosition - target_).length();
+                length = length > castedSpell_->maxDistance ? castedSpell_->maxDistance : length;
+                rect = castedSpell_->geometry.rect;
+                rect.w = rect.w == 0 ? length : rect.w;
+                rect.h = rect.h == 0 ? length : rect.h;
             }
+            // static size
+            else {
+                rect = castedSpell_->geometry.rect;
+            }
+            geometryComponent->setRect(rect);
+            geometryComponent->setTextureFilePath(castedSpell_->textureFilePath);
+            spellEntity->addComponent(geometryComponent);
+
 
             // update mana
             auto mana = entity()->component<ManaComponent>();
@@ -71,6 +84,7 @@ void SpellBookComponent::update(f32 dt) {
             castedSpell_ = nullptr;
             castProgress_ = 0.0f;
             castDuration_ = 0.0f;
+            target_ = {0.0f, 0.0f};
             entity()->root()->addChild(spellEntity);
         }
     }
@@ -122,6 +136,7 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
     INFO("[SPELL BOOK]: caster " + entity()->name() + " casting " + spell->name);
 
     castedSpell_ = spell;
+    target_ = target;
 }
 
 void SpellBookComponent::interruptCasting() {

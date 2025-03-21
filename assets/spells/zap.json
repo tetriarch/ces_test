@@ -1,17 +1,27 @@
 {
     "name": "Zap",
-    "cast_time": 0.1,
+    "geometry": {
+        "geometry_type": "DYNAMIC",
+        "shape": "rect",
+        "rect": {
+            "x": 0.0,
+            "y": -8.0,
+            "w": 0.0,
+            "h": 16.0
+        }
+    },
+    "texture_path": "spells/textures/zap.png",
+    "cast_time": 0.2,
     "interrupt_time": 0.0,
     "mana_cost": 35,
     "cooldown": 5.0,
-    "texture_file_path": "spells/textures/zap.png",
+    "max_distance": 250.0,
     "action": [
         {
             "type": "BEAM",
             "pierce": true,
             "movement": {
-                "type": "instant",
-                "length": 200
+                "type": "instant"
             },
             "on_hit": [
                 {

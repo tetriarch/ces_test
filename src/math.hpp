@@ -7,11 +7,16 @@ struct Vec2 {
     f32 x, y;
 
     Vec2 normalized() const {
-        f32 length = sqrtf(x * x + y * y);
+        f32 length = this->length();
         if(length > 0) {
             return {x / length, y / length};
         }
         return {0.0f, 0.0f};
+    }
+
+    f32 length() const {
+        f32 length = sqrtf(x * x + y * y);
+        return length;
     }
 
     Vec2 operator*(f32 scale) const {

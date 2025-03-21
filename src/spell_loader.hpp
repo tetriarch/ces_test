@@ -14,5 +14,6 @@ private:
     auto parseBasicStats(const json& spellJSON, const std::string& parent = "") -> std::expected<SpellData, JSONParserError>;
     auto parseAction(const json& actionJSON, const std::string& parent = "") -> std::expected<SpellAction, JSONParserError>;
     auto parseOnHitEffect(const json& onHitJSON, const std::string& parent = "") -> std::expected<SpellEffectOnHit, JSONParserError>;
+    auto parseGeometry(const json& geometryJSON, const std::string& parent = "") -> std::expected<SpellGeometry, JSONParserError>;
     auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
 };

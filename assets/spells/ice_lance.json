@@ -1,10 +1,21 @@
 {
     "name": "Ice Lance",
+    "geometry": {
+        "geometry_type": "STATIC",
+        "shape": "rect",
+        "rect": {
+            "x": -8.0,
+            "y": -8.0,
+            "w": 16.0,
+            "h": 16.0
+        }
+    },
+    "texture_path": "spells/textures/ice_lance.png",
     "cast_time": 2.5,
     "interrupt_time": 2.0,
     "mana_cost": 25,
     "cooldown": 0.0,
-    "texture_file_path": "spells/textures/ice_lance.png",
+    "max_distance": 500.0,
     "action": [
         {
             "type": "PROJECTILE",

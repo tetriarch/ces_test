@@ -31,4 +31,5 @@ private:
     std::unordered_map<std::shared_ptr<SpellData>, f32> cooldowns_;
     f32 castProgress_{0.0f};
     f32 castDuration_{0.0f};
+    Vec2 target_{0.0f, 0.0f};
 };

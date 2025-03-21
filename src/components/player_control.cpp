@@ -1,6 +1,10 @@
 #include "player_control.hpp"
 #include "components.hpp"
 
+Vec2 PlayerControlComponent::getMousePosition() {
+    return {mousePosition_.x, mousePosition_.y};
+}
+
 void PlayerControlComponent::handleEvents(const SDL_Event& event) {
 
     if(event.type == SDL_EVENT_MOUSE_MOTION) {

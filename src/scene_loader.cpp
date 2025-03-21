@@ -37,8 +37,8 @@ SceneLoader::SceneLoader() {
         return parseVelocityComponent(JSONData);
     });
 
-    registerComponent("texture", [this](const json& JSONData) {
-        return parseTextureComponent(JSONData);
+    registerComponent("geometry", [this](const json& JSONData) {
+        return parseGeometryComponent(JSONData);
     });
 }
 
@@ -315,15 +315,41 @@ auto SceneLoader::parseVelocityComponent(const json& o) -> ComponentPtr {
     return std::make_shared<VelocityComponent>(velocityComponent);
 }
 
-auto SceneLoader::parseTextureComponent(const json& o) -> ComponentPtr {
+auto SceneLoader::parseGeometryComponent(const json& o) -> ComponentPtr {
 
     std::string filePath;
-    if(!get<std::string>(o, "file_path", true, filePath, "components")) {
+    Rect rect;
+    GeometryComponent geometryComponent;
+
+    json::const_iterator rectJSON = o.find("rect");
+    if(rectJSON == o.end()) {
+        ERROR(error("rect not found", "components"));
         return nullptr;
     }
-    TextureComponent textureComponent;
-    textureComponent.setFilePath(filePath);
-    return std::make_shared<TextureComponent>(textureComponent);
+
+    if(!get<f32>(rectJSON.value(), "x", true, rect.x, "components/rect")) {
+        return nullptr;
+    }
+
+    if(!get<f32>(rectJSON.value(), "y", true, rect.y, "components/rect")) {
+        return nullptr;
+    }
+
+    if(!get<f32>(rectJSON.value(), "w", true, rect.w, "components/rect")) {
+        return nullptr;
+    }
+
+    if(!get<f32>(rectJSON.value(), "h", true, rect.h, "components/rect")) {
+        return nullptr;
+    }
+
+    if(!get<std::string>(o, "texture_path", true, filePath, "components")) {
+        return nullptr;
+    }
+
+    geometryComponent.setRect(rect);
+    geometryComponent.setTextureFilePath(filePath);
+    return std::make_shared<GeometryComponent>(geometryComponent);
 }
 
 auto SceneLoader::error(const std::string& msg, const std::string& parent) -> std::string {

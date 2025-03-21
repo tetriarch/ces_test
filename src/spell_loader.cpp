@@ -55,6 +55,21 @@ auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellDa
         spell.actions.emplace_back(action.value());
     }
 
+    // parse geometry
+    it = spellJSON.find("geometry");
+    if(it == spellJSON.end()) {
+        ERROR(error("failed to find geometry"));
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    auto geometry = parseGeometry(it.value(), "geometry");
+    if(!geometry) {
+        ERROR(error("failed to parse geometry"));
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    spell.geometry = std::move(geometry.value());
+
     return std::move(spell);
 }
 
@@ -82,7 +97,13 @@ auto SpellLoader::parseBasicStats(const json& spellJSON, const std::string& pare
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    get<std::string>(spellJSON, "texture_file_path", false, spellData.textureFilePath, parent);
+    if(!get<f32>(spellJSON, "max_distance", true, spellData.maxDistance, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(!get<std::string>(spellJSON, "texture_path", false, spellData.textureFilePath, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
 
     return std::move(spellData);
 }
@@ -146,7 +167,7 @@ auto SpellLoader::parseAction(const json& actionJSON, const std::string& parent)
             ERROR(error("failed to parse on_hit action", parent));
             return std::unexpected(JSONParserError::PARSE);
         }
-        action.actions.emplace_back(onHitEffect.value());
+        action.effects.emplace_back(onHitEffect.value());
     }
 
     return action;
@@ -222,6 +243,40 @@ auto SpellLoader::parseOnHitEffect(const json& onHitJSON, const std::string& par
     }
 
     return onHitEffect;
+}
+
+auto SpellLoader::parseGeometry(const json& geometryJSON, const std::string& parent) -> std::expected<SpellGeometry, JSONParserError> {
+
+    SpellGeometry geometry;
+    std::string geometryType;
+
+    if(!get<std::string>(geometryJSON, "geometry_type", true, geometryType, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+    geometry.type = magic_enum::enum_cast<GeometryType>(geometryType).value_or(GeometryType::UNKNOWN);
+
+    json::const_iterator it = geometryJSON.find("rect");
+    if(it == geometryJSON.end()) {
+        ERROR(error("has no rect", parent));
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    json rectJSON = it.value();
+
+    if(!get<f32>(rectJSON, "x", true, geometry.rect.x, "rect")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+    if(!get<f32>(rectJSON, "y", true, geometry.rect.y, "rect")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+    if(!get<f32>(rectJSON, "w", true, geometry.rect.w, "rect")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+    if(!get<f32>(rectJSON, "h", true, geometry.rect.h, "rect")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    return geometry;
 }
 
 auto SpellLoader::error(const std::string& msg, const std::string& parent) -> std::string {

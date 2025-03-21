@@ -38,8 +38,14 @@
             "speed": 100.0
         },
         {
-            "type": "texture",
-            "file_path": "characters/playable/textures/player_c.png"
+            "type": "geometry",
+            "rect": {
+                "x": -16.0,
+                "y": -16.0,
+                "w": 32.0,
+                "h": 32.0
+            },
+            "texture_path": "characters/playable/textures/player_c.png"
         }
     ]
 }

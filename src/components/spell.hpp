@@ -60,6 +60,7 @@ struct Motion {
 };
 
 struct ConstantMotion : Motion {
+
     f32 speed{0};
     void apply(const EntityPtr& target, f32 dt) {
 
@@ -71,18 +72,24 @@ struct ConstantMotion : Motion {
     }
 };
 
-struct InstantMotion : Motion {
-    void apply(const EntityPtr& target, f32 dt) {
-        //TODO: Unsure of the logic here yet
-        //for snap action abilities, beams like Zap
-    }
-};
+struct InstantMotion : Motion { /* leave empty*/ };
 
 struct SpellAction {
     ActionType type;
     bool pierce;
     std::shared_ptr<Motion> motion;
-    std::vector<SpellEffectOnHit> actions;
+    std::vector<SpellEffectOnHit> effects;
+};
+
+enum class GeometryType {
+    STATIC,
+    DYNAMIC,
+    UNKNOWN
+};
+
+struct SpellGeometry {
+    Rect rect;
+    GeometryType type;
 };
 
 struct SpellData : public IAsset {
@@ -91,8 +98,10 @@ struct SpellData : public IAsset {
     f32 interruptTime;
     u32 manaCost;
     f32 cooldown;
+    f32 maxDistance;
     std::string textureFilePath;
     std::vector<SpellAction> actions;
+    SpellGeometry geometry;
 };
 
 class SpellComponent : public Component<SpellComponent> {
