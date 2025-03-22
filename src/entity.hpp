@@ -11,9 +11,11 @@ public:
     Entity(const std::string& name, bool lazyAttach);
     static EntityPtr create(const std::string& name, bool lazyAttach = false);
     void addChild(EntityPtr child);
+    void queueRemoveChild(const EntityPtr& child);
     void removeChild(const EntityPtr& child);
 
     void addComponent(ComponentPtr component);
+    void queueRemoveComponent(ComponentPtr component);
     void removeComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
     void setName(const std::string& name);

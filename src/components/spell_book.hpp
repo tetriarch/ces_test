@@ -20,6 +20,7 @@ public:
     void interruptCasting();
     f32 castProgress() const;
     auto castedSpell() -> std::shared_ptr<SpellData const> const;
+    bool isCasting();
     bool isSpellInSlotOnCooldown(u32 index, f32* cooldown = nullptr, f32* progress = nullptr);
     bool isSpellOnCooldown(std::shared_ptr<SpellData> spell);
 

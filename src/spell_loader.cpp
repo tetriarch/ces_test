@@ -97,7 +97,7 @@ auto SpellLoader::parseBasicStats(const json& spellJSON, const std::string& pare
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    if(!get<f32>(spellJSON, "max_distance", true, spellData.maxDistance, parent)) {
+    if(!get<f32>(spellJSON, "lifetime", true, spellData.lifeTime, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 
@@ -253,7 +253,14 @@ auto SpellLoader::parseGeometry(const json& geometryJSON, const std::string& par
     if(!get<std::string>(geometryJSON, "geometry_type", true, geometryType, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
+
     geometry.type = magic_enum::enum_cast<GeometryType>(geometryType).value_or(GeometryType::UNKNOWN);
+
+    if(geometry.type == GeometryType::DYNAMIC) {
+        if(!get<f32>(geometryJSON, "max_size", true, geometry.maxDynamicSize, parent)) {
+            return std::unexpected(JSONParserError::PARSE);
+        }
+    }
 
     json::const_iterator it = geometryJSON.find("rect");
     if(it == geometryJSON.end()) {

@@ -93,6 +93,7 @@ s32 Core::run() {
         Time::get().update();
         while(Time::get().isTimeToUpdate()) {
             update(Time::get().DELTA_TIME);
+            postUpdate(Time::get().DELTA_TIME);
         }
         render();
     }
@@ -112,6 +113,11 @@ void Core::handleEvents(const SDL_Event& event) {
 void Core::update(const f32 dt) {
 
     root_->update(dt);
+}
+
+void Core::postUpdate(const f32 dt) {
+
+    root_->postUpdate(dt);
 }
 
 void Core::render() {

@@ -34,7 +34,20 @@ void Entity::addChild(EntityPtr child) {
 
 }
 
+void Entity::queueRemoveChild(const EntityPtr& child) {
+
+    postUpdateActions_.push_back([child = std::move(child)](Entity* self) {
+        self->removeChild(std::move(child));
+    });
+
+}
+
 void Entity::removeChild(const EntityPtr& child) {
+
+    if(updateState_ == UpdateState::UPDATE) {
+        queueRemoveChild(child);
+        return;
+    }
 
     assert(child->parent_ == this);
 
@@ -64,6 +77,10 @@ void Entity::addComponent(ComponentPtr component) {
         updatable_.insert(component.get());
     }
 
+    if(component->hasPostUpdate()) {
+        postUpdatable_.insert(component.get());
+    }
+
     if(component->hasRender()) {
         renderable_.insert(component.get());
     }
@@ -72,6 +89,42 @@ void Entity::addComponent(ComponentPtr component) {
 
     if(!lazyAttach_) {
         component->attach();
+    }
+}
+
+void Entity::queueRemoveComponent(ComponentPtr component) {
+
+    postUpdateActions_.push_back([component = std::move(component)](Entity* self) {
+        self->removeComponent(std::move(component));
+    });
+}
+
+void Entity::removeComponent(ComponentPtr component) {
+
+    if(updateState_ == UpdateState::UPDATE) {
+        queueRemoveComponent(component);
+        return;
+    }
+
+    assert(component->entity() == shared_from_this());
+    component->entity_.reset();
+
+    components_.erase(std::remove(components_.begin(), components_.end(), component), components_.end());
+
+    if(component->hasHandleEvents()) {
+        controllable_.erase(component.get());
+    }
+
+    if(component->hasUpdate()) {
+        updatable_.erase(component.get());
+    }
+
+    if(component->hasPostUpdate()) {
+        postUpdatable_.erase(component.get());
+    }
+
+    if(component->hasRender()) {
+        renderable_.erase(component.get());
     }
 }
 

@@ -90,6 +90,7 @@ enum class GeometryType {
 struct SpellGeometry {
     Rect rect;
     GeometryType type;
+    f32 maxDynamicSize;
 };
 
 struct SpellData : public IAsset {
@@ -98,7 +99,7 @@ struct SpellData : public IAsset {
     f32 interruptTime;
     u32 manaCost;
     f32 cooldown;
-    f32 maxDistance;
+    f32 lifeTime;
     std::string textureFilePath;
     std::vector<SpellAction> actions;
     SpellGeometry geometry;
@@ -108,7 +109,9 @@ class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent(std::shared_ptr<SpellData> spellData);
     void update(f32 dt) override;
+    void postUpdate(f32 dt) override;
 
 private:
     std::shared_ptr<SpellData> spellData_;
+    f32 lifeTime_;
 };

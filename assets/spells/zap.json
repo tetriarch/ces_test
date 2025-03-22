@@ -1,8 +1,15 @@
 {
     "name": "Zap",
+    "texture_path": "spells/textures/zap.png",
+    "cast_time": 0.2,
+    "interrupt_time": 0.0,
+    "mana_cost": 35,
+    "cooldown": 5.0,
+    "lifetime": 0.1,
     "geometry": {
         "geometry_type": "DYNAMIC",
         "shape": "rect",
+        "max_size": 250.0,
         "rect": {
             "x": 0.0,
             "y": -8.0,
@@ -10,12 +17,6 @@
             "h": 16.0
         }
     },
-    "texture_path": "spells/textures/zap.png",
-    "cast_time": 0.2,
-    "interrupt_time": 0.0,
-    "mana_cost": 35,
-    "cooldown": 5.0,
-    "max_distance": 250.0,
     "action": [
         {
             "type": "BEAM",

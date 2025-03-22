@@ -1,5 +1,7 @@
-#include "velocity.hpp"
 #include "../entity.hpp"
+
+#include "spell_book.hpp"
+#include "velocity.hpp"
 
 Vec2 VelocityComponent::velocity() const {
 
@@ -16,7 +18,16 @@ Vec2 VelocityComponent::velocity() const {
     if((movementDirection_ & static_cast<u8>(MovementDirection::WEST)) != 0) {
         velocityVector += {-1, 0};
     }
-    return velocityVector.normalized() * speed_;
+
+    f32 speed = speed_;
+    // slow down on casting
+    //NOTE: hardcoded multiplier
+    auto spellBook = entity()->component<SpellBookComponent>();
+    if(spellBook && spellBook->isCasting()) {
+        speed *= 0.75f;
+    }
+
+    return velocityVector.normalized() * speed;
 }
 
 void VelocityComponent::update(const f32 dt) {

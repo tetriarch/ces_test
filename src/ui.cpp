@@ -12,6 +12,8 @@
 #include <backends/imgui_impl_sdl3.h>
 #include <backends/imgui_impl_sdlrenderer3.h>
 
+const std::string SPELL_SLOT_DEFAULT = "Select Spell";
+
 UI::UI() :
     firstTime_(true) {
 
@@ -19,7 +21,7 @@ UI::UI() :
     showScene_ = true;
     showDemoWindow_ = false;
 #endif
-    selectedSpells_ = {"Select Spell", "Select Spell", "Select Spell", "Select Spell"};
+    selectedSpells_ = {SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT};
 }
 
 UI::~UI() {
@@ -342,7 +344,7 @@ void UI::renderHUD(EntityPtr player) {
                         // add clear slot option
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 0.0, 0.0, 1.0f));
                         if(ImGui::Selectable("X Clear Slot X", &clearSelected)) {
-                            selectedSpell = "Select Spell";
+                            selectedSpell = SPELL_SLOT_DEFAULT;
                             spellBook->setSlot(i, nullptr);
                         }
                         ImGui::PopStyleColor();

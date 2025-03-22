@@ -52,7 +52,7 @@ void SpellBookComponent::update(f32 dt) {
             if(castedSpell_->geometry.type == GeometryType::DYNAMIC) {
                 Vec2 castPosition = entity()->transform().position;
                 f32 length = Vec2(castPosition - target_).length();
-                length = length > castedSpell_->maxDistance ? castedSpell_->maxDistance : length;
+                length = length > castedSpell_->geometry.maxDynamicSize ? castedSpell_->geometry.maxDynamicSize : length;
                 rect = castedSpell_->geometry.rect;
                 rect.w = rect.w == 0 ? length : rect.w;
                 rect.h = rect.h == 0 ? length : rect.h;
@@ -173,6 +173,11 @@ f32 SpellBookComponent::castProgress() const {
 
 auto SpellBookComponent::castedSpell() -> std::shared_ptr<SpellData const> const {
     return castedSpell_;
+}
+
+bool SpellBookComponent::isCasting() {
+
+    return castedSpell_ ? true : false;
 }
 
 bool SpellBookComponent::isSpellInSlotOnCooldown(u32 index, f32* cooldown, f32* progress) {
