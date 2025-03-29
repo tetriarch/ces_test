@@ -46,6 +46,10 @@ bool Core::init() {
 
     root_ = am->load<Scene>("scenes/level_1.json");
 
+    if(!root_) {
+        return false;
+    }
+
     root_->executeAttached();
 
     return true;

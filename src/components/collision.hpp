@@ -4,30 +4,62 @@
 #include "../entity.hpp"
 #include "../math.hpp"
 
+enum class Shape {
+    CIRCLE,
+    LINE,
+    RECT
+};
+
+enum class CollisionSizeDeterminant {
+    TARGET,
+    NONE
+};
+
+struct CollisionShape : std::variant<Circle, Line, Rect> {
+
+    using std::variant<Circle, Line, Rect>::variant;
+
+    auto shape() -> const Shape {
+        return static_cast<Shape>(index());
+    }
+};
+
+struct CollisionData {
+
+    CollisionShape shape;
+    CollisionSizeDeterminant sizeDeterminant;
+};
+
 class CollisionComponent : public Component<CollisionComponent> {
 
 public:
-    void setCollisionBox(const Rect& rect) { rect_ = rect; }
-    const Rect collisionBox() const { return rect_; }
-    bool checkCollision(EntityPtr target) {
-        auto components = target->components();
-        for(auto& c : components) {
-            if(c->componentType() == typeid(CollisionComponent)) {
-                auto targetCollisionComp = dynamic_cast<CollisionComponent*>(c.get());
-                if(checkAABBIntersection(rect_, targetCollisionComp->collisionBox())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    void attach() override;
+    void setCollisionData(const CollisionData& data);
+
+    CollisionShape shape() const;
+    bool checkCollision(EntityPtr target);
+    bool collided() const;
+    void postUpdate(f32 dt) override;
+    void render(SDL_Renderer* renderer) override;
 
 private:
-    bool checkAABBIntersection(const Rect& a, const Rect& b) {
-        return(a.x < b.x + b.w &&
-            a.x + a.w > b.x &&
-            a.y < b.y + b.h &&
-            a.y + a.h > b.y);
-    }
-    Rect rect_;
+    void reposition();
+    bool intersects(const CollisionShape& l, const CollisionShape& r);
+    bool intersects(const Rect& l, const Rect& r);
+    bool intersects(const Rect& l, const Circle& r);
+    bool intersects(const Rect& l, const Line& r);
+    bool intersects(const Circle& l, const Rect& r);
+    bool intersects(const Circle& l, const Circle& r);
+    bool intersects(const Circle& l, const Line& r);
+    bool intersects(const Line& l, const Rect& r);
+    bool intersects(const Line& l, const Circle& r);
+    bool intersects(const Line& l, const Line& r);
+
+    bool collided_{false};
+
+    // actuall collision object
+    CollisionShape shape_;
+
+    // collision data by which collision object updates
+    CollisionData collisionData_;
 };

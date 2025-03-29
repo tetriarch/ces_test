@@ -6,16 +6,25 @@
     "mana_cost": 35,
     "cooldown": 5.0,
     "lifetime": 0.1,
+    "max_range": 250.0,
     "geometry": {
-        "geometry_type": "DYNAMIC",
-        "shape": "rect",
-        "max_size": 250.0,
         "rect": {
             "x": 0.0,
             "y": -8.0,
             "w": 0.0,
             "h": 16.0
-        }
+        },
+        "determinant": "TARGET"
+    },
+    "collision": {
+        "shape": "line",
+        "line": {
+            "x1": 0.0,
+            "y1": 0.0,
+            "x2": 0.0,
+            "y2": 0.0
+        },
+        "determinant": "TARGET"
     },
     "action": [
         {

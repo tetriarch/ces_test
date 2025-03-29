@@ -3,10 +3,14 @@
 #include "scoped.hpp"
 #include "component.hpp"
 
+u32 Entity::NEXT_ID = 0;
+
 Entity::Entity(const std::string& name, bool lazyAttach) :
+    ID_(NEXT_ID),
     name_(name),
     lazyAttach_(lazyAttach) {
 
+    NEXT_ID++;
 }
 
 EntityPtr Entity::create(const std::string& name, bool lazyAttach) {
@@ -53,6 +57,8 @@ void Entity::removeChild(const EntityPtr& child) {
 
     child->parent_ = nullptr;
     children_.erase(std::remove(children_.begin(), children_.end(), child), children_.end());
+
+    EntityManager::get().removeEntity(child);
 }
 
 void Entity::addComponent(ComponentPtr component) {

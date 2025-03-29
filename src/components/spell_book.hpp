@@ -4,6 +4,9 @@
 #include "../math.hpp"
 #include "../utils.hpp"
 
+#include "geometry.hpp"
+#include "collision.hpp"
+
 class SpellData;
 
 class SpellBookComponent : public Component<SpellBookComponent> {
@@ -23,6 +26,10 @@ public:
     bool isCasting();
     bool isSpellInSlotOnCooldown(u32 index, f32* cooldown = nullptr, f32* progress = nullptr);
     bool isSpellOnCooldown(std::shared_ptr<SpellData> spell);
+
+private:
+    auto determineGeometry() -> GeometryData;
+    auto determineCollision() -> CollisionData;
 
 private:
     std::array<std::shared_ptr<SpellData>, 4> spellSlots_;

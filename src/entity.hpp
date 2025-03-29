@@ -29,7 +29,8 @@ public:
     auto parent() const->Entity*;
     auto root() -> Entity*;
     const Transform& transform() const;
-    constexpr auto  name() -> std::string const& { return name_; }
+    u32 id() { return ID_; }
+    constexpr auto name() -> std::string const& { return name_; }
 
     void executeAttached();
     void handleEvents(const SDL_Event& event);
@@ -39,12 +40,15 @@ public:
     void render(SDL_Renderer* renderer);
 
 private:
+    static u32 NEXT_ID;
+
     enum class UpdateState {
         IDLE,
         UPDATE
     };
 
 private:
+    u32 ID_;
     std::string name_;
     Transform transform_;
     Entity* parent_{nullptr};
@@ -69,6 +73,5 @@ inline auto Entity::component() -> std::shared_ptr<T> {
             return casted;
         }
     }
-    // ERROR_ONCE("[ENTITY]: required component not found");
     return nullptr;
 }

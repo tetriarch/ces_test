@@ -13,7 +13,7 @@ EntityManager::~EntityManager() {
 void EntityManager::addEntity(EntityPtr entity) {
 
     assert(entity);
-    entities_.emplace(entity->name(), entity);
+    entities_.emplace(entity->id(), entity);
 }
 
 void EntityManager::removeEntity(EntityPtr entity) {
@@ -21,14 +21,18 @@ void EntityManager::removeEntity(EntityPtr entity) {
     if(!entity) {
         return;
     }
-    entities_.erase(entity->name());
+    entities_.erase(entity->id());
 }
 
-auto EntityManager::find(const std::string& name) -> EntityPtr {
+auto EntityManager::find(const u32 id) -> EntityPtr {
 
-    if(auto it = entities_.find(name); it != entities_.end()) {
-        auto e = it->second.lock();
-        return e;
+    if(auto it = entities_.find(id); it != entities_.end()) {
+        auto entity = it->second.lock();
+        return entity;
     }
     return nullptr;
+}
+
+auto EntityManager::entities() const -> std::unordered_map<u32, EntityHandle> const& {
+    return entities_;
 }

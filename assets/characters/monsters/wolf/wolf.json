@@ -16,9 +16,12 @@
         },
         {
             "type": "collision",
-            "box": {
-                "width": 32.0,
-                "height": 32.0
+            "shape": "rect",
+            "rect": {
+                "x": -16.0,
+                "y": -16.0,
+                "w": 32.0,
+                "h": 32.0
             }
         },
         {

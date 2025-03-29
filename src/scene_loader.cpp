@@ -151,7 +151,7 @@ auto SceneLoader::parseEntity(const std::string& source, const std::string& name
         return nullptr;
     }
 
-    //NOTE: all initial entities in scene are lazy -> attached after they are all loaded
+    // all initial entities in scene are lazy -> attached after they are all loaded
     auto entity = Entity::create(name, true /* lazy attach*/);
 
     auto components = parseComponents(entityJSON);
@@ -261,25 +261,91 @@ auto SceneLoader::parseControlComponent(const json& o) -> ComponentPtr {
 
 auto SceneLoader::parseCollisionComponent(const json& o) -> ComponentPtr {
 
-    Rect rect;
-    rect.x = 0.0f;
-    rect.y = 0.0f;
+    CollisionData collisionData;
+    std::string shape;
 
-    json::const_iterator box = o.find("box");
-    if(box == o.end()) {
-        ERROR(error("failed to find box", "components"));
+    if(!get<std::string>(o, "shape", true, shape, "components")) {
         return nullptr;
     }
 
-    if(!get<f32>(box.value(), "width", true, rect.w, "components")) {
+    if(shape == "rect") {
+        json::const_iterator it = o.find(shape);
+        if(it == o.end()) {
+            ERROR(error("failed to find " + shape, "components"));
+            return nullptr;
+        }
+        Rect rect;
+
+        if(!get<f32>(it.value(), "x", true, rect.x, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "y", true, rect.y, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "w", true, rect.w, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "h", true, rect.h, "components")) {
+            return nullptr;
+        }
+
+        collisionData.shape = rect;
+    }
+
+    else if(shape == "circle") {
+        json::const_iterator it = o.find(shape);
+        if(it == o.end()) {
+            ERROR(error("failed to find " + shape, "components"));
+            return nullptr;
+        }
+        Circle circle;
+
+        if(!get<f32>(it.value(), "x", true, circle.x, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "y", true, circle.y, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "r", true, circle.r, "components")) {
+            return nullptr;
+        }
+
+        collisionData.shape = circle;
+    }
+
+    else if(shape == "line") {
+        json::const_iterator it = o.find(shape);
+        if(it == o.end()) {
+            ERROR(error("failed to find " + shape, "components"));
+            return nullptr;
+        }
+        Line line;
+
+        if(!get<f32>(it.value(), "x1", true, line.p1.x, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "y1", true, line.p1.y, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "x2", true, line.p2.x, "components")) {
+            return nullptr;
+        }
+        if(!get<f32>(it.value(), "y2", true, line.p2.y, "components")) {
+            return nullptr;
+        }
+
+        collisionData.shape = line;
+    }
+    else {
+        ERROR(error("invalid shape - " + shape));
         return nullptr;
     }
-    if(!get<f32>(box.value(), "height", true, rect.h, "components")) {
-        return nullptr;
-    }
+
+    // assuming no sizeDeterminant for dynamic sizing of entities
+    collisionData.sizeDeterminant = CollisionSizeDeterminant::NONE;
 
     CollisionComponent collisionComponent;
-    collisionComponent.setCollisionBox(rect);
+    collisionComponent.setCollisionData(collisionData);
     return std::make_shared<CollisionComponent>(collisionComponent);
 }
 
@@ -318,28 +384,30 @@ auto SceneLoader::parseVelocityComponent(const json& o) -> ComponentPtr {
 auto SceneLoader::parseGeometryComponent(const json& o) -> ComponentPtr {
 
     std::string filePath;
-    Rect rect;
+    GeometryData geometryData;
     GeometryComponent geometryComponent;
 
-    json::const_iterator rectJSON = o.find("rect");
-    if(rectJSON == o.end()) {
+    json::const_iterator it = o.find("rect");
+    if(it == o.end()) {
         ERROR(error("rect not found", "components"));
         return nullptr;
     }
 
-    if(!get<f32>(rectJSON.value(), "x", true, rect.x, "components/rect")) {
+    json rectJSON = it.value();
+
+    if(!get<f32>(rectJSON, "x", true, geometryData.rect.x, "components/rect")) {
         return nullptr;
     }
 
-    if(!get<f32>(rectJSON.value(), "y", true, rect.y, "components/rect")) {
+    if(!get<f32>(rectJSON, "y", true, geometryData.rect.y, "components/rect")) {
         return nullptr;
     }
 
-    if(!get<f32>(rectJSON.value(), "w", true, rect.w, "components/rect")) {
+    if(!get<f32>(rectJSON, "w", true, geometryData.rect.w, "components/rect")) {
         return nullptr;
     }
 
-    if(!get<f32>(rectJSON.value(), "h", true, rect.h, "components/rect")) {
+    if(!get<f32>(rectJSON, "h", true, geometryData.rect.h, "components/rect")) {
         return nullptr;
     }
 
@@ -347,7 +415,10 @@ auto SceneLoader::parseGeometryComponent(const json& o) -> ComponentPtr {
         return nullptr;
     }
 
-    geometryComponent.setRect(rect);
+    // assuming no sizeDeterminant for dynamic sizing of entities
+    geometryData.sizeDeterminant = GeometrySizeDeterminant::NONE;
+
+    geometryComponent.setGeometryData(geometryData);
     geometryComponent.setTextureFilePath(filePath);
     return std::make_shared<GeometryComponent>(geometryComponent);
 }

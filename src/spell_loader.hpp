@@ -2,7 +2,9 @@
 
 #include "asset_manager.hpp"
 #include "components/spell.hpp"
+#include "components/geometry.hpp"
 #include "json_parser.hpp"
+#include "math.hpp"
 
 class SpellLoader : public IAssetLoader, JSONParser {
 
@@ -11,9 +13,10 @@ public:
 
 private:
     auto parseSpell(const std::string& source) -> std::expected<SpellData, JSONParserError>;
-    auto parseBasicStats(const json& spellJSON, const std::string& parent = "") -> std::expected<SpellData, JSONParserError>;
-    auto parseAction(const json& actionJSON, const std::string& parent = "") -> std::expected<SpellAction, JSONParserError>;
-    auto parseOnHitEffect(const json& onHitJSON, const std::string& parent = "") -> std::expected<SpellEffectOnHit, JSONParserError>;
-    auto parseGeometry(const json& geometryJSON, const std::string& parent = "") -> std::expected<SpellGeometry, JSONParserError>;
+    auto parseBasicStats(const json& o, const std::string& parent = "") -> std::expected<SpellData, JSONParserError>;
+    auto parseAction(const json& o, const std::string& parent = "") -> std::expected<SpellAction, JSONParserError>;
+    auto parseOnHitEffect(const json& o, const std::string& parent = "") -> std::expected<SpellEffectOnHit, JSONParserError>;
+    auto parseGeometryData(const json& o, const std::string& parent = "") -> std::expected<GeometryData, JSONParserError>;
+    auto parseCollisionData(const json& o, const std::string& parent = "") -> std::expected<CollisionData, JSONParserError>;
     auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
 };

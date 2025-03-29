@@ -6,15 +6,25 @@
     "mana_cost": 25,
     "cooldown": 0.0,
     "lifetime": 1.5,
+    "max_range": 750.0,
     "geometry": {
-        "geometry_type": "STATIC",
+        "rect": {
+            "x": -8.0,
+            "y": -8.0,
+            "w": 16.0,
+            "h": 16.0
+        },
+        "determinant": "NONE"
+    },
+    "collision": {
         "shape": "rect",
         "rect": {
             "x": -8.0,
             "y": -8.0,
             "w": 16.0,
             "h": 16.0
-        }
+        },
+        "determinant": "NONE"
     },
     "action": [
         {

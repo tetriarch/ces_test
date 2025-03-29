@@ -1,7 +1,10 @@
 #include "../entity.hpp"
 
+#include "collision.hpp"
 #include "spell_book.hpp"
 #include "velocity.hpp"
+
+const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.5f;
 
 Vec2 VelocityComponent::velocity() const {
 
@@ -21,10 +24,9 @@ Vec2 VelocityComponent::velocity() const {
 
     f32 speed = speed_;
     // slow down on casting
-    //NOTE: hardcoded multiplier
     auto spellBook = entity()->component<SpellBookComponent>();
     if(spellBook && spellBook->isCasting()) {
-        speed *= 0.75f;
+        speed *= ON_CAST_MOVEMENT_SPEED_MULTIPLIER;
     }
 
     return velocityVector.normalized() * speed;

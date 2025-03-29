@@ -7,16 +7,29 @@
 
 #include <SDL3/SDL.h>
 
+enum class GeometrySizeDeterminant {
+    TARGET,
+    NONE
+};
+
+struct GeometryData {
+
+    Rect rect;
+    GeometrySizeDeterminant sizeDeterminant;
+};
+
 class GeometryComponent : public Component<GeometryComponent> {
 
 public:
     void attach() override;
     void setTextureFilePath(const std::string& filePath);
-    void setRect(const Rect& rect);
+    void setGeometryData(const GeometryData& geometryData);
+    void postUpdate(f32 dt) override;
     void render(SDL_Renderer* renderer) override;
 
 private:
     std::string textureFilePath_;
-    Rect rect_;
     std::shared_ptr<Texture> texture_;
+    Rect rect_;
+    GeometryData geometryData_;
 };

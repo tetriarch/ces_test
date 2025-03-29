@@ -4,6 +4,8 @@
 #include "../entity.hpp"
 #include "../utils.hpp"
 #include "../i_asset.hpp"
+#include "collision.hpp"
+#include "geometry.hpp"
 
 enum class ActionType {
     AOE,
@@ -72,25 +74,13 @@ struct ConstantMotion : Motion {
     }
 };
 
-struct InstantMotion : Motion { /* leave empty*/ };
+struct InstantMotion : Motion {};
 
 struct SpellAction {
     ActionType type;
     bool pierce;
     std::shared_ptr<Motion> motion;
     std::vector<SpellEffectOnHit> effects;
-};
-
-enum class GeometryType {
-    STATIC,
-    DYNAMIC,
-    UNKNOWN
-};
-
-struct SpellGeometry {
-    Rect rect;
-    GeometryType type;
-    f32 maxDynamicSize;
 };
 
 struct SpellData : public IAsset {
@@ -100,9 +90,11 @@ struct SpellData : public IAsset {
     u32 manaCost;
     f32 cooldown;
     f32 lifeTime;
+    f32 maxRange;
     std::string textureFilePath;
     std::vector<SpellAction> actions;
-    SpellGeometry geometry;
+    GeometryData geometryData;
+    CollisionData collisionData;
 };
 
 class SpellComponent : public Component<SpellComponent> {
