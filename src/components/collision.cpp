@@ -63,27 +63,6 @@ void CollisionComponent::postUpdate(f32 dt) {
     }
 }
 
-void CollisionComponent::render(SDL_Renderer* renderer) {
-
-    if(collided_) {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    }
-    else {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    }
-
-    if(shape_.shape() == Shape::RECT) {
-        Rect tempRect = std::get<Rect>(shape_);
-        SDL_FRect rect = {tempRect.x, tempRect.y, tempRect.w, tempRect.h};
-        SDL_RenderRect(renderer, &rect);
-    }
-
-    if(shape_.shape() == Shape::LINE) {
-        Line line = std::get<Line>(shape_);
-        SDL_RenderLine(renderer, line.p1.x, line.p1.y, line.p2.x, line.p2.y);
-    }
-}
-
 void CollisionComponent::reposition() {
     auto transform = entity()->transform();
     if(shape_.shape() == Shape::RECT) {

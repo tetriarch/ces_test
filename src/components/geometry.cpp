@@ -19,6 +19,18 @@ void GeometryComponent::setGeometryData(const GeometryData& geometryData) {
     rect_ = geometryData_.rect;
 }
 
+
+#ifdef DEBUG
+void GeometryComponent::handleEvents(const SDL_Event& event) {
+
+    if(event.type == SDL_EVENT_KEY_DOWN) {
+        if(event.key.key == SDLK_F10 && event.key.mod & SDL_KMOD_LCTRL) {
+            showCollisions_ = !showCollisions_;
+        }
+    }
+}
+#endif
+
 void GeometryComponent::postUpdate(f32 dt) {
 
     Transform transform = entity()->transform();
@@ -57,4 +69,31 @@ void GeometryComponent::render(SDL_Renderer* renderer) {
             nullptr,
             SDL_FlipMode::SDL_FLIP_NONE);
     }
+
+#ifdef DEBUG
+    if(showCollisions_) {
+        auto collisionComponent = entity()->component<CollisionComponent>();
+        if(collisionComponent) {
+
+            if(collisionComponent->collided()) {
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            }
+            else {
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            }
+
+            auto shape = collisionComponent->shape();
+            if(shape.shape() == Shape::RECT) {
+                Rect tempRect = std::get<Rect>(shape);
+                SDL_FRect rect = {tempRect.x, tempRect.y, tempRect.w, tempRect.h};
+                SDL_RenderRect(renderer, &rect);
+            }
+
+            if(shape.shape() == Shape::LINE) {
+                Line line = std::get<Line>(shape);
+                SDL_RenderLine(renderer, line.p1.x, line.p1.y, line.p2.x, line.p2.y);
+            }
+        }
+    }
+#endif
 }

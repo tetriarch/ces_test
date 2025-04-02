@@ -27,9 +27,17 @@ public:
     void postUpdate(f32 dt) override;
     void render(SDL_Renderer* renderer) override;
 
+#ifdef DEBUG
+    void handleEvents(const SDL_Event& event) override;
+#endif
+
 private:
     std::string textureFilePath_;
     std::shared_ptr<Texture> texture_;
     Rect rect_;
     GeometryData geometryData_;
+
+#ifdef DEBUG
+    bool showCollisions_{true};
+#endif
 };

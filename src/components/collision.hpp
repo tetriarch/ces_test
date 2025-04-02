@@ -40,7 +40,6 @@ public:
     bool checkCollision(EntityPtr target);
     bool collided() const;
     void postUpdate(f32 dt) override;
-    void render(SDL_Renderer* renderer) override;
 
 private:
     void reposition();

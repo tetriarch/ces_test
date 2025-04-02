@@ -16,6 +16,7 @@ class VelocityComponent : public Component<VelocityComponent> {
 
 public:
     void update(const f32 dt) override;
+    void postUpdate(const f32 dt) override;
     Vec2 velocity() const;
     f32 speed() const;
     void setMotion(MovementDirection direction);
@@ -23,6 +24,7 @@ public:
     void setSpeed(f32 speed);
 
 private:
+    Transform lastTransform_;
     u8 movementDirection_{0};
     f32 speed_;
 };

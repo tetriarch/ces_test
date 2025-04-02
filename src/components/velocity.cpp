@@ -21,6 +21,10 @@ Vec2 VelocityComponent::velocity() const {
     if((movementDirection_ & static_cast<u8>(MovementDirection::WEST)) != 0) {
         velocityVector += {-1, 0};
     }
+    return velocityVector.normalized();
+}
+
+void VelocityComponent::update(const f32 dt) {
 
     f32 speed = speed_;
     // slow down on casting
@@ -29,15 +33,17 @@ Vec2 VelocityComponent::velocity() const {
         speed *= ON_CAST_MOVEMENT_SPEED_MULTIPLIER;
     }
 
-    return velocityVector.normalized() * speed;
-}
-
-void VelocityComponent::update(const f32 dt) {
-
     auto transform = entity()->transform();
-    transform.position += velocity() * dt;
+    lastTransform_ = transform;
+    transform.position += velocity() * speed * dt;
     entity()->setTransform(transform);
 }
+
+void VelocityComponent::postUpdate(const f32 dt) {
+
+
+}
+
 
 f32 VelocityComponent::speed() const {
 
