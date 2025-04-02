@@ -37,9 +37,22 @@ bool CollisionComponent::collided() const {
     return collided_;
 }
 
+Vec2 CollisionComponent::collisionNormal() const {
+
+    return collisionNormal_;
+}
+
+f32 CollisionComponent::collisionDepth() const {
+
+    return collisionDepth_;
+}
+
 void CollisionComponent::postUpdate(f32 dt) {
 
     reposition();
+
+    collisionNormal_ = {0.0f, 0.0f};
+    collisionDepth_ = 0.0f;
 
     auto entitties = EntityManager::get().entities();
 
@@ -98,10 +111,26 @@ bool CollisionComponent::intersects(const CollisionShape& lsh, const CollisionSh
 
 bool CollisionComponent::intersects(const Rect& l, const Rect& r) {
 
-    return l.x < r.x + r.w &&
+    if(l.x < r.x + r.w &&
         l.x + l.w > r.x &&
         l.y < r.y + r.h &&
-        l.y + l.h > r.y;
+        l.y + l.h > r.y) {
+
+        f32 overlapX = std::min(l.x + l.w, r.x + r.w) - std::max(l.x, r.x);
+        f32 overlapY = std::min(l.y + l.h, r.y + r.h) - std::max(l.y, r.y);
+
+        Vec2 normal;
+        if(overlapX > overlapY) {
+            normal = (l.y > r.y) ? Vec2(0.0f, -1.0f) : Vec2(0.0f, 1.0f);
+        }
+        else {
+            normal = (l.x > r.x) ? Vec2(-1.0f, 0.0f) : Vec2(1.0f, 0.0f);
+        }
+        collisionNormal_ = normal;
+        collisionDepth_ = std::min(overlapX, overlapY);
+        return true;
+    }
+    return false;
 }
 
 bool CollisionComponent::intersects(const Rect& l, const Circle& r) {

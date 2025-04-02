@@ -2,6 +2,7 @@
 
 #include "collision.hpp"
 #include "spell_book.hpp"
+#include "tag.hpp"
 #include "velocity.hpp"
 
 const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.5f;
@@ -41,7 +42,16 @@ void VelocityComponent::update(const f32 dt) {
 
 void VelocityComponent::postUpdate(const f32 dt) {
 
+    auto collisionComponent = entity()->component<CollisionComponent>();
+    if(collisionComponent && collisionComponent->collided()) {
 
+        auto tag = entity()->component<TagComponent>();
+        if(tag->tag() == TagType::PLAYER) {
+            auto transform = entity()->transform();
+            transform.position -= collisionComponent->collisionNormal() * collisionComponent->collisionDepth();
+            entity()->setTransform(transform);
+        }
+    }
 }
 
 

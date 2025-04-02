@@ -37,11 +37,13 @@ public:
     void setCollisionData(const CollisionData& data);
 
     CollisionShape shape() const;
-    bool checkCollision(EntityPtr target);
     bool collided() const;
+    Vec2 collisionNormal() const;
+    f32 collisionDepth() const;
     void postUpdate(f32 dt) override;
 
 private:
+    bool checkCollision(EntityPtr target);
     void reposition();
     bool intersects(const CollisionShape& l, const CollisionShape& r);
     bool intersects(const Rect& l, const Rect& r);
@@ -55,6 +57,8 @@ private:
     bool intersects(const Line& l, const Line& r);
 
     bool collided_{false};
+    Vec2 collisionNormal_{0.0f, 0.0f};
+    f32 collisionDepth_{0.0f};
 
     // actuall collision object
     CollisionShape shape_;
