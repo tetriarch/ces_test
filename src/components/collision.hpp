@@ -40,6 +40,7 @@ public:
     bool collided() const;
     Vec2 collisionNormal() const;
     f32 collisionDepth() const;
+    EntityPtr collisionSource() const;
     void postUpdate(f32 dt) override;
 
 private:
@@ -57,6 +58,7 @@ private:
     bool intersects(const Line& l, const Line& r);
 
     bool collided_{false};
+    EntityHandle collisionSource_;
     Vec2 collisionNormal_{0.0f, 0.0f};
     f32 collisionDepth_{0.0f};
 

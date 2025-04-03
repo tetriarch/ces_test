@@ -7,6 +7,7 @@ class OwnerComponent : public Component<OwnerComponent> {
 
 public:
     EntityPtr owner() const;
+    bool isOwnedBy(EntityPtr owner) const;
     void setOwner(EntityPtr owner);
 
 private:

@@ -1,6 +1,7 @@
 #include "../entity.hpp"
 
 #include "collision.hpp"
+#include "owner.hpp"
 #include "spell_book.hpp"
 #include "tag.hpp"
 #include "velocity.hpp"
@@ -46,14 +47,20 @@ void VelocityComponent::postUpdate(const f32 dt) {
     if(collisionComponent && collisionComponent->collided()) {
 
         auto tag = entity()->component<TagComponent>();
-        if(tag->tag() == TagType::PLAYER) {
-            auto transform = entity()->transform();
-            transform.position -= collisionComponent->collisionNormal() * collisionComponent->collisionDepth();
-            entity()->setTransform(transform);
+        auto collider = collisionComponent->collisionSource();
+
+        if(collider) {
+            if(tag && tag->isTaggedAs(TagType::PLAYER)) {
+                auto colliderOwnerComponent = collider->component<OwnerComponent>();
+                if(!colliderOwnerComponent || (colliderOwnerComponent && !colliderOwnerComponent->isOwnedBy(entity()))) {
+                    auto transform = entity()->transform();
+                    transform.position -= collisionComponent->collisionNormal() * collisionComponent->collisionDepth();
+                    entity()->setTransform(transform);
+                }
+            }
         }
     }
 }
-
 
 f32 VelocityComponent::speed() const {
 

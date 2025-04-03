@@ -47,6 +47,15 @@ f32 CollisionComponent::collisionDepth() const {
     return collisionDepth_;
 }
 
+EntityPtr CollisionComponent::collisionSource() const {
+
+    if(collisionSource_.expired()) {
+        return nullptr;
+    }
+
+    return collisionSource_.lock();
+}
+
 void CollisionComponent::postUpdate(f32 dt) {
 
     reposition();
@@ -71,6 +80,7 @@ void CollisionComponent::postUpdate(f32 dt) {
         collided_ = checkCollision(ePtr);
         // stop checking collisions if collided
         if(collided_) {
+            collisionSource_ = ePtr;
             return;
         }
     }
