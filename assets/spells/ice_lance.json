@@ -5,7 +5,7 @@
     "interrupt_time": 2.0,
     "mana_cost": 25,
     "cooldown": 0.0,
-    "lifetime": 1.5,
+    "duration": 0.0,
     "max_range": 750.0,
     "geometry": {
         "rect": {

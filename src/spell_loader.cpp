@@ -111,7 +111,7 @@ auto SpellLoader::parseBasicStats(const json& o, const std::string& parent) -> s
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    if(!get<f32>(o, "lifetime", true, spellData.lifeTime, parent)) {
+    if(!get<f32>(o, "duration", true, spellData.duration, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 

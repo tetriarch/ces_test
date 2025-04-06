@@ -89,7 +89,7 @@ struct SpellData : public IAsset {
     f32 interruptTime;
     u32 manaCost;
     f32 cooldown;
-    f32 lifeTime;
+    f32 duration;
     f32 maxRange;
     std::string textureFilePath;
     std::vector<SpellAction> actions;
@@ -100,10 +100,13 @@ struct SpellData : public IAsset {
 class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent(std::shared_ptr<SpellData> spellData);
+    void attach() override;
     void update(f32 dt) override;
     void postUpdate(f32 dt) override;
 
 private:
     std::shared_ptr<SpellData> spellData_;
-    f32 lifeTime_;
+    f32 currentDuration_;
+    f32 traveledDistance_;
+    bool dead_;
 };
