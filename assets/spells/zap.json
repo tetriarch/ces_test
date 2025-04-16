@@ -37,6 +37,7 @@
                 {
                     "effect_type": "direct_damage",
                     "type": "LIGHTNING",
+                    "target_faction": "HOSTILE",
                     "direct_damage": {
                         "min": 5,
                         "max": 10
@@ -45,6 +46,7 @@
                 {
                     "effect_type": "stun",
                     "type": "LIGHTNING",
+                    "target_faction": "HOSTILE",
                     "stun": {
                         "duration_in_sec": 3.0
                     }

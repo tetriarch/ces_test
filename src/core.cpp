@@ -76,7 +76,7 @@ bool Core::initSDL() {
         return false;
     }
 
-    if(!SDL_SetRenderVSync(renderer_, 1)) {
+    if(!SDL_SetRenderVSync(renderer_, 0)) {
         INFO("failed to set v-sync");
     }
 

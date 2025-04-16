@@ -38,6 +38,7 @@
                 {
                     "effect_type": "direct_damage",
                     "type": "COLD",
+                    "target_faction": "HOSTILE",
                     "direct_damage": {
                         "min": 5,
                         "max": 25
@@ -46,6 +47,7 @@
                 {
                     "effect_type": "slow",
                     "type": "COLD",
+                    "target_faction": "HOSTILE",
                     "slow": {
                         "magnitude": 20,
                         "duration_in_sec": 3.0

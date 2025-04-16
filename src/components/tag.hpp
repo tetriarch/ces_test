@@ -5,24 +5,32 @@
 enum class TagType {
     NPC,
     PLAYER,
-    ENEMY,
+    MONSTER,
+    UNKNOWN
+};
+
+enum class FactionType {
+    FRIENDLY,
+    HOSTILE,
     UNKNOWN
 };
 
 class TagComponent : public Component<TagComponent> {
 
 public:
-    void setTag(TagType tag) { tag_ = tag; }
-    auto tag() -> TagType { return tag_; }
-    bool isTaggedAs(TagType tag) { return tag_ == tag; }
+    void setTag(TagType tag);
+    void associate(FactionType faction, TagType tag);
+    void disassociate(FactionType faction, TagType tag);
+    bool isFriendly(TagType tag);
+    bool isHostile(TagType tag);
+
+    TagType tag();
+    bool isTaggedAs(TagType tag);
+
 private:
     TagType tag_{TagType::UNKNOWN};
-    std::string tagToString(TagType tag) {
-        switch(tag) {
-            case TagType::NPC: return "NPC";
-            case TagType::PLAYER: return "PLAYER";
-            case TagType::ENEMY: return "ENEMY";
-            default: return "";
-        }
-    }
+    std::unordered_set<TagType> friends_;
+    std::unordered_set<TagType> foes_;
+    bool removeFromList(std::unordered_set<TagType>& list, TagType tag);
+    auto tagToString(TagType tag) -> std::string;
 };

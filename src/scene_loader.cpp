@@ -205,10 +205,13 @@ auto SceneLoader::parseComponents(const json& entityJSON) -> std::expected<std::
 auto SceneLoader::parseLifeComponent(const json& o) -> ComponentPtr {
 
     Life life;
-    if(!get<u32>(o, "current", true, life.current, "components")) {
+    if(!get<f32>(o, "current", true, life.current, "components")) {
         return nullptr;
     }
-    if(!get<u32>(o, "max", true, life.max, "components")) {
+    if(!get<f32>(o, "max", true, life.max, "components")) {
+        return nullptr;
+    }
+    if(!get<f32>(o, "regen", true, life.regen, "components")) {
         return nullptr;
     }
     LifeComponent lifeComponent;
@@ -219,10 +222,13 @@ auto SceneLoader::parseLifeComponent(const json& o) -> ComponentPtr {
 auto SceneLoader::parseManaComponent(const json& o) -> ComponentPtr {
 
     Mana mana;
-    if(!get<u32>(o, "current", true, mana.current, "components")) {
+    if(!get<f32>(o, "current", true, mana.current, "components")) {
         return nullptr;
     }
-    if(!get<u32>(o, "max", true, mana.max, "components")) {
+    if(!get<f32>(o, "max", true, mana.max, "components")) {
+        return nullptr;
+    }
+    if(!get<f32>(o, "regen", true, mana.regen, "components")) {
         return nullptr;
     }
     ManaComponent manaComponent;
@@ -234,13 +240,63 @@ auto SceneLoader::parseManaComponent(const json& o) -> ComponentPtr {
 auto SceneLoader::parseTagComponent(const json& o) -> ComponentPtr {
 
     TagType tag;
-    std::string to;
-    if(!get<std::string>(o, "to", true, to, "components")) {
+    std::string tagString;
+    std::vector<std::string> friends;
+    std::vector<std::string> foes;
+
+    if(!get<std::string>(o, "tag", true, tagString, "components")) {
         return nullptr;
     }
-    tag = magic_enum::enum_cast<TagType>(to).value_or(TagType::UNKNOWN);
+
+    if(!o.contains("factions")) {
+        ERROR(error("failed to find factions", "components"));
+        return nullptr;
+    }
+
+    auto factions = o["factions"];
+
+    if(!factions.contains("friendly")) {
+        ERROR(error("failed to find friendly in factions", "components"));
+        return nullptr;
+    }
+
+    auto friendly = factions["friendly"];
+    auto hostile = factions["hostile"];
+
+    if(friendly.is_array()) {
+        for(auto& f : friendly) {
+            friends.push_back(f);
+        }
+    }
+    else {
+        ERROR(error("friendly is not an array", "components"));
+        return nullptr;
+    }
+
+    if(hostile.is_array()) {
+        for(auto& h : hostile) {
+            foes.push_back(h);
+        }
+    }
+    else {
+        ERROR(error("hostile is not an array", "components"));
+        return nullptr;
+    }
+
     TagComponent tagComponent;
+
+    tag = magic_enum::enum_cast<TagType>(tagString).value_or(TagType::UNKNOWN);
     tagComponent.setTag(tag);
+
+    for(auto& f : friends) {
+        tag = magic_enum::enum_cast<TagType>(f).value_or(TagType::UNKNOWN);
+        tagComponent.associate(FactionType::FRIENDLY, tag);
+    }
+
+    for(auto& f : foes) {
+        tag = magic_enum::enum_cast<TagType>(f).value_or(TagType::UNKNOWN);
+        tagComponent.associate(FactionType::HOSTILE, tag);
+    }
 
     return std::make_shared<TagComponent>(tagComponent);
 }

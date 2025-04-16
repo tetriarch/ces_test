@@ -68,9 +68,7 @@ void SpellBookComponent::update(f32 dt) {
                 ERROR("[SPELL BOOK]: missing mana component");
                 return;
             }
-            auto currentMana = mana->mana();
-            currentMana.current -= castedSpell_->manaCost;
-            mana->setMana(currentMana);
+            mana->reduceMana(castedSpell_->manaCost);
 
             // put spell on cooldown if it has one
             if(castedSpell_->cooldown > 0.0f) {

@@ -38,6 +38,7 @@
                 {
                     "effect_type": "direct_damage",
                     "type": "FIRE",
+                    "target_faction": "HOSTILE",
                     "direct_damage": {
                         "min": 10,
                         "max": 30
@@ -46,6 +47,7 @@
                 {
                     "effect_type": "dot",
                     "type": "FIRE",
+                    "target_faction": "HOSTILE",
                     "dot": {
                         "periodic_damage": 5,
                         "duration_in_sec": 5.0

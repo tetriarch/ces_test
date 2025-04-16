@@ -2,17 +2,28 @@
     "components": [
         {
             "type": "life",
-            "current": 100,
-            "max": 100
+            "current": 100.0,
+            "max": 100.0,
+            "regen": 1.0
         },
         {
             "type": "mana",
-            "current": 200,
-            "max": 200
+            "current": 200.0,
+            "max": 200.0,
+            "regen": 1.0
         },
         {
             "type": "tag",
-            "to": "PLAYER"
+            "tag": "PLAYER",
+            "factions": {
+                "friendly": [
+                    "PLAYER",
+                    "NPC"
+                ],
+                "hostile": [
+                    "MONSTER"
+                ]
+            }
         },
         {
             "type": "control",

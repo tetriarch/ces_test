@@ -196,6 +196,7 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
     SpellEffectOnHit onHitEffect;
     std::string effectType;
     std::string damageType;
+    std::string targetFaction;
 
     if(!get<std::string>(o, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
@@ -205,7 +206,12 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
         return std::unexpected(JSONParserError::PARSE);
     }
 
+    if(!get<std::string>(o, "target_faction", true, targetFaction, "on_hit")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
     onHitEffect.damageType = magic_enum::enum_cast<DamageType>(damageType).value_or(DamageType::UNKNOWN);
+    onHitEffect.targetFaction = magic_enum::enum_cast<FactionType>(targetFaction).value_or(FactionType::UNKNOWN);
 
     json::const_iterator it = o.find(effectType);
     if(it == o.end()) {

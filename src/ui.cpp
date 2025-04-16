@@ -245,15 +245,19 @@ void UI::renderHUD(EntityPtr player) {
         return;
     }
     lifeValue = life->life();
-    std::string lifeText = std::to_string(lifeValue.current) + "/" + std::to_string(lifeValue.max) + " ";
+    auto lifeCurrent = static_cast<u32>(std::floor(lifeValue.current));
+    auto lifeMax = static_cast<u32>(std::floor(lifeValue.max));
+    std::string lifeText = std::to_string(lifeCurrent) + "/" + std::to_string(lifeMax) + " ";
     ImVec2 lifeTextSize = ImGui::CalcTextSize(lifeText.c_str());
 
     if(!mana) {
         ERROR_ONCE("no mana component to render hud");
         return;
     }
-    manaValue = mana->mana();;
-    std::string manaText = " " + std::to_string(manaValue.current) + "/" + std::to_string(manaValue.max);
+    manaValue = mana->mana();
+    auto manaCurrent = static_cast<u32>(std::floor(manaValue.current));
+    auto manaMax = static_cast<u32>(std::floor(manaValue.max));
+    std::string manaText = " " + std::to_string(manaCurrent) + "/" + std::to_string(manaMax);
     ImVec2 manaTextSize = ImGui::CalcTextSize(manaText.c_str());
 
     // render resources
@@ -263,7 +267,7 @@ void UI::renderHUD(EntityPtr player) {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.4f, 0.0f, 0.0f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 lifeTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
-            ImGui::ProgressBar(static_cast<f32>(lifeValue.current) / static_cast<f32>(lifeValue.max), resourceBarSize, "");
+            ImGui::ProgressBar(lifeValue.current / lifeValue.max, resourceBarSize, "");
             ImGui::GetWindowDrawList()->AddText(lifeTextPosition, IM_COL32(255, 255, 255, 255), lifeText.c_str());
             ImGui::PopStyleColor();
         }
@@ -272,7 +276,7 @@ void UI::renderHUD(EntityPtr player) {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.4f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 manaTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
-            ImGui::ProgressBar(static_cast<f32>(manaValue.current) / static_cast<f32>(manaValue.max), resourceBarSize, "");
+            ImGui::ProgressBar(manaValue.current / manaValue.max, resourceBarSize, "");
             ImGui::GetWindowDrawList()->AddText(manaTextPosition, IM_COL32(255, 255, 255, 255), manaText.c_str());
             ImGui::PopStyleColor();
         }

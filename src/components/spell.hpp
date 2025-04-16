@@ -2,10 +2,12 @@
 
 #include "../component.hpp"
 #include "../entity.hpp"
-#include "../utils.hpp"
 #include "../i_asset.hpp"
+#include "../random_number_generator.hpp"
+#include "../utils.hpp"
 #include "collision.hpp"
 #include "geometry.hpp"
+#include "tag.hpp"
 
 enum class ActionType {
     AOE,
@@ -28,31 +30,37 @@ enum class DamageType {
 struct DirectDamage {
     u32 min;
     u32 max;
+    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
 };
 
 struct DamageOverTime {
     u32 periodicDamage;
     f32 duration;
+    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
 };
 
 struct Slow {
     u32 magnitude;
     f32 duration;
+    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
 };
 
 struct Stun {
     f32 duration;
+    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
 };
 
 struct Heal {
     u32 min;
     u32 max;
+    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
 };
 
 using SpellEffect = std::variant<DirectDamage, DamageOverTime, Slow, Stun, Heal>;
 
 struct SpellEffectOnHit {
     DamageType damageType;
+    FactionType targetFaction;
     SpellEffect effect;
 };
 
@@ -105,8 +113,14 @@ public:
     void postUpdate(f32 dt) override;
 
 private:
+    bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffectOnHit onHitEffect);
+    void applyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect, RandomNumberGenerator& rng);
+
+
+private:
     std::shared_ptr<SpellData> spellData_;
     f32 currentDuration_;
     f32 traveledDistance_;
+    RandomNumberGenerator rng_;
     bool dead_;
 };
