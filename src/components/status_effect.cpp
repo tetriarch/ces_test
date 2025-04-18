@@ -21,8 +21,6 @@ void StatusEffectComponent::addDebuff(Debuff effect) {
 
 void StatusEffectComponent::update(const f32 dt) {
 
-    isUnderEffect<Stun>();
-
 }
 
 void StatusEffectComponent::postUpdate(const f32 dt) {
