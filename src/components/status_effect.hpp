@@ -4,27 +4,37 @@
 
 #include "../global/effect_types.hpp"
 
-using Buff = std::variant<Haste, HealOverTime>;
-using Debuff = std::variant<DamageOverTime, Slow, Stun>;
+using Buff = std::variant<
+    Haste,
+    HealOverTime
+>;
 
+using Debuff = std::variant<
+    DamageOverTime,
+    Slow,
+    Stun
+>;
+
+// empty struct template for type traits (std::variant)
 template<typename T, typename V>
 struct isInVariant;
 
+// specialization of isInVariant to check if T exists in std::variant<Types...>
+// ... variadic table (multiple parameters basically)
+// std::disjunction checks if T is same as any of the types in std::variant<Types...>
 template<typename T, typename... Types>
 struct isInVariant<T, std::variant<Types...>> : std::disjunction<std::is_same<T, Types>...> {};
 
-template<typename T, typename V>
-inline constexpr bool isInVariantV = false;
-
-template<typename T, typename... Types>
-inline constexpr bool isInVariantV<T, std::variant<Types...>> = (std::is_same_v<T, Types> || ...);
-
+// Helper to check if T is part of Buff variant
 template<typename T>
-constexpr bool isBuff = isInVariantV<T, Buff>;
+constexpr bool isBuff = isInVariant<T, Buff>();
 
+// Helper to check if T is part of Debuff variant
 template<typename T>
-constexpr bool isDebuff = isInVariantV<T, Debuff>;
+constexpr bool isDebuff = isInVariant<T, Debuff>();
 
+// in case the two above return both false
+// helps prevent invalid effect types usage
 template<typename T>
 inline constexpr bool alwaysFalse = false;
 
