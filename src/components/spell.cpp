@@ -15,7 +15,7 @@ void SpellComponent::attach() {
     dead_ = false;
 }
 
-void SpellComponent::update(f32 dt) {
+void SpellComponent::update(const f32 dt) {
 
     auto oldPosition = entity()->transform().position;
     for(auto&& action : spellData_->actions) {
@@ -27,7 +27,7 @@ void SpellComponent::update(f32 dt) {
     traveledDistance_ += Vec2(newPosition - oldPosition).length();
 }
 
-void SpellComponent::postUpdate(f32 dt) {
+void SpellComponent::postUpdate(const f32 dt) {
 
     if(dead_) {
         entity()->parent()->queueRemoveChild(entity());
@@ -99,12 +99,68 @@ bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, Spell
 
 void SpellComponent::applyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect, RandomNumberGenerator& rng) {
 
-    std::visit([&](auto& e) {
-        return e.apply(applicant, target, rng);
+    std::visit([&](const auto& e) {
+        return applyEffect(target, e);
     }, effect);
 }
 
-void DirectDamage::apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng) {
+void SpellComponent::applyEffect(EntityPtr target, DirectDamage damage) {
+
+    auto lifeComponent = target->component<LifeComponent>();
+
+    if(!lifeComponent) {
+        return;
+    }
+
+    f32 amount = rng_.getFloat(damage.min, damage.max);
+    lifeComponent->reduceLife(amount);
+}
+
+void SpellComponent::applyEffect(EntityPtr target, DamageOverTime dot) {
+
+    auto statusEffectComponent = target->component<StatusEffectComponent>();
+
+    if(!statusEffectComponent) {
+        return;
+    }
+
+    statusEffectComponent->addDebuff(dot);
+}
+
+void SpellComponent::applyEffect(EntityPtr target, Slow slow) {
+
+    auto statusEffectComponent = target->component<StatusEffectComponent>();
+
+    if(!statusEffectComponent) {
+        return;
+    }
+
+    statusEffectComponent->addDebuff(slow);
+}
+
+void SpellComponent::applyEffect(EntityPtr target, Haste haste) {
+
+    auto statusEffectComponent = target->component<StatusEffectComponent>();
+
+    if(!statusEffectComponent) {
+        return;
+    }
+
+    statusEffectComponent->addBuff(haste);
+}
+
+void SpellComponent::applyEffect(EntityPtr target, Stun stun) {
+
+    auto statusEffectComponent = target->component<StatusEffectComponent>();
+
+    if(!statusEffectComponent) {
+        return;
+    }
+
+    statusEffectComponent->addDebuff(stun);
+}
+
+void SpellComponent::applyEffect(EntityPtr target, Heal heal) {
 
     auto targetLifeComponent = target->component<LifeComponent>();
 
@@ -112,27 +168,17 @@ void DirectDamage::apply(EntityPtr owner, EntityPtr target, RandomNumberGenerato
         return;
     }
 
-    f32 dmg = rng.getFloat(min, max);
-    targetLifeComponent->reduceLife(dmg);
-
-    // just to see what's going on
-    std::cout << "Damage " << dmg << " dealt to: " << target->name();
-    std::cout << " [" << min << " - " << max << "]" << std::endl;
-    std::cout << "Current life of " << target->name() << " is " << targetLifeComponent->life().current << std::endl;
+    f32 amount = rng_.getFloat(heal.min, heal.max);
+    targetLifeComponent->increaseLife(amount);
 }
 
-void DamageOverTime::apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng) {
+void SpellComponent::applyEffect(EntityPtr target, HealOverTime hot) {
 
-}
+    auto statusEffectComponent = target->component<StatusEffectComponent>();
 
-void Slow::apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng) {
+    if(!statusEffectComponent) {
+        return;
+    }
 
-}
-
-void Stun::apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng) {
-
-}
-
-void Heal::apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng) {
-
+    statusEffectComponent->addBuff(hot);
 }

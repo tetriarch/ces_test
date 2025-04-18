@@ -60,6 +60,9 @@
                 "h": 32.0
             },
             "texture_path": "characters/playable/textures/player_c.png"
+        },
+        {
+            "type": "status_effect"
         }
     ]
 }

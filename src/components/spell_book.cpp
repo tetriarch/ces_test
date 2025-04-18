@@ -34,9 +34,25 @@ void SpellBookComponent::update(f32 dt) {
 
     if(castedSpell_) {
 
+        // put spell on cooldown if it has one
+        if(castedSpell_->cooldown > 0.0f) {
+            cooldowns_.emplace(castedSpell_, castedSpell_->cooldown);
+        }
+
+        auto statusEffectComponent = entity()->component<StatusEffectComponent>();
+        if(!statusEffectComponent) {
+            ERROR("[SPELL BOOK]: missing status effect component");
+            return;
+        }
+        
+        // if stunned during casting
+        if(statusEffectComponent->isUnderEffect<Stun>()) {
+            interruptCasting();
+            return;
+        }
+
         castDuration_ += dt;
         castProgress_ = castDuration_ / castedSpell_->castTime;
-        //TODO: Implement on status effect interruption(stun, freeze...), cooldown
 
         if(castDuration_ >= castedSpell_->castTime) {
             INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(castDuration_) + "s");
@@ -69,11 +85,6 @@ void SpellBookComponent::update(f32 dt) {
                 return;
             }
             mana->reduceMana(castedSpell_->manaCost);
-
-            // put spell on cooldown if it has one
-            if(castedSpell_->cooldown > 0.0f) {
-                cooldowns_.emplace(castedSpell_, castedSpell_->cooldown);
-            }
 
             castedSpell_ = nullptr;
             castProgress_ = 0.0f;

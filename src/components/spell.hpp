@@ -5,6 +5,9 @@
 #include "../i_asset.hpp"
 #include "../random_number_generator.hpp"
 #include "../utils.hpp"
+
+#include "../global/effect_types.hpp"
+
 #include "collision.hpp"
 #include "geometry.hpp"
 #include "tag.hpp"
@@ -23,40 +26,11 @@ enum class DamageType {
     FIRE,
     COLD,
     LIGHTNING,
-    POSION,
+    VOID,
     UNKNOWN
 };
 
-struct DirectDamage {
-    u32 min;
-    u32 max;
-    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
-};
-
-struct DamageOverTime {
-    u32 periodicDamage;
-    f32 duration;
-    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
-};
-
-struct Slow {
-    u32 magnitude;
-    f32 duration;
-    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
-};
-
-struct Stun {
-    f32 duration;
-    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
-};
-
-struct Heal {
-    u32 min;
-    u32 max;
-    void apply(EntityPtr owner, EntityPtr target, RandomNumberGenerator& rng);
-};
-
-using SpellEffect = std::variant<DirectDamage, DamageOverTime, Slow, Stun, Heal>;
+using SpellEffect = std::variant<DirectDamage, DamageOverTime, Slow, Haste, Stun, Heal, HealOverTime>;
 
 struct SpellEffectOnHit {
     DamageType damageType;
@@ -109,12 +83,19 @@ class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent(std::shared_ptr<SpellData> spellData);
     void attach() override;
-    void update(f32 dt) override;
-    void postUpdate(f32 dt) override;
+    void update(const f32 dt) override;
+    void postUpdate(const f32 dt) override;
 
 private:
     bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffectOnHit onHitEffect);
     void applyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect, RandomNumberGenerator& rng);
+    void applyEffect(EntityPtr target, DirectDamage damage);
+    void applyEffect(EntityPtr target, DamageOverTime dot);
+    void applyEffect(EntityPtr target, Slow dot);
+    void applyEffect(EntityPtr target, Haste haste);
+    void applyEffect(EntityPtr target, Stun stun);
+    void applyEffect(EntityPtr target, Heal heal);
+    void applyEffect(EntityPtr target, HealOverTime hot);
 
 
 private:

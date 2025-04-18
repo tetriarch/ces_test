@@ -40,6 +40,9 @@ SceneLoader::SceneLoader() {
     registerComponent("geometry", [this](const json& JSONData) {
         return parseGeometryComponent(JSONData);
     });
+    registerComponent("status_effect", [this](const json& JSONData) {
+        return parseStatusEffectComponent(JSONData);
+    });
 }
 
 auto SceneLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
@@ -477,6 +480,13 @@ auto SceneLoader::parseGeometryComponent(const json& o) -> ComponentPtr {
     geometryComponent.setGeometryData(geometryData);
     geometryComponent.setTextureFilePath(filePath);
     return std::make_shared<GeometryComponent>(geometryComponent);
+}
+
+auto SceneLoader::parseStatusEffectComponent(const json& o) -> ComponentPtr {
+
+    StatusEffectComponent statusEffectComponent;
+
+    return std::make_shared<StatusEffectComponent>(statusEffectComponent);
 }
 
 auto SceneLoader::error(const std::string& msg, const std::string& parent) -> std::string {

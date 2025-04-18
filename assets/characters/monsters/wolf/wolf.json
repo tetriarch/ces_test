@@ -53,6 +53,9 @@
                 "h": 32.0
             },
             "texture_path": "characters/monsters/wolf/textures/wolf_c.png"
+        },
+        {
+            "type": "status_effect"
         }
     ]
 }

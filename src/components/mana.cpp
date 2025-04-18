@@ -16,14 +16,14 @@ void ManaComponent::increaseMana(u32 amount) {
     mana_.current = std::clamp(amount + mana_.current, mana_.current, mana_.max);
 }
 
-void ManaComponent::update(f32 dt) {
+void ManaComponent::update(const f32 dt) {
 
     if(mana_.current < mana_.max) {
         regen(dt);
     }
 }
 
-void ManaComponent::postUpdate(f32 dt) {
+void ManaComponent::postUpdate(const f32 dt) {
 
     // clamp
     if(mana_.current > mana_.max) {
@@ -31,7 +31,7 @@ void ManaComponent::postUpdate(f32 dt) {
     }
 }
 
-void ManaComponent::regen(f32 dt) {
+void ManaComponent::regen(const f32 dt) {
 
     mana_.current += mana_.regen * dt;
 }

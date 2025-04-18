@@ -24,14 +24,14 @@ void LifeComponent::increaseLife(f32 amount) {
     life_.current = std::min(amount + life_.current, life_.max);
 }
 
-void LifeComponent::update(f32 dt) {
+void LifeComponent::update(const f32 dt) {
 
     if(life_.current < life_.max) {
         regen(dt);
     }
 }
 
-void LifeComponent::postUpdate(f32 dt) {
+void LifeComponent::postUpdate(const f32 dt) {
 
     // clamp
     if(life_.current > life_.max) {
@@ -47,7 +47,7 @@ void LifeComponent::postUpdate(f32 dt) {
     }
 }
 
-void LifeComponent::regen(f32 dt) {
+void LifeComponent::regen(const f32 dt) {
 
     life_.current += life_.regen * dt;
 }

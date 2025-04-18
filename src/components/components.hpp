@@ -8,5 +8,6 @@
 #include "player_control.hpp"
 #include "spell.hpp"
 #include "spell_book.hpp"
+#include "status_effect.hpp"
 #include "tag.hpp"
 #include "velocity.hpp"

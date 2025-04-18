@@ -244,7 +244,7 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
 
     else if(effectType == "slow") {
         Slow slow;
-        if(!get<u32>(it.value(), "magnitude", true, slow.magnitude, "slow")) {
+        if(!get<f32>(it.value(), "magnitude", true, slow.magnitude, "slow")) {
             return std::unexpected(JSONParserError::PARSE);
         }
         if(!get<f32>(it.value(), "duration_in_sec", true, slow.duration, "slow")) {

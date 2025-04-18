@@ -17,11 +17,11 @@ public:
     void reduceLife(f32 amount);
     void increaseLife(f32 amount);
 
-    void update(f32 dt) override;
-    void postUpdate(f32 dt) override;
+    void update(const f32 dt) override;
+    void postUpdate(const f32 dt) override;
 
 private:
-    void regen(f32 dt);
+    void regen(const f32 dt);
 
 private:
     Life life_;
