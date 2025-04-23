@@ -17,6 +17,7 @@ enum class ActionType {
     ARC,
     BEAM,
     PROJECTILE,
+    SELF,
     UNKNOWN
 };
 
@@ -30,7 +31,15 @@ enum class DamageType {
     UNKNOWN
 };
 
-using SpellEffect = std::variant<DirectDamage, DamageOverTime, Slow, Haste, Stun, Heal, HealOverTime>;
+using SpellEffect = std::variant<
+    DirectDamage,
+    DamageOverTime,
+    Slow,
+    Haste,
+    Stun,
+    Heal,
+    HealOverTime
+>;
 
 struct SpellEffectOnHit {
     DamageType damageType;

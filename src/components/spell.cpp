@@ -124,7 +124,7 @@ void SpellComponent::applyEffect(EntityPtr target, DamageOverTime dot) {
         return;
     }
 
-    statusEffectComponent->addDebuff(dot);
+    statusEffectComponent->addEffect(dot, EffectType::DEBUFF);
 }
 
 void SpellComponent::applyEffect(EntityPtr target, Slow slow) {
@@ -135,7 +135,7 @@ void SpellComponent::applyEffect(EntityPtr target, Slow slow) {
         return;
     }
 
-    statusEffectComponent->addDebuff(slow);
+    statusEffectComponent->addEffect(slow, EffectType::DEBUFF);
 }
 
 void SpellComponent::applyEffect(EntityPtr target, Haste haste) {
@@ -146,7 +146,7 @@ void SpellComponent::applyEffect(EntityPtr target, Haste haste) {
         return;
     }
 
-    statusEffectComponent->addBuff(haste);
+    statusEffectComponent->addEffect(haste, EffectType::BUFF);
 }
 
 void SpellComponent::applyEffect(EntityPtr target, Stun stun) {
@@ -157,7 +157,7 @@ void SpellComponent::applyEffect(EntityPtr target, Stun stun) {
         return;
     }
 
-    statusEffectComponent->addDebuff(stun);
+    statusEffectComponent->addEffect(stun, EffectType::DEBUFF);
 }
 
 void SpellComponent::applyEffect(EntityPtr target, Heal heal) {
@@ -180,5 +180,5 @@ void SpellComponent::applyEffect(EntityPtr target, HealOverTime hot) {
         return;
     }
 
-    statusEffectComponent->addBuff(hot);
+    statusEffectComponent->addEffect(hot, EffectType::BUFF);
 }

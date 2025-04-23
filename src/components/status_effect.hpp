@@ -4,16 +4,18 @@
 
 #include "../global/effect_types.hpp"
 
-using Buff = std::variant<
-    Haste,
-    HealOverTime
->;
-
-using Debuff = std::variant<
+using StatusEffect = std::variant<
     DamageOverTime,
+    Haste,
+    HealOverTime,
     Slow,
     Stun
 >;
+
+enum class EffectType {
+    BUFF,
+    DEBUFF
+};
 
 // empty struct template for type traits (std::variant)
 template<typename T, typename V>
@@ -25,65 +27,40 @@ struct isInVariant;
 template<typename T, typename... Types>
 struct isInVariant<T, std::variant<Types...>> : std::disjunction<std::is_same<T, Types>...> {};
 
-// Helper to check if T is part of Buff variant
+// Helper to check if T is status effect
 template<typename T>
-constexpr bool isBuff = isInVariant<T, Buff>();
+constexpr bool isStatusEffect = isInVariant<T, StatusEffect>();
 
-// Helper to check if T is part of Debuff variant
-template<typename T>
-constexpr bool isDebuff = isInVariant<T, Debuff>();
-
-// in case the two above return both false
-// helps prevent invalid effect types usage
-template<typename T>
-inline constexpr bool alwaysFalse = false;
-
-struct ActiveBuff {
-    Buff effect;
-    f32 currentDuration{0.0f};
-};
-
-struct ActiveDebuff {
-    Debuff effect;
+struct ActiveEffect {
+    StatusEffect effect;
+    EffectType type;
     f32 currentDuration{0.0f};
 };
 
 class StatusEffectComponent : public Component<StatusEffectComponent> {
 
 public:
-    void addBuff(Buff effect);
-    void addDebuff(Debuff effect);
+    void addEffect(StatusEffect effect, EffectType type);
 
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
 
     template<typename T>
-    bool isUnderEffect();
+    bool isUnderEffect() const;
 
 private:
-    std::vector<ActiveBuff> buffs_;
-    std::vector<ActiveDebuff> debuffs_;
+    std::vector<ActiveEffect> effects_;
 };
 
 template<typename T>
-inline bool StatusEffectComponent::isUnderEffect() {
+inline bool StatusEffectComponent::isUnderEffect() const {
 
-    if constexpr(isBuff<T>) {
-        for(auto& b : buffs_) {
-            if(std::holds_alternative<T>(b.effect)) {
-                return true;
-            }
+    static_assert(isStatusEffect<T>, "T is not valid status effect");
+
+    for(auto& e : effects_) {
+        if(std::holds_alternative<T>(e.effect)) {
+            return true;
         }
-    }
-    else if constexpr(isDebuff<T>) {
-        for(auto& d : debuffs_) {
-            if(std::holds_alternative<T>(d.effect)) {
-                return true;
-            }
-        }
-    }
-    else {
-        static_assert(alwaysFalse<T>, "T has to be Buff or Debuff type");
     }
 
     return false;

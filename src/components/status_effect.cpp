@@ -1,22 +1,13 @@
 #include "status_effect.hpp"
 
+void StatusEffectComponent::addEffect(StatusEffect effect, EffectType type) {
 
-void StatusEffectComponent::addBuff(Buff effect) {
+    ActiveEffect e;
+    e.effect = effect;
+    e.type = type;
+    e.currentDuration = 0.0f;
 
-    ActiveBuff buff;
-    buff.effect = effect;
-    buff.currentDuration = 0;
-
-    buffs_.push_back(buff);
-}
-
-void StatusEffectComponent::addDebuff(Debuff effect) {
-
-    ActiveDebuff debuff;
-    debuff.effect = effect;
-    debuff.currentDuration = 0;
-
-    debuffs_.push_back(debuff);
+    effects_.push_back(e);
 }
 
 void StatusEffectComponent::update(const f32 dt) {
