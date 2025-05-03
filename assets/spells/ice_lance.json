@@ -26,33 +26,31 @@
         },
         "determinant": "NONE"
     },
-    "action": [
-        {
-            "type": "PROJECTILE",
-            "pierce": true,
-            "movement": {
-                "type": "constant_motion",
-                "speed": 500.0
+    "action": {
+        "type": "PROJECTILE",
+        "pierce": true,
+        "movement": {
+            "type": "constant_motion",
+            "speed": 500.0
+        },
+        "on_hit": [
+            {
+                "name": "Direct Cold Damage",
+                "effect_type": "DIRECT_DAMAGE",
+                "damage_type": "COLD",
+                "target_faction": "HOSTILE",
+                "min_value": 5,
+                "max_value": 25,
+                "duration": 0.0
             },
-            "on_hit": [
-                {
-                    "name": "Direct Cold Damage",
-                    "effect_type": "DIRECT_DAMAGE",
-                    "damage_type": "COLD",
-                    "target_faction": "HOSTILE",
-                    "min_value": 5,
-                    "max_value": 25,
-                    "duration": 0.0
-                },
-                {
-                    "name": "Chill",
-                    "effect_type": "SLOW",
-                    "damage_type": "COLD",
-                    "target_faction": "HOSTILE",
-                    "magnitude": 0.20,
-                    "duration": 3.0
-                }
-            ]
-        }
-    ]
+            {
+                "name": "Chill",
+                "effect_type": "SLOW",
+                "damage_type": "COLD",
+                "target_faction": "HOSTILE",
+                "magnitude": 0.20,
+                "duration": 3.0
+            }
+        ]
+    }
 }

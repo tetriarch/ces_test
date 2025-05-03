@@ -39,21 +39,19 @@ auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellDa
     }
     auto spell = stats.value();
 
-    // parse actions
+    // parse action
     json::const_iterator it = spellJSON.find("action");
     if(it == spellJSON.end()) {
         ERROR(error("failed to find action"));
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    for(auto& a : it.value()) {
-        auto action = parseAction(a, "action");
-        if(!action) {
-            ERROR(error("failed to parse action"));
-            return std::unexpected(action.error());
-        }
-        spell.actions.emplace_back(action.value());
+    auto action = parseAction(it.value(), "action");
+    if(!action) {
+        ERROR(error("failed to parse action"));
+        return std::unexpected(action.error());
     }
+    spell.action = action.value();
 
     // parse geometry
     it = spellJSON.find("geometry");
@@ -206,7 +204,7 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
     if(!get<std::string>(o, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
-    onHitEffect.effect = magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
+    onHitEffect.effectType = magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
 
     if(!get<f32>(o, "duration", true, onHitEffect.duration, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);

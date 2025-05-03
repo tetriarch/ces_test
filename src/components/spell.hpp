@@ -41,7 +41,7 @@ enum class SpellEffectType {
 
 struct SpellEffect {
     std::string name{""};
-    SpellEffectType effect{SpellEffectType::UNKNOWN};
+    SpellEffectType effectType{SpellEffectType::UNKNOWN};
     f32 duration{0.0f};
     DamageType dmgType{DamageType::UNKNOWN};
     FactionType targetFaction{FactionType::UNKNOWN};
@@ -88,7 +88,7 @@ struct SpellData : public IAsset {
     f32 duration;
     f32 maxRange;
     std::string textureFilePath;
-    std::vector<SpellAction> actions;
+    SpellAction action;
     GeometryData geometryData;
     CollisionData collisionData;
 };

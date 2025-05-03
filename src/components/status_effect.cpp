@@ -21,9 +21,7 @@ void StatusEffectComponent::addEffect(const SpellEffect& effect) {
     effects_.push_back(e);
 }
 
-/// @brief Removes activeEffect from effects_
-/// @param effect 
-/// @return true if successfuly removed effect, false if failed 
+
 bool StatusEffectComponent::removeEffect(ActiveEffect* effect) {
 
     for(u32 i = 0; i < effects_.size(); i++) {
@@ -62,7 +60,7 @@ void StatusEffectComponent::postUpdate(const f32 dt) {
 bool StatusEffectComponent::isUnderEffect(SpellEffectType type) const {
 
     for(auto& e : effects_) {
-        if(e.effect.effect == type) {
+        if(e.effect.effectType == type) {
             return true;
         }
     }
@@ -77,7 +75,7 @@ void StatusEffectComponent::updateEffect(ActiveEffect& effect, const f32 dt) {
 
     //TODO: Sort this naming shit out - it's straight up disgusting
 
-    auto effectType = effect.effect.effect;
+    auto effectType = effect.effect.effectType;
 
     switch(effectType) {
         case SpellEffectType::DIRECT_DAMAGE: {

@@ -66,13 +66,9 @@ void CollisionComponent::postUpdate(f32 dt) {
 
     for(auto&& e : entities) {
 
-        if(e.second.expired()) {
-            continue;
-        }
-        auto ePtr = e.second.lock();
-
         // skip ourselves
-        if(ePtr == entity()) {
+        auto ePtr = e.second.lock();
+        if(ePtr == nullptr || ePtr == entity()) {
             continue;
         }
 

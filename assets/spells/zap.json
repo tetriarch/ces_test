@@ -26,31 +26,29 @@
         },
         "determinant": "TARGET"
     },
-    "action": [
-        {
-            "type": "BEAM",
-            "pierce": true,
-            "movement": {
-                "type": "instant"
+    "action": {
+        "type": "BEAM",
+        "pierce": true,
+        "movement": {
+            "type": "instant"
+        },
+        "on_hit": [
+            {
+                "name": "Direct Lightning Damage",
+                "effect_type": "DIRECT_DAMAGE",
+                "damage_type": "LIGHTNING",
+                "target_faction": "HOSTILE",
+                "min_value": 5,
+                "max_value": 10,
+                "duration": 0.0
             },
-            "on_hit": [
-                {
-                    "name": "Direct Lightning Damage",
-                    "effect_type": "DIRECT_DAMAGE",
-                    "damage_type": "LIGHTNING",
-                    "target_faction": "HOSTILE",
-                    "min_value": 5,
-                    "max_value": 10,
-                    "duration": 0.0
-                },
-                {
-                    "name": "Stun",
-                    "effect_type": "STUN",
-                    "damage_type": "LIGHTNING",
-                    "target_faction": "HOSTILE",
-                    "duration": 3.0
-                }
-            ]
-        }
-    ]
+            {
+                "name": "Stun",
+                "effect_type": "STUN",
+                "damage_type": "LIGHTNING",
+                "target_faction": "HOSTILE",
+                "duration": 3.0
+            }
+        ]
+    }
 }

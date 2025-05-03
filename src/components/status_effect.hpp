@@ -16,6 +16,10 @@ class StatusEffectComponent : public Component<StatusEffectComponent> {
 
 public:
     void addEffect(const SpellEffect& effect);
+
+    /// @brief Removes activeEffect from effects_
+    /// @param pointer to effect 
+    /// @return true if successfuly removed effect, false if failed 
     bool removeEffect(ActiveEffect* effect);
 
     void update(const f32 dt) override;

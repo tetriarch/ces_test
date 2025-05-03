@@ -16,9 +16,9 @@ void SpellComponent::attach() {
 void SpellComponent::update(const f32 dt) {
 
     auto oldPosition = entity()->transform().position;
-    for(auto&& action : spellData_->actions) {
-        action.motion->apply(entity(), dt);
-    }
+
+    spellData_->action.motion->apply(entity(), dt);
+
     auto newPosition = entity()->transform().position;
 
     currentDuration_ += dt;
@@ -52,13 +52,10 @@ void SpellComponent::postUpdate(const f32 dt) {
             bool effectApllied = false;
 
             for(auto t : colliders) {
-                //TODO: get rid of action array - make it only effects
-                for(auto& a : spellData_->actions) {
-                    for(auto& effect : a.effects) {
-                        if(canApplyEffect(ownerComponent->owner(), t, effect)) {
-                            applyEffect(t, effect);
-                            effectApllied = true;
-                        }
+                for(auto& effect : spellData_->action.effects) {
+                    if(canApplyEffect(ownerComponent->owner(), t, effect)) {
+                        applyEffect(t, effect);
+                        effectApllied = true;
                     }
                 }
             }
