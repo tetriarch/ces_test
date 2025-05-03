@@ -15,7 +15,7 @@ private:
     auto parseSpell(const std::string& source) -> std::expected<SpellData, JSONParserError>;
     auto parseBasicStats(const json& o, const std::string& parent = "") -> std::expected<SpellData, JSONParserError>;
     auto parseAction(const json& o, const std::string& parent = "") -> std::expected<SpellAction, JSONParserError>;
-    auto parseOnHitEffect(const json& o, const std::string& parent = "") -> std::expected<SpellEffectOnHit, JSONParserError>;
+    auto parseOnHitEffect(const json& o, const std::string& parent = "") -> std::expected<SpellEffect, JSONParserError>;
     auto parseGeometryData(const json& o, const std::string& parent = "") -> std::expected<GeometryData, JSONParserError>;
     auto parseCollisionData(const json& o, const std::string& parent = "") -> std::expected<CollisionData, JSONParserError>;
     auto error(const std::string& msg, const std::string& parent = "") -> std::string override;

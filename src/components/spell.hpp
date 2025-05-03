@@ -3,10 +3,7 @@
 #include "../component.hpp"
 #include "../entity.hpp"
 #include "../i_asset.hpp"
-#include "../random_number_generator.hpp"
 #include "../utils.hpp"
-
-#include "../global/effect_types.hpp"
 
 #include "collision.hpp"
 #include "geometry.hpp"
@@ -31,20 +28,28 @@ enum class DamageType {
     UNKNOWN
 };
 
-using SpellEffect = std::variant<
-    DirectDamage,
-    DamageOverTime,
-    Slow,
-    Haste,
-    Stun,
-    Heal,
-    HealOverTime
->;
+enum class SpellEffectType {
+    DIRECT_DAMAGE,
+    DAMAGE_OVER_TIME,
+    SLOW,
+    HASTE,
+    STUN,
+    HEAL,
+    HEAL_OVER_TIME,
+    UNKNOWN
+};
 
-struct SpellEffectOnHit {
-    DamageType damageType;
-    FactionType targetFaction;
-    SpellEffect effect;
+struct SpellEffect {
+    std::string name{""};
+    SpellEffectType effect{SpellEffectType::UNKNOWN};
+    f32 duration{0.0f};
+    DamageType dmgType{DamageType::UNKNOWN};
+    FactionType targetFaction{FactionType::UNKNOWN};
+    u32 minValue{0};
+    u32 maxValue{0};
+    u32 periodicValue{0};
+    f32 magnitude{0.0f};
+    u32 maxStacks{1};
 };
 
 struct Motion {
@@ -71,7 +76,7 @@ struct SpellAction {
     ActionType type;
     bool pierce;
     std::shared_ptr<Motion> motion;
-    std::vector<SpellEffectOnHit> effects;
+    std::vector<SpellEffect> effects;
 };
 
 struct SpellData : public IAsset {
@@ -96,21 +101,12 @@ public:
     void postUpdate(const f32 dt) override;
 
 private:
-    bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffectOnHit onHitEffect);
-    void applyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect, RandomNumberGenerator& rng);
-    void applyEffect(EntityPtr target, DirectDamage damage);
-    void applyEffect(EntityPtr target, DamageOverTime dot);
-    void applyEffect(EntityPtr target, Slow dot);
-    void applyEffect(EntityPtr target, Haste haste);
-    void applyEffect(EntityPtr target, Stun stun);
-    void applyEffect(EntityPtr target, Heal heal);
-    void applyEffect(EntityPtr target, HealOverTime hot);
-
+    bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect onHitEffect);
+    void applyEffect(EntityPtr target, const SpellEffect& effect);
 
 private:
     std::shared_ptr<SpellData> spellData_;
     f32 currentDuration_;
     f32 traveledDistance_;
-    RandomNumberGenerator rng_;
     bool dead_;
 };

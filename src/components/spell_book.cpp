@@ -46,7 +46,7 @@ void SpellBookComponent::update(f32 dt) {
         }
         
         // if stunned during casting
-        if(statusEffectComponent->isUnderEffect<Stun>()) {
+        if(statusEffectComponent->isUnderEffect(SpellEffectType::STUN)) {
             interruptCasting();
             return;
         }

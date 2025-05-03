@@ -36,22 +36,21 @@
             },
             "on_hit": [
                 {
-                    "effect_type": "direct_damage",
-                    "type": "FIRE",
+                    "name": "Direct Fire Damage",
+                    "effect_type": "DIRECT_DAMAGE",
+                    "damage_type": "FIRE",
                     "target_faction": "HOSTILE",
-                    "direct_damage": {
-                        "min": 10,
-                        "max": 30
-                    }
+                    "min_value": 10,
+                    "max_value": 30,
+                    "duration": 0.0
                 },
                 {
-                    "effect_type": "dot",
-                    "type": "FIRE",
+                    "name": "Ignite",
+                    "effect_type": "DAMAGE_OVER_TIME",
+                    "damage_type": "FIRE",
                     "target_faction": "HOSTILE",
-                    "dot": {
-                        "periodic_damage": 5,
-                        "duration_in_sec": 5.0
-                    }
+                    "periodic_value": 5,
+                    "duration": 5.0
                 }
             ]
         }

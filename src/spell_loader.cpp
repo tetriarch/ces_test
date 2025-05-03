@@ -191,80 +191,43 @@ auto SpellLoader::parseAction(const json& o, const std::string& parent) -> std::
     return action;
 }
 
-auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> std::expected<SpellEffectOnHit, JSONParserError> {
+auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> std::expected<SpellEffect, JSONParserError> {
 
-    SpellEffectOnHit onHitEffect;
+    SpellEffect onHitEffect;
     std::string effectType;
-    std::string damageType;
+    std::string dmgType;
     std::string targetFaction;
+
+    // mandatory
+    if(!get<std::string>(o, "name", true, onHitEffect.name, "on_hit")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
 
     if(!get<std::string>(o, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
+    onHitEffect.effect = magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
 
-    if(!get<std::string>(o, "type", true, damageType, "on_hit")) {
+    if(!get<f32>(o, "duration", true, onHitEffect.duration, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
+
+    if(!get<std::string>(o, "damage_type", true, dmgType, "on_hit")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+    onHitEffect.dmgType = magic_enum::enum_cast<DamageType>(dmgType).value_or(DamageType::UNKNOWN);
 
     if(!get<std::string>(o, "target_faction", true, targetFaction, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
-
-    onHitEffect.damageType = magic_enum::enum_cast<DamageType>(damageType).value_or(DamageType::UNKNOWN);
     onHitEffect.targetFaction = magic_enum::enum_cast<FactionType>(targetFaction).value_or(FactionType::UNKNOWN);
 
-    json::const_iterator it = o.find(effectType);
-    if(it == o.end()) {
-        ERROR(error("has no " + effectType, parent));
-        return std::unexpected(JSONParserError::PARSE);
-    }
-
-    // individual effects - honestly this should be broken to functions
-    if(effectType == "direct_damage") {
-        DirectDamage dd;
-        if(!get<u32>(it.value(), "min", true, dd.min, "direct_damage")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        if(!get<u32>(it.value(), "max", true, dd.max, "direct_damage")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        onHitEffect.effect = dd;
-    }
-
-    else if(effectType == "dot") {
-        DamageOverTime dot;
-        if(!get<u32>(it.value(), "periodic_damage", true, dot.periodicDamage, "dot")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        if(!get<f32>(it.value(), "duration_in_sec", true, dot.duration, "dot")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        onHitEffect.effect = dot;
-    }
-
-    else if(effectType == "slow") {
-        Slow slow;
-        if(!get<f32>(it.value(), "magnitude", true, slow.magnitude, "slow")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        if(!get<f32>(it.value(), "duration_in_sec", true, slow.duration, "slow")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        onHitEffect.effect = slow;
-    }
-
-    else if(effectType == "stun") {
-        Stun stun;
-        if(!get<f32>(it.value(), "duration_in_sec", true, stun.duration, "stun")) {
-            return std::unexpected(JSONParserError::PARSE);
-        }
-        onHitEffect.effect = stun;
-    }
-
-    else {
-        ERROR(error("missing associated key to effect_type value: " + effectType, parent));
-        return std::unexpected(JSONParserError::PARSE);
-    }
+    // optional
+    get<u32>(o, "min_value", false, onHitEffect.minValue, "on_hit");
+    get<u32>(o, "max_value", false, onHitEffect.maxValue, "on_hit");
+    get<u32>(o, "periodic_value", false, onHitEffect.periodicValue, "on_hit");
+    get<f32>(o, "magnitude", false, onHitEffect.magnitude, "on_hit");
+    get<u32>(o, "max_stacks", false, onHitEffect.maxStacks, "on_hit");
 
     return onHitEffect;
 }

@@ -7,11 +7,13 @@ void CollisionComponent::attach() {
 }
 
 void CollisionComponent::setCollisionData(const CollisionData& data) {
+
     collisionData_ = data;
     shape_ = data.shape;
 }
 
 CollisionShape CollisionComponent::shape() const {
+
     return shape_;
 }
 
@@ -34,7 +36,7 @@ bool CollisionComponent::checkCollision(EntityPtr target) {
 
 bool CollisionComponent::collided() const {
 
-    return collided_;
+    return !colliders_.empty();
 }
 
 Vec2 CollisionComponent::collisionNormal() const {
@@ -47,13 +49,9 @@ f32 CollisionComponent::collisionDepth() const {
     return collisionDepth_;
 }
 
-EntityPtr CollisionComponent::collisionSource() const {
+const std::unordered_set<EntityPtr>& CollisionComponent::colliders() const {
 
-    if(collisionSource_.expired()) {
-        return nullptr;
-    }
-
-    return collisionSource_.lock();
+    return colliders_;
 }
 
 void CollisionComponent::postUpdate(f32 dt) {
@@ -63,9 +61,10 @@ void CollisionComponent::postUpdate(f32 dt) {
     collisionNormal_ = {0.0f, 0.0f};
     collisionDepth_ = 0.0f;
 
-    auto entitties = EntityManager::get().entities();
+    auto entities = EntityManager::get().entities();
+    colliders_.clear();
 
-    for(auto&& e : entitties) {
+    for(auto&& e : entities) {
 
         if(e.second.expired()) {
             continue;
@@ -73,21 +72,20 @@ void CollisionComponent::postUpdate(f32 dt) {
         auto ePtr = e.second.lock();
 
         // skip ourselves
-        if(ePtr.get() == entity()->shared_from_this().get()) {
+        if(ePtr == entity()) {
             continue;
         }
 
-        collided_ = checkCollision(ePtr);
-        // stop checking collisions if collided
-        if(collided_) {
-            collisionSource_ = ePtr;
-            return;
+        if(checkCollision(ePtr)) {
+            colliders_.emplace(ePtr);
         }
     }
 }
 
 void CollisionComponent::reposition() {
+
     auto transform = entity()->transform();
+
     if(shape_.shape() == Shape::RECT) {
         auto rect = std::get<Rect>(shape_);
         auto dataRect = std::get<Rect>(collisionData_.shape);
@@ -136,7 +134,9 @@ bool CollisionComponent::intersects(const Rect& l, const Rect& r) {
         else {
             normal = (l.x > r.x) ? Vec2(-1.0f, 0.0f) : Vec2(1.0f, 0.0f);
         }
+
         collisionNormal_ = normal;
+
         collisionDepth_ = std::min(overlapX, overlapY);
         return true;
     }

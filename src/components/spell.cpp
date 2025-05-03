@@ -1,8 +1,6 @@
 #include "spell.hpp"
 #include "components.hpp"
 
-#include "../random_number_generator.hpp"
-
 SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData) {
 
     spellData_ = spellData;
@@ -47,22 +45,23 @@ void SpellComponent::postUpdate(const f32 dt) {
     auto ownerComponent = entity()->component<OwnerComponent>();
 
     if(collisionComponent && ownerComponent) {
+
         if(collisionComponent->collided()) {
 
-            auto target = collisionComponent->collisionSource();
+            auto colliders = collisionComponent->colliders();
             bool effectApllied = false;
 
-            for(auto& a : spellData_->actions) {
-                for(auto& onHitEffect : a.effects) {
-
-                    if(!canApplyEffect(ownerComponent->owner(), target, onHitEffect)) {
-                        continue;
+            for(auto t : colliders) {
+                //TODO: get rid of action array - make it only effects
+                for(auto& a : spellData_->actions) {
+                    for(auto& effect : a.effects) {
+                        if(canApplyEffect(ownerComponent->owner(), t, effect)) {
+                            applyEffect(t, effect);
+                            effectApllied = true;
+                        }
                     }
-                    applyEffect(ownerComponent->owner(), target, onHitEffect.effect, rng_);
-                    effectApllied = true;
                 }
             }
-
             if(effectApllied) {
                 dead_ = true;
             }
@@ -70,7 +69,7 @@ void SpellComponent::postUpdate(const f32 dt) {
     }
 }
 
-bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffectOnHit onHitEffect) {
+bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect) {
 
     auto applicantTagComponent = applicant->component<TagComponent>();
     auto targetTagComponent = target->component<TagComponent>();
@@ -83,10 +82,10 @@ bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, Spell
 
     bool belongs;
 
-    if(onHitEffect.targetFaction == FactionType::FRIENDLY) {
+    if(effect.targetFaction == FactionType::FRIENDLY) {
         belongs = applicantTagComponent->isFriendly(targetTag);
     }
-    else if(onHitEffect.targetFaction == FactionType::HOSTILE) {
+    else if(effect.targetFaction == FactionType::HOSTILE) {
         belongs = applicantTagComponent->isHostile(targetTag);
     }
     else {
@@ -97,88 +96,11 @@ bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, Spell
     return belongs;
 }
 
-void SpellComponent::applyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect, RandomNumberGenerator& rng) {
-
-    std::visit([&](const auto& e) {
-        return applyEffect(target, e);
-    }, effect);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, DirectDamage damage) {
-
-    auto lifeComponent = target->component<LifeComponent>();
-
-    if(!lifeComponent) {
-        return;
-    }
-
-    f32 amount = rng_.getFloat(damage.min, damage.max);
-    lifeComponent->reduceLife(amount);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, DamageOverTime dot) {
+void SpellComponent::applyEffect(EntityPtr target, const SpellEffect& effect) {
 
     auto statusEffectComponent = target->component<StatusEffectComponent>();
 
-    if(!statusEffectComponent) {
-        return;
+    if(statusEffectComponent) {
+        statusEffectComponent->addEffect(effect);
     }
-
-    statusEffectComponent->addEffect(dot, EffectType::DEBUFF);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, Slow slow) {
-
-    auto statusEffectComponent = target->component<StatusEffectComponent>();
-
-    if(!statusEffectComponent) {
-        return;
-    }
-
-    statusEffectComponent->addEffect(slow, EffectType::DEBUFF);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, Haste haste) {
-
-    auto statusEffectComponent = target->component<StatusEffectComponent>();
-
-    if(!statusEffectComponent) {
-        return;
-    }
-
-    statusEffectComponent->addEffect(haste, EffectType::BUFF);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, Stun stun) {
-
-    auto statusEffectComponent = target->component<StatusEffectComponent>();
-
-    if(!statusEffectComponent) {
-        return;
-    }
-
-    statusEffectComponent->addEffect(stun, EffectType::DEBUFF);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, Heal heal) {
-
-    auto targetLifeComponent = target->component<LifeComponent>();
-
-    if(!targetLifeComponent) {
-        return;
-    }
-
-    f32 amount = rng_.getFloat(heal.min, heal.max);
-    targetLifeComponent->increaseLife(amount);
-}
-
-void SpellComponent::applyEffect(EntityPtr target, HealOverTime hot) {
-
-    auto statusEffectComponent = target->component<StatusEffectComponent>();
-
-    if(!statusEffectComponent) {
-        return;
-    }
-
-    statusEffectComponent->addEffect(hot, EffectType::BUFF);
 }

@@ -47,9 +47,9 @@ void VelocityComponent::postUpdate(const f32 dt) {
     if(collisionComponent && collisionComponent->collided()) {
 
         auto tag = entity()->component<TagComponent>();
-        auto collider = collisionComponent->collisionSource();
+        auto colliders = collisionComponent->colliders();
 
-        if(collider) {
+        for(auto&& collider : colliders) {
             if(tag && tag->isTaggedAs(TagType::PLAYER)) {
                 auto colliderOwnerComponent = collider->component<OwnerComponent>();
                 if(!colliderOwnerComponent || (colliderOwnerComponent && !colliderOwnerComponent->isOwnedBy(entity()))) {

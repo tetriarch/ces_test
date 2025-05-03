@@ -36,22 +36,21 @@
             },
             "on_hit": [
                 {
-                    "effect_type": "direct_damage",
-                    "type": "COLD",
+                    "name": "Direct Cold Damage",
+                    "effect_type": "DIRECT_DAMAGE",
+                    "damage_type": "COLD",
                     "target_faction": "HOSTILE",
-                    "direct_damage": {
-                        "min": 5,
-                        "max": 25
-                    }
+                    "min_value": 5,
+                    "max_value": 25,
+                    "duration": 0.0
                 },
                 {
-                    "effect_type": "slow",
-                    "type": "COLD",
+                    "name": "Chill",
+                    "effect_type": "SLOW",
+                    "damage_type": "COLD",
                     "target_faction": "HOSTILE",
-                    "slow": {
-                        "magnitude": 0.20,
-                        "duration_in_sec": 3.0
-                    }
+                    "magnitude": 0.20,
+                    "duration": 3.0
                 }
             ]
         }

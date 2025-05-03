@@ -16,8 +16,4 @@ public:
     u32 getUnsigned(u32 min, u32 max);
 private:
     std::mt19937_64 generator_;
-
-private:
 };
-
-#define RNG RandomNumberGenerator::get()

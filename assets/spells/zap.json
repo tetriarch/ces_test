@@ -35,21 +35,20 @@
             },
             "on_hit": [
                 {
-                    "effect_type": "direct_damage",
-                    "type": "LIGHTNING",
+                    "name": "Direct Lightning Damage",
+                    "effect_type": "DIRECT_DAMAGE",
+                    "damage_type": "LIGHTNING",
                     "target_faction": "HOSTILE",
-                    "direct_damage": {
-                        "min": 5,
-                        "max": 10
-                    }
+                    "min_value": 5,
+                    "max_value": 10,
+                    "duration": 0.0
                 },
                 {
-                    "effect_type": "stun",
-                    "type": "LIGHTNING",
+                    "name": "Stun",
+                    "effect_type": "STUN",
+                    "damage_type": "LIGHTNING",
                     "target_faction": "HOSTILE",
-                    "stun": {
-                        "duration_in_sec": 3.0
-                    }
+                    "duration": 3.0
                 }
             ]
         }
