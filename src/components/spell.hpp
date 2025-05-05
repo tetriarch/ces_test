@@ -34,22 +34,26 @@ enum class SpellEffectType {
     SLOW,
     HASTE,
     STUN,
-    HEAL,
+    DIRECT_HEAL,
     HEAL_OVER_TIME,
     UNKNOWN
 };
 
 struct SpellEffect {
     std::string name{""};
-    SpellEffectType effectType{SpellEffectType::UNKNOWN};
-    f32 duration{0.0f};
+    SpellEffectType type{SpellEffectType::UNKNOWN};
+    f32 currentDuration{0.0f};
+    f32 maxDuration{0.0f};
     DamageType dmgType{DamageType::UNKNOWN};
     FactionType targetFaction{FactionType::UNKNOWN};
     u32 minValue{0};
     u32 maxValue{0};
     u32 periodicValue{0};
     f32 magnitude{0.0f};
+    u32 currentStacks{0};
     u32 maxStacks{1};
+
+    bool isDirect() const;
 };
 
 struct Motion {
@@ -102,7 +106,6 @@ public:
 
 private:
     bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect onHitEffect);
-    void applyEffect(EntityPtr target, const SpellEffect& effect);
 
 private:
     std::shared_ptr<SpellData> spellData_;

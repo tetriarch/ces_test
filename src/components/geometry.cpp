@@ -97,3 +97,7 @@ void GeometryComponent::render(SDL_Renderer* renderer) {
     }
 #endif
 }
+
+Rect GeometryComponent::rect() const {
+    return rect_;
+}

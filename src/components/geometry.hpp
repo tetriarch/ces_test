@@ -26,6 +26,7 @@ public:
     void setGeometryData(const GeometryData& geometryData);
     void postUpdate(f32 dt) override;
     void render(SDL_Renderer* renderer) override;
+    Rect rect() const;
 
 #ifdef DEBUG
     void handleEvents(const SDL_Event& event) override;

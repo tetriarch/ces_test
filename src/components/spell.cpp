@@ -1,6 +1,10 @@
 #include "spell.hpp"
 #include "components.hpp"
 
+bool SpellEffect::isDirect() const {
+    return (type == SpellEffectType::DIRECT_DAMAGE || type == SpellEffectType::DIRECT_HEAL);
+}
+
 SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData) {
 
     spellData_ = spellData;
@@ -51,11 +55,16 @@ void SpellComponent::postUpdate(const f32 dt) {
             auto colliders = collisionComponent->colliders();
             bool effectApllied = false;
 
-            for(auto t : colliders) {
+            for(auto target : colliders) {
                 for(auto& effect : spellData_->action.effects) {
-                    if(canApplyEffect(ownerComponent->owner(), t, effect)) {
-                        applyEffect(t, effect);
-                        effectApllied = true;
+                    if(canApplyEffect(ownerComponent->owner(), target, effect)) {
+
+                        auto statusEffectComponent = target->component<StatusEffectComponent>();
+
+                        if(statusEffectComponent) {
+                            statusEffectComponent->applyEffect(effect);
+                            effectApllied = true;
+                        }
                     }
                 }
             }
@@ -93,11 +102,4 @@ bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, Spell
     return belongs;
 }
 
-void SpellComponent::applyEffect(EntityPtr target, const SpellEffect& effect) {
 
-    auto statusEffectComponent = target->component<StatusEffectComponent>();
-
-    if(statusEffectComponent) {
-        statusEffectComponent->addEffect(effect);
-    }
-}

@@ -1,8 +1,8 @@
 {
     "name": "Fireball",
     "texture_path": "spells/textures/fireball.png",
-    "cast_time": 2.0,
-    "interrupt_time": 1.5,
+    "cast_time": 1.5,
+    "interrupt_time": 1.25,
     "mana_cost": 15,
     "cooldown": 0.0,
     "duration": 0.0,
@@ -49,7 +49,8 @@
                 "damage_type": "FIRE",
                 "target_faction": "HOSTILE",
                 "periodic_value": 5,
-                "duration": 5.0
+                "duration": 5.0,
+                "max_stacks": 10
             }
         ]
     }

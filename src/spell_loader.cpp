@@ -204,9 +204,9 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
     if(!get<std::string>(o, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
-    onHitEffect.effectType = magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
+    onHitEffect.type = magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
 
-    if(!get<f32>(o, "duration", true, onHitEffect.duration, "on_hit")) {
+    if(!get<f32>(o, "duration", true, onHitEffect.maxDuration, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
 

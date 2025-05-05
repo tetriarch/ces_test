@@ -5,51 +5,84 @@
 
 #include "spell.hpp"
 
-void StatusEffectComponent::addEffect(const SpellEffect& effect) {
+void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
 
-    //TODO: Find out whether effect is already in palce, if so check the statck count, refresh duration
-    //: If The the effect is not in collection, add it
-
-    ActiveEffect e;
-    e.effect = effect;
-    e.currentDuration = 0.0f;
-
-    if(e.stacks < effect.maxStacks) {
-        e.stacks += 1;
+    // handle direct effects
+    if(effect.isDirect()) {
+        applyDirectEffect(effect);
+        return;
     }
 
-    effects_.push_back(e);
+    // check if is the effect already present
+    if(auto it = effects_.find(effect.type); it != effects_.end()) {
+
+        auto& e = it->second;
+        // check if we can add stacks
+        if(e.currentStacks < e.maxStacks) {
+            e.currentStacks++;
+        }
+
+        // reset duration
+        it->second.currentDuration = 0.0f;
+        return;
+    }
+
+    SpellEffect e = effect;
+
+    e.currentDuration = 0.0f;
+    e.currentStacks = 1;
+    effects_.insert(std::pair<SpellEffectType, SpellEffect>(e.type, e));
+}
+
+void StatusEffectComponent::applyDirectEffect(const SpellEffect& effect) {
+
+    auto lifeComponent = entity()->component<LifeComponent>();
+    auto value = rng_.getUnsigned(effect.minValue, effect.maxValue);
+
+    if(lifeComponent) {
+        if(effect.type == SpellEffectType::DIRECT_DAMAGE) {
+            lifeComponent->reduceLife(value);
+        }
+        if(effect.type == SpellEffectType::DIRECT_HEAL) {
+            lifeComponent->increaseLife(value);
+        }
+    }
 }
 
 
-bool StatusEffectComponent::removeEffect(ActiveEffect* effect) {
+bool StatusEffectComponent::removeEffect(SpellEffectType type) {
 
-    for(u32 i = 0; i < effects_.size(); i++) {
-
-        if(effects_[i].effect.name == effect->effect.name) {
-            INFO("[STATUS EFFECT]: Removed " + effect->effect.name + " after " + std::to_string(effects_[i].currentDuration) + "s");
-            effects_.erase(effects_.begin() + i);
-            return true;
-        }
+    if(auto it = effects_.find(type); it != effects_.end()) {
+        INFO("[STATUS EFFECT]: Removed " + it->second.name + " after " + std::to_string(it->second.currentDuration) + "s");
+        effects_.erase(it);
+        return true;
     }
+
     return false;
+}
+
+auto StatusEffectComponent::effect(SpellEffectType type) const -> const SpellEffect* {
+
+    if(auto it = effects_.find(type); it != effects_.end()) {
+        return &it->second;
+    }
+    return nullptr;
 }
 
 void StatusEffectComponent::update(const f32 dt) {
 
-    for(auto& e : effects_) {
+    for(auto& [type, effect] : effects_) {
 
-        updateEffect(e, dt);
+        updateEffect(effect, dt);
 
-        if(e.currentDuration >= e.effect.duration) {
-            effectsToRemove_.push_back(&e);
+        if(effect.currentDuration >= effect.maxDuration) {
+            effectsToRemove_.emplace_back(type);
         }
     }
 }
 
 void StatusEffectComponent::postUpdate(const f32 dt) {
 
-    // remove effects 
     while(!effectsToRemove_.empty()) {
         if(removeEffect(effectsToRemove_.back())) {
             effectsToRemove_.pop_back();
@@ -59,67 +92,26 @@ void StatusEffectComponent::postUpdate(const f32 dt) {
 
 bool StatusEffectComponent::isUnderEffect(SpellEffectType type) const {
 
-    for(auto& e : effects_) {
-        if(e.effect.effectType == type) {
-            return true;
+    return effects_.find(type) != effects_.end();
+}
+
+void StatusEffectComponent::updateEffect(SpellEffect& effect, const f32 dt) {
+
+    auto lifeComponent = entity()->component<LifeComponent>();
+    auto effectType = effect.type;
+
+    if(effectType == SpellEffectType::DAMAGE_OVER_TIME) {
+        if(lifeComponent) {
+            f32 dmg = effect.periodicValue * effect.currentStacks * dt;
+            lifeComponent->reduceLife(dmg);
         }
     }
 
-    return false;
-}
-
-void StatusEffectComponent::updateEffect(ActiveEffect& effect, const f32 dt) {
-
-
-    auto lifeComponent = entity()->component<LifeComponent>();
-
-    //TODO: Sort this naming shit out - it's straight up disgusting
-
-    auto effectType = effect.effect.effectType;
-
-    switch(effectType) {
-        case SpellEffectType::DIRECT_DAMAGE: {
-            if(lifeComponent) {
-                u32 dmg = rng_.getUnsigned(effect.effect.minValue, effect.effect.maxValue);
-                lifeComponent->reduceLife(dmg);
-            }
-            break;
-        }
-
-        case SpellEffectType::DAMAGE_OVER_TIME: {
-            if(lifeComponent) {
-                f32 dmg = effect.effect.periodicValue * dt;
-                lifeComponent->reduceLife(dmg);
-            }
-            break;
-        }
-
-        case SpellEffectType::SLOW: {
-            //TODO: StatModifierComponent
-            break;
-        }
-        case SpellEffectType::HASTE: {
-            //TODO: StatModifierComponent
-            break;
-        }
-        case SpellEffectType::STUN: {
-            //TODO: StatModifierComponent
-            break;
-        }
-        case SpellEffectType::HEAL: {
-            if(lifeComponent) {
-                u32 heal = rng_.getUnsigned(effect.effect.minValue, effect.effect.maxValue);
-                lifeComponent->increaseLife(heal);
-            }
-            break;
-        }
-        case SpellEffectType::HEAL_OVER_TIME: {
-            f32 heal = effect.effect.periodicValue * dt;
+    if(effectType == SpellEffectType::HEAL_OVER_TIME) {
+        if(lifeComponent) {
+            f32 heal = effect.periodicValue * effect.currentStacks * dt;
             lifeComponent->increaseLife(heal);
-            break;
         }
-        default:
-            break;
     }
 
     effect.currentDuration += dt;

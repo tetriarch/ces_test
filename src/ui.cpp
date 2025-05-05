@@ -264,7 +264,7 @@ void UI::renderHUD(EntityPtr player) {
     ImGui::SetCursorPosX(horizontalCenter);
     if(life && mana) {
         {
-            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.4f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5f, 0.0f, 0.0f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 lifeTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
             ImGui::ProgressBar(lifeValue.current / lifeValue.max, resourceBarSize, "");
@@ -273,7 +273,7 @@ void UI::renderHUD(EntityPtr player) {
         }
         ImGui::SameLine();
         {
-            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.4f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.5f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 manaTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
             ImGui::ProgressBar(manaValue.current / manaValue.max, resourceBarSize, "");

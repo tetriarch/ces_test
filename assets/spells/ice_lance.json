@@ -48,7 +48,7 @@
                 "effect_type": "SLOW",
                 "damage_type": "COLD",
                 "target_faction": "HOSTILE",
-                "magnitude": 0.20,
+                "magnitude": 0.40,
                 "duration": 3.0
             }
         ]

@@ -40,13 +40,9 @@ void SpellBookComponent::update(f32 dt) {
         }
 
         auto statusEffectComponent = entity()->component<StatusEffectComponent>();
-        if(!statusEffectComponent) {
-            ERROR("[SPELL BOOK]: missing status effect component");
-            return;
-        }
         
         // if stunned during casting
-        if(statusEffectComponent->isUnderEffect(SpellEffectType::STUN)) {
+        if(statusEffectComponent && statusEffectComponent->isUnderEffect(SpellEffectType::STUN)) {
             interruptCasting();
             return;
         }
@@ -108,6 +104,12 @@ void SpellBookComponent::addSpellFile(const std::string& filePath) {
 void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
 
     assert(index < spellSlots_.size());
+
+    // prevent casting due to being stunned
+    auto statusEffectComponent = entity()->component<StatusEffectComponent>();
+    if(statusEffectComponent && statusEffectComponent->isUnderEffect(SpellEffectType::STUN)) {
+        return;
+    }
 
     if(isSpellInSlotOnCooldown(index)) {
         INFO("[SPELL BOOK]: " + spellSlots_[index]->name + " on cooldown");

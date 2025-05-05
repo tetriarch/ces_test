@@ -16,9 +16,10 @@ public:
     void setLife(const Life& life);
     void reduceLife(f32 amount);
     void increaseLife(f32 amount);
-
+    bool isAtFull();
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
+    void render(SDL_Renderer* renderer) override;
 
 private:
     void regen(const f32 dt);

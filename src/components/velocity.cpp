@@ -3,6 +3,7 @@
 #include "collision.hpp"
 #include "owner.hpp"
 #include "spell_book.hpp"
+#include "status_effect.hpp"
 #include "tag.hpp"
 #include "velocity.hpp"
 
@@ -29,11 +30,30 @@ Vec2 VelocityComponent::velocity() const {
 void VelocityComponent::update(const f32 dt) {
 
     f32 speed = speed_;
+    f32 speedModifier = 1.0f;
+
     // slow down on casting
     auto spellBook = entity()->component<SpellBookComponent>();
     if(spellBook && spellBook->isCasting()) {
-        speed *= ON_CAST_MOVEMENT_SPEED_MULTIPLIER;
+        speedModifier -= ON_CAST_MOVEMENT_SPEED_MULTIPLIER;
     }
+
+    // modify speed when hasted or slowed
+    auto statusEffect = entity()->component<StatusEffectComponent>();
+    if(statusEffect) {
+        auto haste = statusEffect->effect(SpellEffectType::HASTE);
+        auto slow = statusEffect->effect(SpellEffectType::SLOW);
+
+        if(haste) {
+            speedModifier *= 1.0f + haste->magnitude;
+
+        }
+        if(slow) {
+            speedModifier *= 1.0f - slow->magnitude;
+        }
+    }
+
+    speed *= speedModifier;
 
     auto transform = entity()->transform();
     lastTransform_ = transform;

@@ -11,7 +11,8 @@ auto TextureLoader::load(AssetManager& assetManager, const std::string& assetPat
 
     SDL_Texture* texture = IMG_LoadTexture(renderer_, assetPath.c_str());
     if(!texture) {
-        ERROR(SDL_GetError());
+        std::string error = SDL_GetError();
+        ERROR("[TEXTURE LOADER]: " + error);
         return nullptr;
     }
     Texture result;
