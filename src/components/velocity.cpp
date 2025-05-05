@@ -43,6 +43,7 @@ void VelocityComponent::update(const f32 dt) {
     if(statusEffect) {
         auto haste = statusEffect->effect(SpellEffectType::HASTE);
         auto slow = statusEffect->effect(SpellEffectType::SLOW);
+        auto stun = statusEffect->effect(SpellEffectType::STUN);
 
         if(haste) {
             speedModifier *= 1.0f + haste->magnitude;
@@ -50,6 +51,10 @@ void VelocityComponent::update(const f32 dt) {
         }
         if(slow) {
             speedModifier *= 1.0f - slow->magnitude;
+        }
+
+        if(stun) {
+            speedModifier = 0.0f;
         }
     }
 
