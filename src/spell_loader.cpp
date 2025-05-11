@@ -5,7 +5,7 @@
 
 auto SpellLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
 
-    auto spellSource = FileIO::readTextFile((filePath));
+    auto spellSource = FileIO::readTextFile(filePath);
     if(!spellSource) {
         ERROR(error(filePath + " " + spellSource.error().message()));
         return nullptr;
@@ -79,8 +79,23 @@ auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellDa
         ERROR(error("failed to parse collision"));
         return std::unexpected(JSONParserError::PARSE);
     }
-
     spell.collisionData = std::move(collisionData.value());
+
+    if(spell.animated) {
+
+        it = spellJSON.find("animations");
+        if(it == spellJSON.end()) {
+            ERROR(error("failed to find animations"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        auto animations = parseAnimations(it.value(), "animations");
+        if(!animations) {
+            ERROR(error("failed to parse animations"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+        spell.animationFiles = std::move(animations.value());
+    }
 
     return std::move(spell);
 }
@@ -118,6 +133,10 @@ auto SpellLoader::parseBasicStats(const json& o, const std::string& parent) -> s
     }
 
     if(!get<std::string>(o, "texture_path", false, spellData.textureFilePath, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(!get<bool>(o, "animated", true, spellData.animated, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 
@@ -356,6 +375,25 @@ auto SpellLoader::parseCollisionData(const json& o, const std::string& parent) -
         .value_or(CollisionSizeDeterminant::NONE);
 
     return collisionData;
+}
+
+auto SpellLoader::parseAnimations(const json& o, const std::string& parent)-> std::expected<std::unordered_map<std::string, std::string>, JSONParserError> {
+
+    if(!o.is_object()) {
+        ERROR(error(parent + " is not an object", parent));
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    std::unordered_map<std::string, std::string> animations;
+    for(auto& [key, value] : o.items()) {
+        if(!value.is_string()) {
+            ERROR(error(key + " is not a string", parent));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+        animations.insert(std::pair<std::string, std::string>(key, value));
+    }
+
+    return animations;
 }
 
 auto SpellLoader::error(const std::string& msg, const std::string& parent) -> std::string {

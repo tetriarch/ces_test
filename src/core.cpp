@@ -1,3 +1,4 @@
+#include "animation_loader.hpp"
 #include "asset_manager.hpp"
 #include "core.hpp"
 #include "entity_manager.hpp"
@@ -43,6 +44,7 @@ bool Core::init() {
     am->registerLoader<SpellData>(std::make_shared<SpellLoader>());
     am->registerLoader<Scene>(std::make_shared<SceneLoader>());
     am->registerLoader<Texture>(std::make_shared<TextureLoader>(renderer_));
+    am->registerLoader<AnimationData>(std::make_shared<AnimationLoader>());
 
     root_ = am->load<Scene>("scenes/level_1.json");
 

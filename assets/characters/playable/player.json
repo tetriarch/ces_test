@@ -42,10 +42,10 @@
         {
             "type": "spellbook",
             "spells": [
-                "spells/fireball.json",
-                "spells/zap.json",
-                "spells/ice_lance.json",
-                "spells/haste.json"
+                "spells/fireball/fireball.json",
+                "spells/zap/zap.json",
+                "spells/ice_lance/ice_lance.json",
+                "spells/haste/haste.json"
             ]
         },
         {

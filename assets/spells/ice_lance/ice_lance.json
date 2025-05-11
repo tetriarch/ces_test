@@ -1,6 +1,6 @@
 {
     "name": "Ice Lance",
-    "texture_path": "spells/textures/ice_lance.png",
+    "texture_path": "spells/ice_lance/ice_lance.png",
     "cast_time": 2.5,
     "interrupt_time": 2.0,
     "mana_cost": 25,
@@ -26,6 +26,7 @@
         },
         "determinant": "NONE"
     },
+    "animated": false,
     "action": {
         "type": "PROJECTILE",
         "pierce": true,

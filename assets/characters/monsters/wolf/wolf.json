@@ -37,7 +37,7 @@
         {
             "type": "spellbook",
             "spells": [
-                "spells/ice_lance.json"
+                "spells/ice_lance/ice_lance.json"
             ]
         },
         {

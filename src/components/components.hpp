@@ -1,5 +1,6 @@
 #pragma once
 
+#include "animation.hpp"
 #include "collision.hpp"
 #include "geometry.hpp"
 #include "life.hpp"

@@ -95,6 +95,8 @@ struct SpellData : public IAsset {
     SpellAction action;
     GeometryData geometryData;
     CollisionData collisionData;
+    bool animated;
+    std::unordered_map<std::string, std::string> animationFiles;
 };
 
 class SpellComponent : public Component<SpellComponent> {

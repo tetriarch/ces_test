@@ -74,6 +74,13 @@ void SpellBookComponent::update(f32 dt) {
             ownerComponent->setOwner(entity());
             spellEntity->addComponent(ownerComponent);
 
+            if(castedSpell_->animated) {
+                std::shared_ptr<AnimationComponent> animationComponent = std::make_shared<AnimationComponent>();
+                animationComponent->addAnimationFiles(castedSpell_->animationFiles);
+                animationComponent->queueAnimation("idle");
+                spellEntity->addComponent(animationComponent);
+            }
+            
             // update mana
             auto mana = entity()->component<ManaComponent>();
             if(!mana) {

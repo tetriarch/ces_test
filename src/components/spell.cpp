@@ -19,6 +19,10 @@ void SpellComponent::attach() {
 
 void SpellComponent::update(const f32 dt) {
 
+    if(dead_) {
+        return;
+    }
+
     auto oldPosition = entity()->transform().position;
 
     spellData_->action.motion->apply(entity(), dt);
@@ -31,8 +35,12 @@ void SpellComponent::update(const f32 dt) {
 
 void SpellComponent::postUpdate(const f32 dt) {
 
+    auto animationComponent = entity()->component<AnimationComponent>();
+
     if(dead_) {
-        entity()->parent()->queueRemoveChild(entity());
+        if(!animationComponent) {
+            entity()->parent()->queueRemoveChild(entity());
+        }
         return;
     }
 
@@ -73,8 +81,17 @@ void SpellComponent::postUpdate(const f32 dt) {
             }
         }
     }
-}
 
+    if(dead_) {
+        // play on death animation if there is any
+        auto animation = entity()->component<AnimationComponent>();
+        if(animation) {
+            animation->playAnimation("death", [&]() {
+                return entity()->parent()->queueRemoveChild(entity());
+            });
+        }
+    }
+}
 bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect) {
 
     auto applicantTagComponent = applicant->component<TagComponent>();

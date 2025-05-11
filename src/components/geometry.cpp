@@ -46,25 +46,32 @@ void GeometryComponent::render(SDL_Renderer* renderer) {
     }
 
     Transform transform = entity()->transform();
-    SDL_FRect rect = {rect_.x, rect_.y, rect_.w, rect_.h};
+    SDL_FRect srcRect = {0.0f, 0.0f, rect_.w, rect_.h};
+    SDL_FRect dRect = {rect_.x, rect_.y, rect_.w, rect_.h};
+
+    auto animationComponent = entity()->component<AnimationComponent>();
+    if(animationComponent) {
+        srcRect.x = animationComponent->frame() * rect_.w;
+        srcRect.y = animationComponent->index() * rect_.h;
+    }
 
     if(rect_.w != rect_.h) {
         SDL_FPoint rotationPoint;
-        rotationPoint = (rect_.w > rect_.h) ? SDL_FPoint(0, rect.h / 2.0f) : SDL_FPoint(rect.w / 2.0f, 0);
+        rotationPoint = (rect_.w > rect_.h) ? SDL_FPoint(0, dRect.h / 2.0f) : SDL_FPoint(dRect.w / 2.0f, 0);
 
         SDL_RenderTextureRotated(renderer,
             texture_->get(),
-            nullptr,
-            &rect,
+            &srcRect,
+            &dRect,
             transform.rotationInDegrees,
-            rect.w != rect.h ? &rotationPoint : nullptr,
+            dRect.w != dRect.h ? &rotationPoint : nullptr,
             SDL_FlipMode::SDL_FLIP_NONE);
     }
     else {
         SDL_RenderTextureRotated(renderer,
             texture_->get(),
-            nullptr,
-            &rect,
+            &srcRect,
+            &dRect,
             transform.rotationInDegrees,
             nullptr,
             SDL_FlipMode::SDL_FLIP_NONE);

@@ -18,5 +18,6 @@ private:
     auto parseOnHitEffect(const json& o, const std::string& parent = "") -> std::expected<SpellEffect, JSONParserError>;
     auto parseGeometryData(const json& o, const std::string& parent = "") -> std::expected<GeometryData, JSONParserError>;
     auto parseCollisionData(const json& o, const std::string& parent = "") -> std::expected<CollisionData, JSONParserError>;
+    auto parseAnimations(const json& o, const std::string& parent = "") -> std::expected<std::unordered_map<std::string, std::string>, JSONParserError>;
     auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
 };

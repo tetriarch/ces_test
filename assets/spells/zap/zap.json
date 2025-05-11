@@ -1,6 +1,6 @@
 {
     "name": "Zap",
-    "texture_path": "spells/textures/zap.png",
+    "texture_path": "spells/zap/zap.png",
     "cast_time": 0.2,
     "interrupt_time": 0.0,
     "mana_cost": 35,
@@ -26,6 +26,7 @@
         },
         "determinant": "TARGET"
     },
+    "animated": false,
     "action": {
         "type": "BEAM",
         "pierce": true,

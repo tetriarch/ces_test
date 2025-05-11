@@ -1,6 +1,6 @@
 {
     "name": "Haste",
-    "texture_path": "spells/textures/haste.png",
+    "texture_path": "spells/haste/haste.png",
     "cast_time": 0.0,
     "interrupt_time": 0.0,
     "mana_cost": 20,
@@ -26,6 +26,7 @@
         },
         "determinant": "NONE"
     },
+    "animated": false,
     "action": {
         "type": "SELF",
         "pierce": false,
