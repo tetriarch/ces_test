@@ -1,10 +1,45 @@
-# Future development
+# CES TEST
 
-## 1. Entity Containment & Component Refactor
-## 2. UI - health, mana, xp
-## 3. Spellcasting & Interaction
-## 4. Combat
-- engage - pull range or by attack
-- interrupt - leashing after some time or LOS for longer period
-- end - death of enemy NPC or player
-- reward - xp
+## TODO:
+**Texture update**
+ - update textures for spells and spell effects to enable animations for them
+
+**Render queueing**
+ - z-index based render queueing
+ - queue sorting
+
+**Particle System**
+ - data representation
+ - parsing
+ - ParticleSystemComponent
+   * emitter (shape)
+   * direction
+   * lifetime
+   * count
+   * scale
+   * size
+   * particles
+ - rendering
+
+**AI**
+ - research(decision tree,..)
+ - states
+ - update
+ - take action
+ 
+**XP component**
+ - current
+ - next level requirement
+ - lvl
+
+**OnKillAction**
+ - reward (xp, loot)
+
+**Entity Spawner**
+ - Data representation
+ - parsing
+
+**Polish, clean up**
+ - UI
+ - Consistency through out entire project
+ - finish
