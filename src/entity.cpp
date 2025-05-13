@@ -244,7 +244,7 @@ void Entity::applyPostUpdateActions() {
     postUpdateActions_ = {};
 }
 
-void Entity::render(SDL_Renderer* renderer) {
+void Entity::render(std::shared_ptr<Renderer> renderer) {
 
     for(auto& r : renderable_) {
         r->render(renderer);

@@ -17,7 +17,7 @@ public:
     auto load(const std::string& assetPath) -> std::shared_ptr<T>;
 
     void unload(const std::string& assetPath);
-    auto getAssetPath(const std::string& assetPath) const->std::filesystem::path;
+    auto getAssetPath(const std::string& assetPath) const -> std::filesystem::path;
 
 private:
     std::string assetRoot_;

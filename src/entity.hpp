@@ -4,7 +4,7 @@
 #include "log.hpp"
 
 #include <SDL3/SDL.h>
-
+class Renderer;
 class Entity : public std::enable_shared_from_this<Entity> {
 
 public:
@@ -20,13 +20,13 @@ public:
     void setTransform(const Transform& transform);
     void setName(const std::string& name);
 
-    auto children() const->std::span<EntityPtr const>;
+    auto children() const -> std::span<EntityPtr const>;
 
     template<typename T>
     auto component() -> std::shared_ptr<T>;
 
-    auto components() const->std::span<ComponentPtr const>;
-    auto parent() const->Entity*;
+    auto components() const -> std::span<ComponentPtr const>;
+    auto parent() const -> Entity*;
     auto root() -> Entity*;
     const Transform& transform() const;
     u32 id() { return ID_; }
@@ -37,7 +37,7 @@ public:
     void update(const f32 dt);
     void postUpdate(const f32 dt);
     void applyPostUpdateActions();
-    void render(SDL_Renderer* renderer);
+    void render(std::shared_ptr<Renderer> renderer);
 
 private:
     static u32 NEXT_ID;

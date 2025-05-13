@@ -25,7 +25,7 @@ public:
     void setTextureFilePath(const std::string& filePath);
     void setGeometryData(const GeometryData& geometryData);
     void postUpdate(f32 dt) override;
-    void render(SDL_Renderer* renderer) override;
+    void render(std::shared_ptr<Renderer> renderer) override;
     Rect rect() const;
 
 #ifdef DEBUG

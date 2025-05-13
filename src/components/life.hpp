@@ -19,7 +19,7 @@ public:
     bool isAtFull();
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
-    void render(SDL_Renderer* renderer) override;
+    void render(std::shared_ptr<Renderer> renderer) override;
 
 private:
     void regen(const f32 dt);

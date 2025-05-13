@@ -1,15 +1,21 @@
 #include "log.hpp"
+#include "renderer.hpp"
 #include "texture_loader.hpp"
 
 #include <SDL3_image/SDL_image.h>
-
-TextureLoader::TextureLoader(SDL_Renderer* renderer) : renderer_(renderer) {
+TextureLoader::TextureLoader(std::shared_ptr<Renderer> renderer) : renderer_(renderer) {
 
 }
 
 auto TextureLoader::load(AssetManager& assetManager, const std::string& assetPath) -> IAssetPtr {
 
-    SDL_Texture* texture = IMG_LoadTexture(renderer_, assetPath.c_str());
+    auto renderer = renderer_.lock();
+    if(!renderer) {
+        ERROR("[TEXTURE LOADER]: failed to access renderer handle to load texture");
+        return nullptr;
+    }
+
+    SDL_Texture* texture = IMG_LoadTexture(renderer->handle(), assetPath.c_str());
     if(!texture) {
         std::string error = SDL_GetError();
         ERROR("[TEXTURE LOADER]: " + error);

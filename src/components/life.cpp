@@ -2,6 +2,7 @@
 #include "life.hpp"
 
 #include "../entity.hpp"
+#include "../renderer.hpp"
 
 
 const f32 LIFE_BAR_VERTICAL_OFFSET = 10;
@@ -57,36 +58,38 @@ void LifeComponent::postUpdate(const f32 dt) {
     }
 }
 
-void LifeComponent::render(SDL_Renderer* renderer) {
+void LifeComponent::render(std::shared_ptr<Renderer> renderer) {
 
-    auto geometryComponent = entity()->component<GeometryComponent>();
-    if(geometryComponent) {
-        Rect geometry = geometryComponent->rect();
-        SDL_FRect rect = {
-            geometry.x,
-            geometry.y,
-            geometry.w,
-            geometry.h
-        };
+    renderer->queueRenderCall(Strata::UI, [&]() {
+        auto geometryComponent = entity()->component<GeometryComponent>();
+        if(geometryComponent) {
+            Rect geometry = geometryComponent->rect();
+            SDL_FRect rect = {
+                geometry.x,
+                geometry.y,
+                geometry.w,
+                geometry.h
+            };
 
-        auto t = life_.current / life_.max;
+            auto t = life_.current / life_.max;
 
-        SDL_FRect missingLifeBar = rect;
-        missingLifeBar.y -= LIFE_BAR_VERTICAL_OFFSET;
-        missingLifeBar.h = LIFE_BAR_HEIGHT;
+            SDL_FRect missingLifeBar = rect;
+            missingLifeBar.y -= LIFE_BAR_VERTICAL_OFFSET;
+            missingLifeBar.h = LIFE_BAR_HEIGHT;
 
-        SDL_FRect currentLifeBar;
-        currentLifeBar = missingLifeBar;
-        currentLifeBar.w *= t;
+            SDL_FRect currentLifeBar;
+            currentLifeBar = missingLifeBar;
+            currentLifeBar.w *= t;
 
-        SDL_SetRenderDrawColor(renderer, 32, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &missingLifeBar);
+            SDL_SetRenderDrawColor(renderer->handle(), 32, 0, 0, 255);
+            SDL_RenderFillRect(renderer->handle(), &missingLifeBar);
 
-        SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &currentLifeBar);
+            SDL_SetRenderDrawColor(renderer->handle(), 128, 0, 0, 255);
+            SDL_RenderFillRect(renderer->handle(), &currentLifeBar);
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    }
+            SDL_SetRenderDrawColor(renderer->handle(), 0, 0, 0, 255);
+        }
+    });
 }
 
 

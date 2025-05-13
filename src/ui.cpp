@@ -1,4 +1,5 @@
 #include "log.hpp"
+#include "renderer.hpp"
 #include "scene.hpp"
 #include "ui.hpp"
 #include "components/life.hpp"
@@ -32,7 +33,9 @@ UI::~UI() {
     imguiContext_ = nullptr;
 }
 
-bool UI::init(SDL_Window* window, SDL_Renderer* renderer) {
+bool UI::init(SDL_Window* window, std::shared_ptr<Renderer> renderer) {
+
+    renderer_ = renderer;
 
     // Setup Dear ImGui context
     imguiContext_ = ImGui::CreateContext();
@@ -43,12 +46,12 @@ bool UI::init(SDL_Window* window, SDL_Renderer* renderer) {
     ImGuiStyle& style = ImGui::GetStyle();
     style.Colors[ImGuiCol_WindowBg] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-    imguiSDL3InitResult_ = ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+    imguiSDL3InitResult_ = ImGui_ImplSDL3_InitForSDLRenderer(window, renderer->handle());
     if(!imguiSDL3InitResult_) {
         ERROR("failed to init imgui for SDL renderer");
         return false;
     }
-    imguiSDL3RendererInitResult_ = ImGui_ImplSDLRenderer3_Init(renderer);
+    imguiSDL3RendererInitResult_ = ImGui_ImplSDLRenderer3_Init(renderer->handle());
     if(!imguiSDL3RendererInitResult_) {
         ERROR("failed to init imgui for SDL renderer");
         return false;
@@ -130,7 +133,7 @@ void UI::setupDockSpace() {
     ImGui::End();
 }
 
-void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
+void UI::render(std::shared_ptr<Scene> scene) {
 
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
@@ -157,7 +160,18 @@ void UI::render(SDL_Renderer* renderer, std::shared_ptr<Scene> scene) {
 
 
     ImGui::Render();
-    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+
+    auto renderer = renderer_.lock();
+
+    if(!renderer) {
+        ERROR_ONCE("Unable to access renderer");
+        return;
+    }
+
+    renderer->queueRenderCall(Strata::UI, [&, renderer]() {
+        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer->handle());
+    });
+
 }
 
 void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {

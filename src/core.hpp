@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils.hpp"
+#include "renderer.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -25,7 +26,7 @@ private:
 
 private:
     SDL_Window* window_;
-    SDL_Renderer* renderer_;
+    std::shared_ptr<Renderer> renderer_;
     std::unique_ptr<UI> ui_;
     bool running_;
     std::shared_ptr<Scene> root_;

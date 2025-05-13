@@ -6,13 +6,14 @@
 #include <SDL3/SDL.h>
 
 class AssetManager;
+class Renderer;
 
 class TextureLoader : public IAssetLoader {
 
 public:
-    TextureLoader(SDL_Renderer* renderer);
+    TextureLoader(std::shared_ptr<Renderer> renderer);
 
     auto load(AssetManager& assetManager, const std::string& assetPath) -> IAssetPtr;
 private:
-    SDL_Renderer* renderer_;
+    std::weak_ptr<Renderer> renderer_;
 };

@@ -16,12 +16,11 @@ constexpr s32 startWindowHeight = 720;
 Core::Core() : running_(true) {
 
     ui_ = std::make_unique<UI>();
-
 }
 
 Core::~Core() {
 
-    SDL_DestroyRenderer(renderer_);
+    renderer_->destroy();
     SDL_DestroyWindow(window_);
     SDL_Quit();
 }
@@ -72,15 +71,9 @@ bool Core::initSDL() {
 
     SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
-    renderer_ = SDL_CreateRenderer(window_, nullptr);
-    if(!renderer_) {
-        ERROR(SDL_GetError());
-        return false;
-    }
+    renderer_ = std::make_shared<Renderer>(Renderer::init(window_));
 
-    if(!SDL_SetRenderVSync(renderer_, 0)) {
-        INFO("failed to set v-sync");
-    }
+    renderer_->toogleVsync(true);
 
     return true;
 }
@@ -128,12 +121,10 @@ void Core::postUpdate(const f32 dt) {
 
 void Core::render() {
 
-    SDL_SetRenderDrawColor(renderer_, 0, 35, 0, 255);
-    SDL_RenderClear(renderer_);
-
+    renderer_->clear();
     root_->render(renderer_);
-    ui_->render(renderer_, root_);
-
-    SDL_RenderPresent(renderer_);
+    ui_->render(root_);
+    renderer_->executeRenderCalls();
+    renderer_->present();
 }
 

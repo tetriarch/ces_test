@@ -1,6 +1,7 @@
 #include "components.hpp"
 #include "../asset_manager.hpp"
 #include "../entity.hpp"
+#include "../renderer.hpp"
 #include "geometry.hpp"
 
 void GeometryComponent::attach() {
@@ -38,73 +39,75 @@ void GeometryComponent::postUpdate(f32 dt) {
     rect_.y = transform.position.y + geometryData_.rect.y;
 }
 
-void GeometryComponent::render(SDL_Renderer* renderer) {
+void GeometryComponent::render(std::shared_ptr<Renderer> renderer) {
 
     if(!texture_) {
         ERROR_ONCE("[TEXTURE COMPONENT]: texture is empty");
         return;
     }
 
-    Transform transform = entity()->transform();
-    SDL_FRect srcRect = {0.0f, 0.0f, rect_.w, rect_.h};
-    SDL_FRect dRect = {rect_.x, rect_.y, rect_.w, rect_.h};
+    renderer->queueRenderCall(Strata::ENTITY, [&, renderer]() {
 
-    auto animationComponent = entity()->component<AnimationComponent>();
-    if(animationComponent) {
-        srcRect.x = animationComponent->frame() * rect_.w;
-        srcRect.y = animationComponent->index() * rect_.h;
-    }
+        Transform transform = entity()->transform();
+        SDL_FRect srcRect = {0.0f, 0.0f, rect_.w, rect_.h};
+        SDL_FRect dRect = {rect_.x, rect_.y, rect_.w, rect_.h};
 
-    if(rect_.w != rect_.h) {
-        SDL_FPoint rotationPoint;
-        rotationPoint = (rect_.w > rect_.h) ? SDL_FPoint(0, dRect.h / 2.0f) : SDL_FPoint(dRect.w / 2.0f, 0);
+        auto animationComponent = entity()->component<AnimationComponent>();
+        if(animationComponent) {
+            srcRect.x = animationComponent->frame() * rect_.w;
+            srcRect.y = animationComponent->index() * rect_.h;
+        }
 
-        SDL_RenderTextureRotated(renderer,
-            texture_->get(),
-            &srcRect,
-            &dRect,
-            transform.rotationInDegrees,
-            dRect.w != dRect.h ? &rotationPoint : nullptr,
-            SDL_FlipMode::SDL_FLIP_NONE);
-    }
-    else {
-        SDL_RenderTextureRotated(renderer,
-            texture_->get(),
-            &srcRect,
-            &dRect,
-            transform.rotationInDegrees,
-            nullptr,
-            SDL_FlipMode::SDL_FLIP_NONE);
-    }
+        if(rect_.w != rect_.h) {
+            SDL_FPoint rotationPoint;
+            rotationPoint = (rect_.w > rect_.h) ? SDL_FPoint(0, dRect.h / 2.0f) : SDL_FPoint(dRect.w / 2.0f, 0);
 
-#ifdef DEBUG
-    if(showCollisions_) {
-        auto collisionComponent = entity()->component<CollisionComponent>();
-        if(collisionComponent) {
+            SDL_RenderTextureRotated(renderer->handle(),
+                texture_->get(),
+                &srcRect,
+                &dRect,
+                transform.rotationInDegrees,
+                dRect.w != dRect.h ? &rotationPoint : nullptr,
+                SDL_FlipMode::SDL_FLIP_NONE);
+        }
+        else {
+            SDL_RenderTextureRotated(renderer->handle(),
+                texture_->get(),
+                &srcRect,
+                &dRect,
+                transform.rotationInDegrees,
+                nullptr,
+                SDL_FlipMode::SDL_FLIP_NONE);
+        }
 
-            if(collisionComponent->collided()) {
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-            }
-            else {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            }
+    #ifdef DEBUG
+        if(showCollisions_) {
+            auto collisionComponent = entity()->component<CollisionComponent>();
+            if(collisionComponent) {
 
-            auto shape = collisionComponent->shape();
-            if(shape.shape() == Shape::RECT) {
-                Rect tempRect = std::get<Rect>(shape);
-                SDL_FRect rect = {tempRect.x, tempRect.y, tempRect.w, tempRect.h};
-                SDL_RenderRect(renderer, &rect);
-            }
+                if(collisionComponent->collided()) {
+                    SDL_SetRenderDrawColor(renderer->handle(), 255, 0, 0, 255);
+                }
+                else {
+                    SDL_SetRenderDrawColor(renderer->handle(), 0, 0, 0, 255);
+                }
 
-            if(shape.shape() == Shape::LINE) {
-                Line line = std::get<Line>(shape);
-                SDL_RenderLine(renderer, line.p1.x, line.p1.y, line.p2.x, line.p2.y);
+                auto shape = collisionComponent->shape();
+                if(shape.shape() == Shape::RECT) {
+                    Rect tempRect = std::get<Rect>(shape);
+                    SDL_FRect rect = {tempRect.x, tempRect.y, tempRect.w, tempRect.h};
+                    SDL_RenderRect(renderer->handle(), &rect);
+                }
+
+                if(shape.shape() == Shape::LINE) {
+                    Line line = std::get<Line>(shape);
+                    SDL_RenderLine(renderer->handle(), line.p1.x, line.p1.y, line.p2.x, line.p2.y);
+                }
             }
         }
-    }
-#endif
+    #endif
+    });
 }
-
 Rect GeometryComponent::rect() const {
     return rect_;
 }
