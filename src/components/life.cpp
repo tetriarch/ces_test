@@ -60,7 +60,7 @@ void LifeComponent::postUpdate(const f32 dt) {
 
 void LifeComponent::render(std::shared_ptr<Renderer> renderer) {
 
-    renderer->queueRenderCall(Strata::UI, [&]() {
+    renderer->queueRenderCall(Strata::UI, [&, renderer]() {
         auto geometryComponent = entity()->component<GeometryComponent>();
         if(geometryComponent) {
             Rect geometry = geometryComponent->rect();
