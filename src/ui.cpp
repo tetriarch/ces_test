@@ -372,9 +372,8 @@ void UI::renderHUD(EntityPtr player) {
             }
         }
         ImGui::EndTable();
-        ImGui::PopStyleVar();
     }
-
+    ImGui::PopStyleVar();
     ImGui::End();
 }
 
