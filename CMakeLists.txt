@@ -85,5 +85,4 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/compile_commands.json"
         "${CMAKE_SOURCE_DIR}/compile_commands.json"
-    COMMENT "Copying compile_commands.json for current config to source root"
 )
