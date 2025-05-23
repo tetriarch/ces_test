@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(ces_test VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(ExternalProject)
 include(FetchContent)
@@ -77,3 +78,12 @@ target_link_options(ces_test PRIVATE
 endif()
 
 add_dependencies(ces_test copy_assets)
+
+add_custom_command(
+    TARGET ces_test
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/compile_commands.json"
+        "${CMAKE_SOURCE_DIR}/compile_commands.json"
+    COMMENT "Copying compile_commands.json for current config to source root"
+)

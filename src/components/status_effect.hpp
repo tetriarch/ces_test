@@ -4,7 +4,7 @@
 #include "../random_number_generator.hpp"
 #include "spell.hpp"
 
-class SpellEffect;
+struct SpellEffect;
 
 class StatusEffectComponent : public Component<StatusEffectComponent> {
 

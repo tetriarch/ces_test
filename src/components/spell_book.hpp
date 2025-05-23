@@ -7,7 +7,7 @@
 #include "geometry.hpp"
 #include "collision.hpp"
 
-class SpellData;
+struct SpellData;
 
 class SpellBookComponent : public Component<SpellBookComponent> {
 

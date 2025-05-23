@@ -4,7 +4,7 @@
 
 #include <SDL3/SDL.h>
 
-class ImGuiContext;
+struct ImGuiContext;
 class Scene;
 class Renderer;
 
