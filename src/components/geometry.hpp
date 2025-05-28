@@ -1,25 +1,20 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include "../component.hpp"
 #include "../math.hpp"
 #include "../texture.hpp"
 #include "../utils.hpp"
 
-#include <SDL3/SDL.h>
-
-enum class GeometrySizeDeterminant {
-    TARGET,
-    NONE
-};
+enum class GeometrySizeDeterminant { TARGET, NONE };
 
 struct GeometryData {
-
     Rect rect;
     GeometrySizeDeterminant sizeDeterminant;
 };
 
 class GeometryComponent : public Component<GeometryComponent> {
-
 public:
     void attach() override;
     void setTextureFilePath(const std::string& filePath);
