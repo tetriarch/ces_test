@@ -1,12 +1,11 @@
 #include "status_effect.hpp"
-#include "life.hpp"
+
 #include "../entity.hpp"
 #include "../log.hpp"
-
+#include "life.hpp"
 #include "spell.hpp"
 
 void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
-
     // handle direct effects
     if(effect.isDirect()) {
         applyDirectEffect(effect);
@@ -15,7 +14,6 @@ void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
 
     // check if is the effect already present
     if(auto it = effects_.find(effect.type); it != effects_.end()) {
-
         auto& e = it->second;
         // check if we can add stacks
         if(e.currentStacks < e.maxStacks) {
@@ -35,7 +33,6 @@ void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
 }
 
 void StatusEffectComponent::applyDirectEffect(const SpellEffect& effect) {
-
     auto lifeComponent = entity()->component<LifeComponent>();
     auto value = rng_.getUnsigned(effect.minValue, effect.maxValue);
 
@@ -49,11 +46,10 @@ void StatusEffectComponent::applyDirectEffect(const SpellEffect& effect) {
     }
 }
 
-
 bool StatusEffectComponent::removeEffect(SpellEffectType type) {
-
     if(auto it = effects_.find(type); it != effects_.end()) {
-        INFO("[STATUS EFFECT]: Removed " + it->second.name + " after " + std::to_string(it->second.currentDuration) + "s");
+        INFO("[STATUS EFFECT]: Removed " + it->second.name + " after " +
+             std::to_string(it->second.currentDuration) + "s");
         effects_.erase(it);
         return true;
     }
@@ -62,7 +58,6 @@ bool StatusEffectComponent::removeEffect(SpellEffectType type) {
 }
 
 auto StatusEffectComponent::effect(SpellEffectType type) const -> const SpellEffect* {
-
     if(auto it = effects_.find(type); it != effects_.end()) {
         return &it->second;
     }
@@ -70,9 +65,7 @@ auto StatusEffectComponent::effect(SpellEffectType type) const -> const SpellEff
 }
 
 void StatusEffectComponent::update(const f32 dt) {
-
     for(auto& [type, effect] : effects_) {
-
         updateEffect(effect, dt);
 
         if(effect.currentDuration >= effect.maxDuration) {
@@ -82,7 +75,6 @@ void StatusEffectComponent::update(const f32 dt) {
 }
 
 void StatusEffectComponent::postUpdate(const f32 dt) {
-
     while(!effectsToRemove_.empty()) {
         if(removeEffect(effectsToRemove_.back())) {
             effectsToRemove_.pop_back();
@@ -91,12 +83,10 @@ void StatusEffectComponent::postUpdate(const f32 dt) {
 }
 
 bool StatusEffectComponent::isUnderEffect(SpellEffectType type) const {
-
     return effects_.find(type) != effects_.end();
 }
 
 void StatusEffectComponent::updateEffect(SpellEffect& effect, const f32 dt) {
-
     auto lifeComponent = entity()->component<LifeComponent>();
     auto effectType = effect.type;
 

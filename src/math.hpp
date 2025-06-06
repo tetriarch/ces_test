@@ -1,10 +1,9 @@
 #pragma once
 
-#include "utils.hpp"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
-
+#include "utils.hpp"
 
 struct Vec2 {
     f32 x, y;
@@ -43,7 +42,7 @@ struct Vec2 {
     }
 
     inline Vec2 operator+(const Vec2& addition) const {
-        return{x + addition.x, y + addition.y};
+        return {x + addition.x, y + addition.y};
     }
 
     inline Vec2& operator-=(const Vec2& substraction) {
@@ -53,7 +52,7 @@ struct Vec2 {
     }
 
     inline Vec2 operator-(const Vec2& substraction) const {
-        return{x - substraction.x, y - substraction.y};
+        return {x - substraction.x, y - substraction.y};
     }
 };
 
@@ -69,7 +68,6 @@ struct Circle {
 struct Rect {
     f32 x, y, w, h;
     Rect rotate(f32 angleInDegrees, const Vec2* pivotPoint = nullptr);
-
 };
 
 struct Box {
@@ -88,17 +86,27 @@ namespace math {
     /// @param b max value
     /// @param t 0.0 - 1.0 to interpolate min and max value with
     /// @return result of interpolation
-    inline f32 lerp(f32 a, f32 b, f32 t) { return a + t * (b - a); }
+    inline f32 lerp(f32 a, f32 b, f32 t) {
+        return a + t * (b - a);
+    }
 
-    inline f32 radians(f32 angleInDegrees) { return angleInDegrees * (static_cast<f32>(M_PI) / 180.0f); }
+    inline f32 radians(f32 angleInDegrees) {
+        return angleInDegrees * (static_cast<f32>(M_PI) / 180.0f);
+    }
 
-    inline f32 degrees(f32 angleInRadians) { return angleInRadians * (180.0f / static_cast<f32>(M_PI)); }
-    inline f32 cross(const Vec2& l, const Vec2& r) { return l.x * r.y - l.y * r.x; }
-    inline f32 dot(const Vec2& l, const Vec2& r) { return l.x * r.x + l.y * r.y; }
-}
+    inline f32 degrees(f32 angleInRadians) {
+        return angleInRadians * (180.0f / static_cast<f32>(M_PI));
+    }
+    inline f32 cross(const Vec2& l, const Vec2& r) {
+        return l.x * r.y - l.y * r.x;
+    }
+    inline f32 dot(const Vec2& l, const Vec2& r) {
+        return l.x * r.x + l.y * r.y;
+    }
+}  // namespace math
 
 /// @brief calculates directional vector based on angle in degrees
-/// @param angleInDegrees 
+/// @param angleInDegrees
 /// @return directional vector
 inline Vec2 directionFromAngle(f32 angleInDegrees) {
     f32 radians = math::radians(angleInDegrees);
@@ -107,4 +115,3 @@ inline Vec2 directionFromAngle(f32 angleInDegrees) {
     direction.y = sin(radians);
     return direction;
 }
-

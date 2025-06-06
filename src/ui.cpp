@@ -1,32 +1,31 @@
-#include "log.hpp"
-#include "renderer.hpp"
-#include "scene.hpp"
 #include "ui.hpp"
+
+#include <backends/imgui_impl_sdl3.h>
+#include <backends/imgui_impl_sdlrenderer3.h>
+#include <imgui.h>
+#include <imgui_internal.h>
+
 #include "components/life.hpp"
 #include "components/mana.hpp"
 #include "components/spell.hpp"
 #include "components/spell_book.hpp"
 #include "components/tag.hpp"
-
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <backends/imgui_impl_sdl3.h>
-#include <backends/imgui_impl_sdlrenderer3.h>
+#include "log.hpp"
+#include "renderer.hpp"
+#include "scene.hpp"
 
 const std::string SPELL_SLOT_DEFAULT = "Select Spell";
 
-UI::UI() :
-    firstTime_(true) {
-
+UI::UI() : firstTime_(true) {
 #ifdef DEBUG
     showScene_ = true;
     showDemoWindow_ = false;
 #endif
-    selectedSpells_ = {SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT};
+    selectedSpells_ = {
+        SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT};
 }
 
 UI::~UI() {
-
     if(imguiSDL3RendererInitResult_) ImGui_ImplSDLRenderer3_Shutdown();
     if(imguiSDL3InitResult_) ImGui_ImplSDL3_Shutdown();
     if(imguiContext_) ImGui::DestroyContext();
@@ -34,12 +33,12 @@ UI::~UI() {
 }
 
 bool UI::init(SDL_Window* window, std::shared_ptr<Renderer> renderer) {
-
     renderer_ = renderer;
 
     // Setup Dear ImGui context
     imguiContext_ = ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui::StyleColorsDark();
@@ -75,7 +74,6 @@ void UI::handleEvents(const SDL_Event& event) {
 }
 
 void UI::setupDockSpace() {
-
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -83,14 +81,10 @@ void UI::setupDockSpace() {
     ImGui::SetNextWindowViewport(viewport->ID);
 
     ImGuiWindowFlags windowFlags;
-    windowFlags = ImGuiWindowFlags_NoTitleBar
-        | ImGuiWindowFlags_NoCollapse
-        | ImGuiWindowFlags_NoResize
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoBringToFrontOnFocus
-        | ImGuiWindowFlags_NoNavFocus
-        | ImGuiWindowFlags_NoInputs;
-
+    windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                  ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+                  ImGuiWindowFlags_NoInputs;
 
     ImGui::Begin("DockSpace", nullptr, windowFlags);
     ImGui::GetStyle().WindowBorderSize = 0.0f;
@@ -101,29 +95,30 @@ void UI::setupDockSpace() {
     ImGui::DockSpaceOverViewport(dockspaceID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
     if(firstTime_) {
-
         firstTime_ = false;
         ImGui::DockBuilderRemoveNode(dockspaceID);
         ImGui::DockBuilderAddNode(dockspaceID, ImGuiDockNodeFlags_DockSpace);
         ImGui::DockBuilderSetNodeSize(dockspaceID, viewport->Size);
 
         ImGuiID dockMain = dockspaceID;
-        ImGuiID dockBottom = ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Down, 0.15f, nullptr, &dockMain);
+        ImGuiID dockBottom =
+            ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Down, 0.15f, nullptr, &dockMain);
 
-    #ifdef DEBUG
-        ImGuiID dockLeft = ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Left, 0.2f, nullptr, &dockMain);
+#ifdef DEBUG
+        ImGuiID dockLeft =
+            ImGui::DockBuilderSplitNode(dockMain, ImGuiDir_Left, 0.2f, nullptr, &dockMain);
         ImGui::DockBuilderDockWindow("scene", dockLeft);
         ImGuiDockNode* nodeLeft = ImGui::DockBuilderGetNode(dockLeft);
         if(nodeLeft) {
-            //NOTE: Ignore the warnings about combo of flag types
+            // NOTE: Ignore the warnings about combo of flag types
             nodeLeft->LocalFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
         }
-    #endif
+#endif
 
         ImGui::DockBuilderDockWindow("hud", dockBottom);
         ImGuiDockNode* nodeBottom = ImGui::DockBuilderGetNode(dockBottom);
         if(nodeBottom) {
-            //NOTE: Ignore the warnings about combo of flag types
+            // NOTE: Ignore the warnings about combo of flag types
             nodeBottom->LocalFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
         }
 
@@ -134,7 +129,6 @@ void UI::setupDockSpace() {
 }
 
 void UI::render(std::shared_ptr<Scene> scene) {
-
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -157,8 +151,6 @@ void UI::render(std::shared_ptr<Scene> scene) {
 
     renderHUD(player);
 
-
-
     ImGui::Render();
 
     auto renderer = renderer_.lock();
@@ -168,19 +160,14 @@ void UI::render(std::shared_ptr<Scene> scene) {
         return;
     }
 
-    renderer->queueRenderCall(Strata::UI, [&, renderer]() {
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer->handle());
-    });
-
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer->handle());
 }
 
 void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
-
     ImGui::Begin("scene", nullptr, 0);
 
     ImGui::SeparatorText("Scene Hierarchy");
     if(ImGui::TreeNode(scene->name().c_str())) {
-
         for(auto& c : scene->children()) {
             if(ImGui::TreeNode(c->name().c_str())) {
                 for(auto& comp : c->components()) {
@@ -196,7 +183,6 @@ void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
 }
 
 void UI::renderHUD(EntityPtr player) {
-
     if(!player) {
         ERROR_ONCE("no player to render hud");
         return;
@@ -230,19 +216,19 @@ void UI::renderHUD(EntityPtr player) {
     if(spellBook && spellBook->castedSpell()) {
         if(spellBook->interruptible()) {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.4f, 0.00f, 0.4f, 1.0f));
-        }
-        else {
+        } else {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
         }
         auto spellName = spellBook->castedSpell() ? spellBook->castedSpell()->name.c_str() : "";
         ImVec2 spellTextSize = ImGui::CalcTextSize(spellName);
         ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-        ImVec2 spellTextPosition = ImVec2(cursorPos.x + (castBarSize.x - spellTextSize.x) * 0.5f, cursorPos.y + (castBarSize.y - spellTextSize.y) * 0.5f);
+        ImVec2 spellTextPosition = ImVec2(cursorPos.x + (castBarSize.x - spellTextSize.x) * 0.5f,
+            cursorPos.y + (castBarSize.y - spellTextSize.y) * 0.5f);
         ImGui::ProgressBar(spellBook->castProgress(), castBarSize, "");
-        ImGui::GetWindowDrawList()->AddText(spellTextPosition, IM_COL32(255, 255, 255, 255), spellName);
+        ImGui::GetWindowDrawList()->AddText(
+            spellTextPosition, IM_COL32(255, 255, 255, 255), spellName);
         ImGui::PopStyleColor();
-    }
-    else {
+    } else {
         ImGui::Dummy(castBarSize);
     }
 
@@ -280,18 +266,24 @@ void UI::renderHUD(EntityPtr player) {
         {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5f, 0.0f, 0.0f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-            ImVec2 lifeTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
+            ImVec2 lifeTextPosition =
+                ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f,
+                    cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
             ImGui::ProgressBar(lifeValue.current / lifeValue.max, resourceBarSize, "");
-            ImGui::GetWindowDrawList()->AddText(lifeTextPosition, IM_COL32(255, 255, 255, 255), lifeText.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                lifeTextPosition, IM_COL32(255, 255, 255, 255), lifeText.c_str());
             ImGui::PopStyleColor();
         }
         ImGui::SameLine();
         {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.5f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-            ImVec2 manaTextPosition = ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f, cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
+            ImVec2 manaTextPosition =
+                ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f,
+                    cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
             ImGui::ProgressBar(manaValue.current / manaValue.max, resourceBarSize, "");
-            ImGui::GetWindowDrawList()->AddText(manaTextPosition, IM_COL32(255, 255, 255, 255), manaText.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                manaTextPosition, IM_COL32(255, 255, 255, 255), manaText.c_str());
             ImGui::PopStyleColor();
         }
     }
@@ -311,7 +303,8 @@ void UI::renderHUD(EntityPtr player) {
             ImGui::TableSetColumnIndex(i);
 
             // render spell cooldown
-            f32 cooldown;;
+            f32 cooldown;
+            ;
             f32 cooldownProgress;
             ImGui::SetNextItemWidth(spellSlotSize.x);
             if(spellBook->isSpellInSlotOnCooldown(i, &cooldown, &cooldownProgress)) {
@@ -319,12 +312,14 @@ void UI::renderHUD(EntityPtr player) {
                 std::string cooldownText = std::format("{:.2f}s", cooldown);
                 ImVec2 cooldownTextSize = ImGui::CalcTextSize(cooldownText.c_str());
                 ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-                ImVec2 spellTextPosition = ImVec2(cursorPos.x + (spellSlotSize.x - cooldownTextSize.x) * 0.5f, cursorPos.y + (spellSlotSize.y - cooldownTextSize.y) * 0.5f);
+                ImVec2 spellTextPosition =
+                    ImVec2(cursorPos.x + (spellSlotSize.x - cooldownTextSize.x) * 0.5f,
+                        cursorPos.y + (spellSlotSize.y - cooldownTextSize.y) * 0.5f);
                 ImGui::ProgressBar(cooldownProgress, spellSlotSize, "");
-                ImGui::GetWindowDrawList()->AddText(spellTextPosition, IM_COL32(255, 255, 255, 255), cooldownText.c_str());
+                ImGui::GetWindowDrawList()->AddText(
+                    spellTextPosition, IM_COL32(255, 255, 255, 255), cooldownText.c_str());
                 ImGui::PopStyleColor();
-            }
-            else {
+            } else {
                 // render spell selection
                 std::string slotLabel = "##slot " + std::to_string(i + 1);
                 auto& selectedSpell = selectedSpells_[i];
@@ -344,7 +339,8 @@ void UI::renderHUD(EntityPtr player) {
                             }
                             if(onCooldown || !canSelect) {
                                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5, 0.5, 0.5, 1.0f));
-                                ImGui::Selectable(spell->name.c_str(), &selected, ImGuiSelectableFlags_Disabled);
+                                ImGui::Selectable(
+                                    spell->name.c_str(), &selected, ImGuiSelectableFlags_Disabled);
                                 ImGui::PopStyleColor();
                             }
                             // normal selection
@@ -376,5 +372,3 @@ void UI::renderHUD(EntityPtr player) {
     ImGui::PopStyleVar();
     ImGui::End();
 }
-
-

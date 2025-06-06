@@ -13,7 +13,9 @@ constexpr std::string gameTitle = "CES_test";
 constexpr s32 startWindowWidth = 1280;
 constexpr s32 startWindowHeight = 720;
 
-Core::Core() : running_(true) { ui_ = std::make_unique<UI>(); }
+Core::Core() : running_(true) {
+    ui_ = std::make_unique<UI>();
+}
 
 Core::~Core() {
     renderer_->destroy();
@@ -22,12 +24,12 @@ Core::~Core() {
 }
 
 bool Core::init() {
-    if (!initSDL()) {
+    if(!initSDL()) {
         ERROR("failed to init SDL");
         return false;
     }
 
-    if (!ui_->init(window_, renderer_)) {
+    if(!ui_->init(window_, renderer_)) {
         ERROR("failed to init UI");
         return false;
     }
@@ -42,7 +44,7 @@ bool Core::init() {
 
     root_ = am->load<Scene>("scenes/level_1.json");
 
-    if (!root_) {
+    if(!root_) {
         return false;
     }
 
@@ -52,13 +54,13 @@ bool Core::init() {
 }
 
 bool Core::initSDL() {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if(!SDL_Init(SDL_INIT_VIDEO)) {
         ERROR(SDL_GetError());
         return false;
     }
 
     window_ = SDL_CreateWindow(gameTitle.c_str(), startWindowWidth, startWindowHeight, 0);
-    if (!window_) {
+    if(!window_) {
         ERROR(SDL_GetError());
         return false;
     }
@@ -73,17 +75,17 @@ bool Core::initSDL() {
 }
 
 s32 Core::run() {
-    if (!init()) {
+    if(!init()) {
         return 1;
     }
 
     SDL_Event event;
-    while (running_) {
-        while (SDL_PollEvent(&event)) {
+    while(running_) {
+        while(SDL_PollEvent(&event)) {
             handleEvents(event);
         }
         Time::get().update();
-        while (Time::get().isTimeToUpdate()) {
+        while(Time::get().isTimeToUpdate()) {
             update(Time::get().DELTA_TIME);
             postUpdate(Time::get().DELTA_TIME);
         }
@@ -92,23 +94,27 @@ s32 Core::run() {
     return 0;
 }
 
-void Core::handleEvents(const SDL_Event &event) {
+void Core::handleEvents(const SDL_Event& event) {
     root_->handleEvents(event);
     ui_->handleEvents(event);
 
-    if (event.type == SDL_EVENT_QUIT) {
+    if(event.type == SDL_EVENT_QUIT) {
         running_ = false;
     }
 }
 
-void Core::update(const f32 dt) { root_->update(dt); }
+void Core::update(const f32 dt) {
+    root_->update(dt);
+}
 
-void Core::postUpdate(const f32 dt) { root_->postUpdate(dt); }
+void Core::postUpdate(const f32 dt) {
+    root_->postUpdate(dt);
+}
 
 void Core::render() {
     renderer_->clear();
     root_->render(renderer_);
-    ui_->render(root_);
     renderer_->executeRenderCalls();
+    ui_->render(root_);
     renderer_->present();
 }

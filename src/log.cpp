@@ -13,21 +13,21 @@ Log::~Log() {
 #endif
 }
 
-void Log::log(LogType type, const std::string& msg, const std::string& file, const std::string& function, u32 line, bool callOnce) {
-
+void Log::log(LogType type, const std::string& msg, const std::string& file,
+    const std::string& function, u32 line, bool callOnce) {
     if(callOnce) {
         std::string cacheEntry = msg + file + function + std::to_string(line);
 
         // allready in cache
         if(logOnceCache_.find(cacheEntry) != logOnceCache_.end()) {
             return;
-        }
-        else {
+        } else {
             logOnceCache_.insert(cacheEntry);
         }
     }
 
-    std::string logEntry = "[" + currentDateTime() + "] " + "<" + logTypeToString(type) + "> " + msg;
+    std::string logEntry =
+        "[" + currentDateTime() + "] " + "<" + logTypeToString(type) + "> " + msg;
 
 #ifdef DEBUG
 
@@ -46,24 +46,25 @@ void Log::log(LogType type, const std::string& msg, const std::string& file, con
 }
 
 std::string Log::currentDateTime() {
-
     auto tp = std::chrono::system_clock::now();
     return std::format("{:%d/%m/%Y %H:%M:%S}", tp);
 }
 
 std::string Log::logTypeToString(LogType type) {
-
     switch(type) {
-        case LogType::INFO: return "INFO";
-        case LogType::ERROR: return "ERROR";
-        case LogType::FATAL_ERROR: return "FATAL ERROR";
-        default: break;
+        case LogType::INFO:
+            return "INFO";
+        case LogType::ERROR:
+            return "ERROR";
+        case LogType::FATAL_ERROR:
+            return "FATAL ERROR";
+        default:
+            break;
     }
     return "";
 }
 
 Log::Log() {
-
 #ifndef DEBUG
     logFile_.open("log.txt", std::ios::out);
     if(!logFile_.is_open()) {

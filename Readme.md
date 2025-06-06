@@ -4,9 +4,7 @@
 **Texture update**
  - update textures for spells and spell effects to enable animations for them
 
-**Render queueing**
- - z-index based render queueing
- - queue sorting
+**SDL_ Decoupling (optional)
 
 **Particle System**
  - data representation

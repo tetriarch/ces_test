@@ -4,7 +4,6 @@
 
 #include "../component.hpp"
 #include "../math.hpp"
-#include "../texture.hpp"
 #include "../utils.hpp"
 
 enum class GeometrySizeDeterminant { TARGET, NONE };
@@ -16,7 +15,6 @@ struct GeometryData {
 
 class GeometryComponent : public Component<GeometryComponent> {
 public:
-    void attach() override;
     void setTextureFilePath(const std::string& filePath);
     void setGeometryData(const GeometryData& geometryData);
     void postUpdate(f32 dt) override;
@@ -29,7 +27,6 @@ public:
 
 private:
     std::string textureFilePath_;
-    std::shared_ptr<Texture> texture_;
     Rect rect_;
     GeometryData geometryData_;
 
