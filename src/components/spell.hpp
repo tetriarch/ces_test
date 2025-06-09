@@ -4,29 +4,14 @@
 #include "../entity.hpp"
 #include "../i_asset.hpp"
 #include "../utils.hpp"
-
 #include "collision.hpp"
 #include "geometry.hpp"
 #include "tag.hpp"
 
-enum class ActionType {
-    AOE,
-    ARC,
-    BEAM,
-    PROJECTILE,
-    SELF,
-    UNKNOWN
-};
+enum class ActionType { AOE, ARC, BEAM, PROJECTILE, SELF, UNKNOWN };
 
 // nature/element of the spell
-enum class DamageType {
-    PHYSICAL,
-    FIRE,
-    COLD,
-    LIGHTNING,
-    VOID,
-    UNKNOWN
-};
+enum class DamageType { PHYSICAL, FIRE, COLD, LIGHTNING, VOID, UNKNOWN };
 
 enum class SpellEffectType {
     DIRECT_DAMAGE,
@@ -52,6 +37,8 @@ struct SpellEffect {
     f32 magnitude{0.0f};
     u32 currentStacks{0};
     u32 maxStacks{1};
+    bool visual;
+    std::string effectFilePath{""};
 
     bool isDirect() const;
 };
@@ -62,10 +49,8 @@ struct Motion {
 };
 
 struct ConstantMotion : Motion {
-
     f32 speed{0};
     void apply(const EntityPtr& target, f32 dt) {
-
         Transform targetTransform = target->transform();
         Vec2 direction = directionFromAngle(targetTransform.rotationInDegrees);
         Vec2 velocity = direction * speed;

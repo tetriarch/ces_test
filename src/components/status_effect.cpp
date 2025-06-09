@@ -1,9 +1,12 @@
 #include "status_effect.hpp"
 
+#include "../asset_manager.hpp"
 #include "../entity.hpp"
 #include "../log.hpp"
+#include "animation.hpp"
 #include "life.hpp"
 #include "spell.hpp"
+#include "visual_status_effect.hpp"
 
 void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
     // handle direct effects
@@ -30,6 +33,31 @@ void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
     e.currentDuration = 0.0f;
     e.currentStacks = 1;
     effects_.insert(std::pair<SpellEffectType, SpellEffect>(e.type, e));
+
+    if(e.visual) {
+        auto am = AssetManager::get();
+        auto visualEffect = am->load<StatusEffectData>(e.effectFilePath);
+        if(!visualEffect) {
+            ERROR("status effect " + e.name +
+                  " is flagged as visual but no visual data has been found");
+            return;
+        }
+
+        auto effectSpawn = Entity::create(e.name);
+        if(visualEffect->animated) {
+            auto animationComponent = std::make_shared<AnimationComponent>();
+            animationComponent->addAnimationFiles(visualEffect->animationFiles);
+            animationComponent->queueAnimation("idle");
+            effectSpawn->addComponent(animationComponent);
+        }
+
+        auto visualStatusEffectComponent = std::make_shared<VisualStatusEffectComponent>();
+        visualStatusEffectComponent->setTextureFile(visualEffect->textureFilePath);
+        visualStatusEffectComponent->setRect(visualEffect->rect);
+        effectSpawn->addComponent(visualStatusEffectComponent);
+
+        entity()->addChild(effectSpawn);
+    }
 }
 
 void StatusEffectComponent::applyDirectEffect(const SpellEffect& effect) {
@@ -51,9 +79,19 @@ bool StatusEffectComponent::removeEffect(SpellEffectType type) {
         INFO("[STATUS EFFECT]: Removed " + it->second.name + " after " +
              std::to_string(it->second.currentDuration) + "s");
         effects_.erase(it);
+
+        // remove visual effect
+        if(it->second.visual) {
+            auto children = entity()->children();
+            for(auto& c : children) {
+                if(c->name() == it->second.name) {
+                    entity()->queueRemoveChild(c);
+                    break;
+                }
+            }
+        }
         return true;
     }
-
     return false;
 }
 

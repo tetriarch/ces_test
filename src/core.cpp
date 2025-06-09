@@ -5,6 +5,7 @@
 #include "log.hpp"
 #include "scene_loader.hpp"
 #include "spell_loader.hpp"
+#include "status_effect_loader.hpp"
 #include "texture_loader.hpp"
 #include "time.hpp"
 #include "ui.hpp"
@@ -19,6 +20,7 @@ Core::Core() : running_(true) {
 
 Core::~Core() {
     renderer_->destroy();
+    SDL_DestroySurface(icon_);
     SDL_DestroyWindow(window_);
     SDL_Quit();
 }
@@ -41,6 +43,7 @@ bool Core::init() {
     am->registerLoader<Scene>(std::make_shared<SceneLoader>());
     am->registerLoader<Texture>(std::make_shared<TextureLoader>(renderer_));
     am->registerLoader<AnimationData>(std::make_shared<AnimationLoader>());
+    am->registerLoader<StatusEffectData>(std::make_shared<StatusEffectLoader>());
 
     root_ = am->load<Scene>("scenes/level_1.json");
 
@@ -66,6 +69,13 @@ bool Core::initSDL() {
     }
 
     SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+    icon_ = SDL_LoadBMP("assets/app_icon.bmp");
+    if(!icon_) {
+        ERROR(SDL_GetError());
+        return false;
+    }
+    SDL_SetWindowIcon(window_, icon_);
 
     renderer_ = std::make_shared<Renderer>(Renderer::init(window_));
 

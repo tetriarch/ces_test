@@ -6,15 +6,21 @@
 
 struct SpellEffect;
 
-class StatusEffectComponent : public Component<StatusEffectComponent> {
+struct StatusEffectData : public IAsset {
+    std::string textureFilePath;
+    bool animated;
+    std::unordered_map<std::string, std::string> animationFiles;
+    Rect rect;
+};
 
+class StatusEffectComponent : public Component<StatusEffectComponent> {
 public:
     void applyEffect(const SpellEffect& effect);
     void applyDirectEffect(const SpellEffect& effect);
 
     /// @brief Removes activeEffect from effects_
     /// @param type of the effect e.g SpellEffecType::HASTE
-    /// @return true if successfuly removed effect, false if failed 
+    /// @return true if successfuly removed effect, false if failed
     bool removeEffect(SpellEffectType type);
     auto effect(SpellEffectType type) const -> const SpellEffect*;
 

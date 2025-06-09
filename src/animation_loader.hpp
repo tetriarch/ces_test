@@ -10,6 +10,7 @@ public:
 
 private:
     auto parseAnimation(const std::string& source) -> std::expected<AnimationData, JSONParserError>;
-    auto parseAnimationData(const json& o, const std::string& parent = "") -> std::expected<AnimationData, JSONParserError>;
-    auto error(const std::string& msg, const std::string& parent = "") -> std::string;
+    auto parseAnimationData(const json& o, const std::string& parent = "")
+        -> std::expected<AnimationData, JSONParserError>;
+    auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
 };

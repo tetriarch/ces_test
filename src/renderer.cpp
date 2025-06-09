@@ -43,6 +43,22 @@ void Renderer::toogleVsync(bool toggle) {
     }
 }
 
+void Renderer::queueRenderTexture(
+    Strata strata, const std::string& textureName, const Rect& sRect, const Rect& dRect) {
+    auto texture = AssetManager::get()->load<Texture>(textureName);
+
+    if(!texture) {
+        ERROR_ONCE("[RENDERER]: failed to acquire texture - " + textureName);
+        return;
+    }
+
+    queueRenderCall(strata, [&, texture, sRect, dRect]() {
+        SDL_FRect srcRect = {sRect.x, sRect.y, sRect.w, sRect.h};
+        SDL_FRect dstRect = {dRect.x, dRect.y, dRect.w, dRect.h};
+        SDL_RenderTexture(renderer_, texture->get(), &srcRect, &dstRect);
+    });
+}
+
 void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textureName,
     const Rect& sRect, const Rect& dRect, const Vec2& pivot, f32 angleInDegrees) {
     auto texture = AssetManager::get()->load<Texture>(textureName);

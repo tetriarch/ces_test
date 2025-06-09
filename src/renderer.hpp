@@ -16,8 +16,11 @@ public:
 public:
     SDL_Renderer* handle();
     void toogleVsync(bool toggle);
+    void queueRenderTexture(
+        Strata strata, const std::string& textureName, const Rect& sRect, const Rect& dRect);
     void queueRenderTextureRotated(Strata strata, const std::string& textureName, const Rect& sRect,
         const Rect& dRect, const Vec2& pivot, f32 angleInDegrees);
+
     void queueRenderRect(Strata strata, const Rect& rect, u8 r = 0, u8 g = 0, u8 b = 0, u8 a = 255);
     void queueRenderFilledRect(
         Strata strata, const Rect& rect, u8 r = 0, u8 g = 0, u8 b = 0, u8 a = 255);

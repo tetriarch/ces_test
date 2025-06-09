@@ -46,7 +46,8 @@
                 "target_faction": "HOSTILE",
                 "min_value": 10,
                 "max_value": 30,
-                "duration": 0.0
+                "duration": 0.0,
+                "visual": false
             },
             {
                 "name": "Ignite",
@@ -55,7 +56,9 @@
                 "target_faction": "HOSTILE",
                 "periodic_value": 5,
                 "duration": 5.0,
-                "max_stacks": 10
+                "max_stacks": 10,
+                "visual": true,
+                "effect_path": "effects/ignite/ignite.json"
             }
         ]
     }

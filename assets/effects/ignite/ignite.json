@@ -1,0 +1,13 @@
+{
+    "texture_path": "effects/ignite/ignite.png",
+    "animated": true,
+    "animations": {
+        "idle": "effects/ignite/animations/idle.json"
+    },
+    "rect": {
+        "x": -8.0,
+        "y": -8.0,
+        "w": 16.0,
+        "h": 16.0
+    }
+}

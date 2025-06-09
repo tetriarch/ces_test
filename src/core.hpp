@@ -1,15 +1,14 @@
 #pragma once
 
-#include "utils.hpp"
-#include "renderer.hpp"
-
 #include <SDL3/SDL.h>
+
+#include "renderer.hpp"
+#include "utils.hpp"
 
 class AssetManager;
 class Scene;
 class UI;
 class Core {
-
 public:
     Core();
     ~Core();
@@ -26,6 +25,7 @@ private:
 
 private:
     SDL_Window* window_;
+    SDL_Surface* icon_;
     std::shared_ptr<Renderer> renderer_;
     std::unique_ptr<UI> ui_;
     bool running_;

@@ -12,3 +12,4 @@
 #include "status_effect.hpp"
 #include "tag.hpp"
 #include "velocity.hpp"
+#include "visual_status_effect.hpp"

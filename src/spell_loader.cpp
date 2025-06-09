@@ -1,10 +1,10 @@
 #include "spell_loader.hpp"
-#include "file_io.hpp"
 
 #include <magic_enum/magic_enum.hpp>
 
-auto SpellLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
+#include "file_io.hpp"
 
+auto SpellLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
     auto spellSource = FileIO::readTextFile(filePath);
     if(!spellSource) {
         ERROR(error(filePath + " " + spellSource.error().message()));
@@ -20,13 +20,12 @@ auto SpellLoader::load(AssetManager& assetManager, const std::string& filePath) 
     return std::make_shared<SpellData>(spell.value());
 }
 
-auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellData, JSONParserError> {
-
+auto SpellLoader::parseSpell(const std::string& source)
+    -> std::expected<SpellData, JSONParserError> {
     json spellJSON;
     try {
         spellJSON = json::parse(source);
-    }
-    catch(const json::exception& e) {
+    } catch(const json::exception& e) {
         ERROR(error(std::string(e.what())));
         return std::unexpected(JSONParserError::PARSE);
     }
@@ -82,7 +81,6 @@ auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellDa
     spell.collisionData = std::move(collisionData.value());
 
     if(spell.animated) {
-
         it = spellJSON.find("animations");
         if(it == spellJSON.end()) {
             ERROR(error("failed to find animations"));
@@ -100,8 +98,8 @@ auto SpellLoader::parseSpell(const std::string& source) -> std::expected<SpellDa
     return std::move(spell);
 }
 
-auto SpellLoader::parseBasicStats(const json& o, const std::string& parent) -> std::expected<SpellData, JSONParserError> {
-
+auto SpellLoader::parseBasicStats(const json& o, const std::string& parent)
+    -> std::expected<SpellData, JSONParserError> {
     SpellData spellData;
 
     if(!get<std::string>(o, "name", true, spellData.name, parent)) {
@@ -143,8 +141,8 @@ auto SpellLoader::parseBasicStats(const json& o, const std::string& parent) -> s
     return std::move(spellData);
 }
 
-auto SpellLoader::parseAction(const json& o, const std::string& parent) -> std::expected<SpellAction, JSONParserError> {
-
+auto SpellLoader::parseAction(const json& o, const std::string& parent)
+    -> std::expected<SpellAction, JSONParserError> {
     SpellAction action;
 
     std::string actionType;
@@ -179,12 +177,10 @@ auto SpellLoader::parseAction(const json& o, const std::string& parent) -> std::
             return std::unexpected(JSONParserError::PARSE);
         }
         action.motion = std::make_shared<ConstantMotion>(motion);
-    }
-    else if(movementType == "instant") {
+    } else if(movementType == "instant") {
         InstantMotion motion;
         action.motion = std::make_shared<InstantMotion>(motion);
-    }
-    else {
+    } else {
         ERROR(error("invalid movement type", "movement"));
         return std::unexpected(JSONParserError::PARSE);
     }
@@ -208,8 +204,8 @@ auto SpellLoader::parseAction(const json& o, const std::string& parent) -> std::
     return action;
 }
 
-auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> std::expected<SpellEffect, JSONParserError> {
-
+auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent)
+    -> std::expected<SpellEffect, JSONParserError> {
     SpellEffect onHitEffect;
     std::string effectType;
     std::string dmgType;
@@ -223,7 +219,8 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
     if(!get<std::string>(o, "effect_type", true, effectType, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
-    onHitEffect.type = magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
+    onHitEffect.type =
+        magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
 
     if(!get<f32>(o, "duration", true, onHitEffect.maxDuration, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
@@ -237,8 +234,18 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
     if(!get<std::string>(o, "target_faction", true, targetFaction, "on_hit")) {
         return std::unexpected(JSONParserError::PARSE);
     }
-    onHitEffect.targetFaction = magic_enum::enum_cast<FactionType>(targetFaction).value_or(FactionType::UNKNOWN);
+    onHitEffect.targetFaction =
+        magic_enum::enum_cast<FactionType>(targetFaction).value_or(FactionType::UNKNOWN);
 
+    if(!get<bool>(o, "visual", true, onHitEffect.visual, "on_hit")) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(onHitEffect.visual) {
+        if(!get<std::string>(o, "effect_path", true, onHitEffect.effectFilePath, "on_hit")) {
+            return std::unexpected(JSONParserError::PARSE);
+        }
+    }
     // optional
     get<u32>(o, "min_value", false, onHitEffect.minValue, "on_hit");
     get<u32>(o, "max_value", false, onHitEffect.maxValue, "on_hit");
@@ -249,8 +256,8 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent) -> 
     return onHitEffect;
 }
 
-auto SpellLoader::parseGeometryData(const json& o, const std::string& parent) -> std::expected<GeometryData, JSONParserError> {
-
+auto SpellLoader::parseGeometryData(const json& o, const std::string& parent)
+    -> std::expected<GeometryData, JSONParserError> {
     GeometryData geometryData;
     std::string sizeDeterminant;
 
@@ -279,13 +286,13 @@ auto SpellLoader::parseGeometryData(const json& o, const std::string& parent) ->
     }
 
     geometryData.sizeDeterminant = magic_enum::enum_cast<GeometrySizeDeterminant>(sizeDeterminant)
-        .value_or(GeometrySizeDeterminant::NONE);
+                                       .value_or(GeometrySizeDeterminant::NONE);
 
     return geometryData;
 }
 
-auto SpellLoader::parseCollisionData(const json& o, const std::string& parent) -> std::expected<CollisionData, JSONParserError> {
-
+auto SpellLoader::parseCollisionData(const json& o, const std::string& parent)
+    -> std::expected<CollisionData, JSONParserError> {
     CollisionData collisionData;
     std::string shape;
     std::string sizeDeterminant;
@@ -361,8 +368,7 @@ auto SpellLoader::parseCollisionData(const json& o, const std::string& parent) -
         }
 
         collisionData.shape = line;
-    }
-    else {
+    } else {
         ERROR(error("invalid shape - " + shape));
         return std::unexpected(JSONParserError::PARSE);
     }
@@ -372,13 +378,13 @@ auto SpellLoader::parseCollisionData(const json& o, const std::string& parent) -
     }
 
     collisionData.sizeDeterminant = magic_enum::enum_cast<CollisionSizeDeterminant>(sizeDeterminant)
-        .value_or(CollisionSizeDeterminant::NONE);
+                                        .value_or(CollisionSizeDeterminant::NONE);
 
     return collisionData;
 }
 
-auto SpellLoader::parseAnimations(const json& o, const std::string& parent)-> std::expected<std::unordered_map<std::string, std::string>, JSONParserError> {
-
+auto SpellLoader::parseAnimations(const json& o, const std::string& parent)
+    -> std::expected<std::unordered_map<std::string, std::string>, JSONParserError> {
     if(!o.is_object()) {
         ERROR(error(parent + " is not an object", parent));
         return std::unexpected(JSONParserError::PARSE);
@@ -397,7 +403,6 @@ auto SpellLoader::parseAnimations(const json& o, const std::string& parent)-> st
 }
 
 auto SpellLoader::error(const std::string& msg, const std::string& parent) -> std::string {
-
     std::string error = "[SPELL LOADER]: ";
     if(!parent.empty()) {
         error += '(' + parent + ") ";

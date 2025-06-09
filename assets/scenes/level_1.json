@@ -23,8 +23,8 @@
             "name": "Hephasto the Armorer",
             "prefab": "characters/npc/hephasto/hephasto.json",
             "transform": [
-                0.0,
-                0.0,
+                16.0,
+                16.0,
                 0.0
             ]
         }

@@ -4,7 +4,7 @@
 **Texture update**
  - update textures for spells and spell effects to enable animations for them
 
-**SDL_ Decoupling (optional)
+**SDL_ Decoupling (optional)**
 
 **Particle System**
  - data representation
