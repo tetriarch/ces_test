@@ -89,6 +89,9 @@ namespace math {
     inline f32 lerp(f32 a, f32 b, f32 t) {
         return a + t * (b - a);
     }
+    inline f32 rlerp(f32 a, f32 b, f32 v) {
+        return (v - a) / (b - a);
+    }
 
     inline f32 radians(f32 angleInDegrees) {
         return angleInDegrees * (static_cast<f32>(M_PI) / 180.0f);

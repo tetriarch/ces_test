@@ -1,0 +1,17 @@
+{
+    "texture_path": "particles/smoke.png",
+    "lifetime_min": 0.7,
+    "lifetime_max": 1.4,
+    "scale_min_start": 0.8,
+    "scale_max_start": 1.0,
+    "scale_min_end": 1.5,
+    "scale_max_end": 2.0,
+    "alpha_min_start": 0.6,
+    "alpha_max_start": 0.8,
+    "alpha_min_end": 0.1,
+    "alpha_max_end": 0.2,
+    "speed_min": 0.0,
+    "speed_max": 0.0,
+    "angular_velocity_min": -40.0,
+    "angular_velocity_max": 40.0
+}

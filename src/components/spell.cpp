@@ -1,24 +1,25 @@
 #include "spell.hpp"
-#include "components.hpp"
+
+#include "animation.hpp"
+#include "owner.hpp"
+#include "particle_system.hpp"
+#include "status_effect.hpp"
 
 bool SpellEffect::isDirect() const {
     return (type == SpellEffectType::DIRECT_DAMAGE || type == SpellEffectType::DIRECT_HEAL);
 }
 
 SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData) {
-
     spellData_ = spellData;
 }
 
 void SpellComponent::attach() {
-
     currentDuration_ = 0.0f;
     traveledDistance_ = 0.0f;
     dead_ = false;
 }
 
 void SpellComponent::update(const f32 dt) {
-
     if(dead_) {
         return;
     }
@@ -34,7 +35,6 @@ void SpellComponent::update(const f32 dt) {
 }
 
 void SpellComponent::postUpdate(const f32 dt) {
-
     auto animationComponent = entity()->component<AnimationComponent>();
 
     if(dead_) {
@@ -48,8 +48,7 @@ void SpellComponent::postUpdate(const f32 dt) {
         if(currentDuration_ >= spellData_->duration) {
             dead_ = true;
         }
-    }
-    else if(traveledDistance_ >= spellData_->maxRange) {
+    } else if(traveledDistance_ >= spellData_->maxRange) {
         dead_ = true;
     }
 
@@ -57,16 +56,13 @@ void SpellComponent::postUpdate(const f32 dt) {
     auto ownerComponent = entity()->component<OwnerComponent>();
 
     if(collisionComponent && ownerComponent) {
-
         if(collisionComponent->collided()) {
-
             auto colliders = collisionComponent->colliders();
             bool effectApllied = false;
 
             for(auto target : colliders) {
                 for(auto& effect : spellData_->action.effects) {
                     if(canApplyEffect(ownerComponent->owner(), target, effect)) {
-
                         auto statusEffectComponent = target->component<StatusEffectComponent>();
 
                         if(statusEffectComponent) {
@@ -86,14 +82,22 @@ void SpellComponent::postUpdate(const f32 dt) {
         // play on death animation if there is any
         auto animation = entity()->component<AnimationComponent>();
         if(animation) {
-            animation->playAnimation("death", [&]() {
-                return entity()->parent()->queueRemoveChild(entity());
-            });
+            animation->playAnimation(
+                "death", [&]() { return entity()->parent()->queueRemoveChild(entity()); });
+        }
+
+        auto particles = entity()->component<ParticleSystemComponent>();
+        if(particles) {
+            particles->setEmitting(false);
         }
     }
 }
-bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect) {
 
+bool SpellComponent::isDead() {
+    return dead_;
+}
+
+bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect) {
     auto applicantTagComponent = applicant->component<TagComponent>();
     auto targetTagComponent = target->component<TagComponent>();
 
@@ -107,16 +111,12 @@ bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, Spell
 
     if(effect.targetFaction == FactionType::FRIENDLY) {
         belongs = applicantTagComponent->isFriendly(targetTag);
-    }
-    else if(effect.targetFaction == FactionType::HOSTILE) {
+    } else if(effect.targetFaction == FactionType::HOSTILE) {
         belongs = applicantTagComponent->isHostile(targetTag);
-    }
-    else {
+    } else {
         // unknown faction
         belongs = false;
     }
 
     return belongs;
 }
-
-

@@ -27,6 +27,7 @@
         "determinant": "NONE"
     },
     "animated": false,
+    "particles": false,
     "action": {
         "type": "PROJECTILE",
         "pierce": true,

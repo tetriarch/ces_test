@@ -1,7 +1,7 @@
 #pragma once
 
-#include "asset_manager.hpp"
-#include "components/animation.hpp"
+#include "../asset_manager.hpp"
+#include "../components/animation.hpp"
 #include "json_parser.hpp"
 
 class AnimationLoader : public IAssetLoader, JSONParser {

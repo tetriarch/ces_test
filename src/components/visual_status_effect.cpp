@@ -13,10 +13,7 @@ void VisualStatusEffectComponent::setRect(const Rect& rect) {
 }
 
 void VisualStatusEffectComponent::render(std::shared_ptr<Renderer> renderer) {
-    // NOTE: given that the status effect is mainly used on entity itself we don't need to track the
-    //  transform but only query it
-    //  get transform of the parent to which we display the status effect
-
+    // get transform of the parent to which we display the status effect
     auto transform = entity()->parent()->transform();
     Rect sRect = rect_;
     sRect.x = 0;

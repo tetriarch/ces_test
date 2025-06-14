@@ -80,8 +80,10 @@ struct SpellData : public IAsset {
     SpellAction action;
     GeometryData geometryData;
     CollisionData collisionData;
-    bool animated;
+    bool animated{false};
     std::unordered_map<std::string, std::string> animationFiles;
+    bool particles{false};
+    std::vector<std::string> emitterFiles;
 };
 
 class SpellComponent : public Component<SpellComponent> {
@@ -90,6 +92,7 @@ public:
     void attach() override;
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
+    bool isDead();
 
 private:
     bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect onHitEffect);

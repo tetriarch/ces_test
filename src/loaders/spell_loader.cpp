@@ -2,7 +2,7 @@
 
 #include <magic_enum/magic_enum.hpp>
 
-#include "file_io.hpp"
+#include "../file_io.hpp"
 
 auto SpellLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
     auto spellSource = FileIO::readTextFile(filePath);
@@ -95,6 +95,21 @@ auto SpellLoader::parseSpell(const std::string& source)
         spell.animationFiles = std::move(animations.value());
     }
 
+    if(spell.particles) {
+        it = spellJSON.find("emitters");
+        if(it == spellJSON.end()) {
+            ERROR(error("failed to find emitters"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        auto emitters = parseEmitters(it.value(), "emitters");
+        if(!emitters) {
+            ERROR(error("failed to parse animations"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+        spell.emitterFiles = std::move(emitters.value());
+    }
+
     return std::move(spell);
 }
 
@@ -135,6 +150,10 @@ auto SpellLoader::parseBasicStats(const json& o, const std::string& parent)
     }
 
     if(!get<bool>(o, "animated", true, spellData.animated, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(!get<bool>(o, "particles", true, spellData.particles, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 
@@ -400,6 +419,23 @@ auto SpellLoader::parseAnimations(const json& o, const std::string& parent)
     }
 
     return animations;
+}
+auto SpellLoader::parseEmitters(const json& o, const std::string& parent)
+    -> std::expected<std::vector<std::string>, JSONParserError> {
+    if(!o.is_array()) {
+        ERROR(error(parent + " is not an array", parent));
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    std::vector<std::string> emitters;
+    for(auto& e : o) {
+        if(!e.is_string()) {
+            ERROR_ONCE(error(parent + " is not an array of strings", parent));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+        emitters.push_back(e);
+    }
+    return emitters;
 }
 
 auto SpellLoader::error(const std::string& msg, const std::string& parent) -> std::string {

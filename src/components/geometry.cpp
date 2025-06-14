@@ -2,7 +2,8 @@
 
 #include "../entity.hpp"
 #include "../renderer.hpp"
-#include "components.hpp"
+#include "animation.hpp"
+#include "collision.hpp"
 
 void GeometryComponent::setTextureFilePath(const std::string& filePath) {
     textureFilePath_ = filePath;

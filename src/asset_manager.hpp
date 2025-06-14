@@ -1,6 +1,6 @@
 #pragma once
 
-#include "i_asset_loader.hpp"
+#include "loaders/i_asset_loader.hpp"
 #include "log.hpp"
 
 class AssetManager {
@@ -33,7 +33,7 @@ private:
 
 template <class T>
 inline void AssetManager::registerLoader(std::shared_ptr<IAssetLoader> loader) {
-    if (assetLoaders_.contains(typeid(T))) {
+    if(assetLoaders_.contains(typeid(T))) {
         INFO("[ASSET MANAGER]: loader " + std::string(typeid(T).name()) + " is already registered");
         return;
     }
@@ -43,13 +43,13 @@ inline void AssetManager::registerLoader(std::shared_ptr<IAssetLoader> loader) {
 template <class T>
 inline auto AssetManager::load(const std::string& assetPath) -> std::shared_ptr<T> {
     // check if already cached
-    if (auto it = assets_.find(assetPath); it != assets_.end()) {
+    if(auto it = assets_.find(assetPath); it != assets_.end()) {
         return std::static_pointer_cast<T>(it->second);
     }
 
     // find appropriate loader
     auto loaderIter = assetLoaders_.find(typeid(T));
-    if (loaderIter == assetLoaders_.end()) {
+    if(loaderIter == assetLoaders_.end()) {
         ERROR("[ASSET MANAGER]: loader " + std::string(typeid(T).name()) + " not found");
         return nullptr;
     }
@@ -58,7 +58,7 @@ inline auto AssetManager::load(const std::string& assetPath) -> std::shared_ptr<
 
     // validate path
     auto path = getAssetPath(assetPath);
-    if (!std::filesystem::exists(path)) {
+    if(!std::filesystem::exists(path)) {
         ERROR("[ASSET MANAGER] asset path " + path.generic_string() + " does not exist");
         return nullptr;
     }

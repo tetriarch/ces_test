@@ -1,0 +1,8 @@
+{
+    "particle_path": "spells/fireball/particles/ember.json",
+    "spawn_rate": 5.0,
+    "max_particles": 40,
+    "shape": "ARC",
+    "arc": 90.0,
+    "direction": 180.0
+}

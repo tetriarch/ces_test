@@ -1,9 +1,9 @@
 #pragma once
 
-#include "asset_manager.hpp"
-#include "components/status_effect.hpp"
+#include "../asset_manager.hpp"
+#include "../components/status_effect.hpp"
+#include "../utils.hpp"
 #include "json_parser.hpp"
-#include "utils.hpp"
 
 class StatusEffectLoader : public IAssetLoader, JSONParser {
 public:

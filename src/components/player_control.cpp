@@ -1,12 +1,13 @@
 #include "player_control.hpp"
-#include "components.hpp"
+
+#include "spell_book.hpp"
+#include "velocity.hpp"
 
 Vec2 PlayerControlComponent::getMousePosition() {
     return {mousePosition_.x, mousePosition_.y};
 }
 
 void PlayerControlComponent::handleEvents(const SDL_Event& event) {
-
     if(event.type == SDL_EVENT_MOUSE_MOTION) {
         mousePosition_.x = event.motion.x;
         mousePosition_.y = event.motion.y;
@@ -33,7 +34,6 @@ void PlayerControlComponent::handleEvents(const SDL_Event& event) {
             auto spellBook = entity()->component<SpellBookComponent>();
             if(spellBook) spellBook->interruptCasting();
         }
-
     }
     if(event.type == SDL_EVENT_KEY_UP) {
         if(event.key.key == SDLK_W) {
@@ -72,7 +72,6 @@ void PlayerControlComponent::handleEvents(const SDL_Event& event) {
 }
 
 void PlayerControlComponent::update(f32 dt) {
-
     Transform t = entity()->transform();
     Vec2 direction = mousePosition_ - t.position;
     direction = direction.normalized();

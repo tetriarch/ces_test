@@ -1,0 +1,7 @@
+{
+    "particle_path": "spells/fireball/particles/smoke.json",
+    "spawn_rate": 20.0,
+    "max_particles": 20,
+    "shape": "POINT",
+    "direction": 180.0
+}

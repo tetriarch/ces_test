@@ -1,12 +1,14 @@
 #include "core.hpp"
 
-#include "animation_loader.hpp"
 #include "asset_manager.hpp"
+#include "loaders/animation_loader.hpp"
+#include "loaders/emitter_loader.hpp"
+#include "loaders/particle_loader.hpp"
+#include "loaders/scene_loader.hpp"
+#include "loaders/spell_loader.hpp"
+#include "loaders/status_effect_loader.hpp"
+#include "loaders/texture_loader.hpp"
 #include "log.hpp"
-#include "scene_loader.hpp"
-#include "spell_loader.hpp"
-#include "status_effect_loader.hpp"
-#include "texture_loader.hpp"
 #include "time.hpp"
 #include "ui.hpp"
 
@@ -44,6 +46,8 @@ bool Core::init() {
     am->registerLoader<Texture>(std::make_shared<TextureLoader>(renderer_));
     am->registerLoader<AnimationData>(std::make_shared<AnimationLoader>());
     am->registerLoader<StatusEffectData>(std::make_shared<StatusEffectLoader>());
+    am->registerLoader<EmitterData>(std::make_shared<EmitterLoader>());
+    am->registerLoader<ParticleData>(std::make_shared<ParticleLoader>());
 
     root_ = am->load<Scene>("scenes/level_1.json");
 

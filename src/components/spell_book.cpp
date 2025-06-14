@@ -1,11 +1,16 @@
-#include "../log.hpp"
-
-#include "components.hpp"
 #include "spell_book.hpp"
+
 #include "../asset_manager.hpp"
+#include "../entity.hpp"
+#include "../log.hpp"
+#include "animation.hpp"
+#include "mana.hpp"
+#include "owner.hpp"
+#include "particle_system.hpp"
+#include "spell.hpp"
+#include "status_effect.hpp"
 
 void SpellBookComponent::attach() {
-
     auto am = AssetManager::get();
     for(auto& it : spellFiles_) {
         auto s = am->load<SpellData>(it);
@@ -16,7 +21,6 @@ void SpellBookComponent::attach() {
 }
 
 void SpellBookComponent::update(f32 dt) {
-
     // update cooldowns
     for(auto&& cd : cooldowns_) {
         cd.second -= dt;
@@ -26,21 +30,19 @@ void SpellBookComponent::update(f32 dt) {
     for(auto it = cooldowns_.begin(); it != cooldowns_.end();) {
         if(it->second <= 0.0f) {
             it = cooldowns_.erase(it);
-        }
-        else {
+        } else {
             ++it;
         }
     }
 
     if(castedSpell_) {
-
         // put spell on cooldown if it has one
         if(castedSpell_->cooldown > 0.0f) {
             cooldowns_.emplace(castedSpell_, castedSpell_->cooldown);
         }
 
         auto statusEffectComponent = entity()->component<StatusEffectComponent>();
-        
+
         // if stunned during casting
         if(statusEffectComponent && statusEffectComponent->isUnderEffect(SpellEffectType::STUN)) {
             interruptCasting();
@@ -51,14 +53,17 @@ void SpellBookComponent::update(f32 dt) {
         castProgress_ = castDuration_ / castedSpell_->castTime;
 
         if(castDuration_ >= castedSpell_->castTime) {
-            INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " + std::to_string(castDuration_) + "s");
+            INFO("[SPELL BOOK]: " + castedSpell_->name + " going off after " +
+                 std::to_string(castDuration_) + "s");
 
             EntityPtr spellEntity = Entity::create(castedSpell_->name, true);
             spellEntity->setTransform(entity()->transform());
             spellEntity->addComponent(std::make_shared<SpellComponent>(castedSpell_));
 
-            std::shared_ptr<GeometryComponent> geometryComponent = std::make_shared<GeometryComponent>();
-            std::shared_ptr<CollisionComponent> collisionComponent = std::make_shared<CollisionComponent>();
+            std::shared_ptr<GeometryComponent> geometryComponent =
+                std::make_shared<GeometryComponent>();
+            std::shared_ptr<CollisionComponent> collisionComponent =
+                std::make_shared<CollisionComponent>();
             std::shared_ptr<OwnerComponent> ownerComponent = std::make_shared<OwnerComponent>();
 
             auto geometryData = determineGeometry();
@@ -75,12 +80,20 @@ void SpellBookComponent::update(f32 dt) {
             spellEntity->addComponent(ownerComponent);
 
             if(castedSpell_->animated) {
-                std::shared_ptr<AnimationComponent> animationComponent = std::make_shared<AnimationComponent>();
+                std::shared_ptr<AnimationComponent> animationComponent =
+                    std::make_shared<AnimationComponent>();
                 animationComponent->addAnimationFiles(castedSpell_->animationFiles);
                 animationComponent->queueAnimation("idle");
                 spellEntity->addComponent(animationComponent);
             }
-            
+
+            if(castedSpell_->particles) {
+                std::shared_ptr<ParticleSystemComponent> particleSystemComponent =
+                    std::make_shared<ParticleSystemComponent>();
+                particleSystemComponent->addEmitterFiles(castedSpell_->emitterFiles);
+                spellEntity->addComponent(particleSystemComponent);
+            }
+
             // update mana
             auto mana = entity()->component<ManaComponent>();
             if(!mana) {
@@ -99,17 +112,14 @@ void SpellBookComponent::update(f32 dt) {
 }
 
 void SpellBookComponent::addSpell(const std::shared_ptr<SpellData> spellData) {
-
     spells_.push_back(spellData);
 }
 
 void SpellBookComponent::addSpellFile(const std::string& filePath) {
-
     spellFiles_.push_back(filePath);
 }
 
 void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
-
     assert(index < spellSlots_.size());
 
     // prevent casting due to being stunned
@@ -154,29 +164,24 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
 }
 
 void SpellBookComponent::interruptCasting() {
-
     INFO("[SPELL BOOK]: interrupting casting " + castedSpell_->name + "...");
     castedSpell_ = nullptr;
     castDuration_ = 0.0f;
 }
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
-
     return spells_;
 }
 
 void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
-
     assert(index < spellSlots_.size());
     spellSlots_[index] = spell;
 }
 
 bool SpellBookComponent::interruptible() const {
-
     if(!castedSpell_) {
         return false;
-    }
-    else {
+    } else {
         return castDuration_ <= castedSpell_->interruptTime;
     }
 }
@@ -190,12 +195,10 @@ auto SpellBookComponent::castedSpell() -> std::shared_ptr<SpellData const> const
 }
 
 bool SpellBookComponent::isCasting() {
-
     return castedSpell_ ? true : false;
 }
 
 bool SpellBookComponent::isSpellInSlotOnCooldown(u32 index, f32* cooldown, f32* progress) {
-
     assert(index < spellSlots_.size());
 
     auto spell = spellSlots_[index];
@@ -214,21 +217,18 @@ bool SpellBookComponent::isSpellInSlotOnCooldown(u32 index, f32* cooldown, f32* 
 }
 
 bool SpellBookComponent::isSpellOnCooldown(std::shared_ptr<SpellData> spell) {
-
     if(auto it = cooldowns_.find(spell); it != cooldowns_.end()) {
         return true;
     }
     return false;
 }
 
-auto SpellBookComponent::determineGeometry() -> GeometryData{
-
+auto SpellBookComponent::determineGeometry() -> GeometryData {
     auto geometryData = castedSpell_->geometryData;
     auto maxRange = castedSpell_->maxRange;
 
     // resolve geometry size based on target position
     if(geometryData.sizeDeterminant == GeometrySizeDeterminant::TARGET) {
-
         Vec2 castPosition = entity()->transform().position;
         f32 length = Vec2(target_ - castPosition).length();
 
@@ -239,13 +239,11 @@ auto SpellBookComponent::determineGeometry() -> GeometryData{
         rect.w = rect.w == 0 ? length : rect.w;
         rect.h = rect.h == 0 ? length : rect.h;
         geometryData.rect = rect;
-
     }
     return geometryData;
 }
 
 auto SpellBookComponent::determineCollision() -> CollisionData {
-
     auto collisionData = castedSpell_->collisionData;
     auto maxRange = castedSpell_->maxRange;
     Vec2 castPosition = entity()->transform().position;
@@ -256,9 +254,7 @@ auto SpellBookComponent::determineCollision() -> CollisionData {
 
     // resolve collision object based on target position
     if(collisionData.sizeDeterminant == CollisionSizeDeterminant::TARGET) {
-
         if(collisionData.shape.shape() == Shape::RECT) {
-
             Rect rect = std::get<Rect>(collisionData.shape);
             rect.x = castPosition.x + rect.x;
             rect.y = castPosition.y + rect.y;
@@ -292,4 +288,4 @@ auto SpellBookComponent::determineCollision() -> CollisionData {
         }
     }
     return collisionData;
-}   
+}

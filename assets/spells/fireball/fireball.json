@@ -31,6 +31,11 @@
         "idle": "spells/fireball/animations/idle.json",
         "death": "spells/fireball/animations/death.json"
     },
+    "particles": true,
+    "emitters": [
+        "spells/fireball/particles/ember_emitter.json",
+        "spells/fireball/particles/smoke_emitter.json"
+    ],
     "action": {
         "type": "PROJECTILE",
         "pierce": false,

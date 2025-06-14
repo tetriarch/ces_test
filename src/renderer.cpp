@@ -77,6 +77,27 @@ void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textu
     });
 }
 
+void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textureName,
+    Vec2 position, f32 angleInDegrees, f32 scale, f32 alpha) {
+    auto texture = AssetManager::get()->load<Texture>(textureName);
+    if(!texture) {
+        ERROR_ONCE("[RENDERER]: failed to acquire texture - " + textureName);
+        return;
+    }
+
+    queueRenderCall(strata, [&, texture, position, angleInDegrees, scale, alpha]() {
+        f32 width, height;
+        SDL_GetTextureSize(texture->get(), &width, &height);
+        width *= scale;
+        height *= scale;
+        SDL_FRect dstRect = {position.x - width / 2.0f, position.y - height / 2.0f, width, height};
+        u8 textureAlpha = static_cast<u8>(255 * alpha);
+        SDL_SetTextureAlphaMod(texture->get(), textureAlpha);
+        SDL_RenderTextureRotated(renderer_, texture->get(), nullptr, &dstRect, angleInDegrees,
+            nullptr, SDL_FlipMode::SDL_FLIP_NONE);
+    });
+}
+
 void Renderer::queueRenderRect(Strata strata, const Rect& rect, u8 r, u8 g, u8 b, u8 a) {
     SDL_Color color = {r, g, b, a};
     queueRenderCall(strata, [&, rect, color]() {

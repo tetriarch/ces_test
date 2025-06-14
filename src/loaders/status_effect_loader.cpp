@@ -1,7 +1,7 @@
 #include "status_effect_loader.hpp"
 
-#include "file_io.hpp"
-#include "log.hpp"
+#include "../file_io.hpp"
+#include "../log.hpp"
 
 auto StatusEffectLoader::load(AssetManager& assetManager, const std::string& filePath)
     -> IAssetPtr {

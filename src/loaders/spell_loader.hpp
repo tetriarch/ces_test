@@ -1,8 +1,8 @@
 #pragma once
 
-#include "asset_manager.hpp"
-#include "components/geometry.hpp"
-#include "components/spell.hpp"
+#include "../asset_manager.hpp"
+#include "../components/geometry.hpp"
+#include "../components/spell.hpp"
 #include "json_parser.hpp"
 
 class SpellLoader : public IAssetLoader, JSONParser {
@@ -23,5 +23,7 @@ private:
         -> std::expected<CollisionData, JSONParserError>;
     auto parseAnimations(const json& o, const std::string& parent = "")
         -> std::expected<std::unordered_map<std::string, std::string>, JSONParserError>;
+    auto parseEmitters(const json& o, const std::string& parent = "")
+        -> std::expected<std::vector<std::string>, JSONParserError>;
     auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
 };

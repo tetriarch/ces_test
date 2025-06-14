@@ -27,6 +27,7 @@
         "determinant": "TARGET"
     },
     "animated": false,
+    "particles": false,
     "action": {
         "type": "BEAM",
         "pierce": true,
