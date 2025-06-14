@@ -5,20 +5,9 @@
  - update textures for spells and spell effects to enable animations for them
 
 **SDL_ Decoupling (optional)**
-
-**Particle System**
- - data representation
- - parsing
- - ParticleSystemComponent
-   * emitter (shape)
-   * direction
-   * lifetime
-   * count
-   * scale
-   * size
-   * particles
- - rendering
-
+**Particle system (optional)**
+ - add possibility to spawn particles on collision
+ 
 **AI**
  - research(decision tree,..)
  - states
