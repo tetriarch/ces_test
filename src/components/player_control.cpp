@@ -75,6 +75,6 @@ void PlayerControlComponent::update(f32 dt) {
     Transform t = entity()->transform();
     Vec2 direction = mousePosition_ - t.position;
     direction = direction.normalized();
-    t.rotationInDegrees = atan2f(direction.y, direction.x) * (180.0f / static_cast<f32>(M_PI));
+    t.rotationInDegrees = angleFromDirection(direction);
     entity()->setTransform(t);
 }

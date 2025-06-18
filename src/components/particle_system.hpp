@@ -66,7 +66,7 @@ class Emitter {
 public:
     void setData(std::shared_ptr<EmitterData> emitterData);
     void spawnParticle(Transform entityTransform);
-    std::vector<Particle>& particles();
+    auto particles() -> std::vector<Particle>&;
     bool canSpawn();
     void updateSpawnTime(const f32 dt);
 

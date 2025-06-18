@@ -60,7 +60,7 @@ void Emitter::spawnParticle(Transform entityTransform) {
     }
 }
 
-std::vector<Particle>& Emitter::particles() {
+auto Emitter::particles() -> std::vector<Particle>& {
     return particles_;
 }
 

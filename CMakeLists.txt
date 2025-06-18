@@ -33,14 +33,16 @@ FetchContent_MakeAvailable(magic_enum)
 
 fetch_dependency(
     SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.12
+    GIT_SOURCE https://github.com/libsdl-org/SDL.git
+    VERSION release-3.2.12
+    CONFIGURATION ${CMAKE_BUILD_TYPE}
 )
 
 fetch_dependency(
     SDL3_image
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-    GIT_TAG release-3.2.4
+    GIT_SOURCE https://github.com/libsdl-org/SDL_image.git
+    VERSION release-3.2.4
+    CONFIGURATION ${CMAKE_BUILD_TYPE}
 )
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)

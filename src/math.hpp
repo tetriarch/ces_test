@@ -118,3 +118,10 @@ inline Vec2 directionFromAngle(f32 angleInDegrees) {
     direction.y = sin(radians);
     return direction;
 }
+/// @brief calculates angle in degrees based on 2D vector
+/// @param 2D vector
+/// @return angle in degrees
+inline f32 angleFromDirection(Vec2 direction) {
+    f32 radians = atan2f(direction.y, direction.x);
+    return math::degrees(radians);
+}

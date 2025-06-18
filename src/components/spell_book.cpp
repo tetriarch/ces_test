@@ -18,6 +18,7 @@ void SpellBookComponent::attach() {
             addSpell(s);
         }
     }
+    autoEquipSpells();
 }
 
 void SpellBookComponent::update(f32 dt) {
@@ -152,8 +153,11 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
         return;
     }
 
-    if(mana->mana().current < spell->manaCost) {
-        INFO("Not enough mana");
+    if(mana->mana().current < static_cast<f32>(spell->manaCost)) {
+        auto tagComponent = entity()->component<TagComponent>();
+        if(tagComponent->tag() == TagType::PLAYER) {
+            INFO("[SPELL BOOK]: not enough mana");
+        }
         return;
     }
 
@@ -164,9 +168,11 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
 }
 
 void SpellBookComponent::interruptCasting() {
-    INFO("[SPELL BOOK]: interrupting casting " + castedSpell_->name + "...");
-    castedSpell_ = nullptr;
-    castDuration_ = 0.0f;
+    if(castedSpell_) {
+        INFO("[SPELL BOOK]: interrupting casting " + castedSpell_->name + "...");
+        castedSpell_ = nullptr;
+        castDuration_ = 0.0f;
+    }
 }
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
@@ -176,6 +182,10 @@ auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<Spe
 void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
     assert(index < spellSlots_.size());
     spellSlots_[index] = spell;
+}
+
+auto SpellBookComponent::slots() const -> std::array<std::shared_ptr<SpellData>, 4> {
+    return spellSlots_;
 }
 
 bool SpellBookComponent::interruptible() const {
@@ -221,6 +231,15 @@ bool SpellBookComponent::isSpellOnCooldown(std::shared_ptr<SpellData> spell) {
         return true;
     }
     return false;
+}
+
+void SpellBookComponent::autoEquipSpells() {
+    for(u32 j = 0; j < spellSlots_.size(); j++) {
+        for(u32 i = j; i < spells_.size();) {
+            spellSlots_[j] = spells_[i];
+            break;
+        }
+    }
 }
 
 auto SpellBookComponent::determineGeometry() -> GeometryData {

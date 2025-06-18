@@ -14,8 +14,17 @@
             "name": "Big Bad Wolf",
             "prefab": "characters/monsters/wolf/wolf.json",
             "transform": [
-                200.0,
-                200.0,
+                500.0,
+                300.0,
+                0.0
+            ]
+        },
+        {
+            "name": "Big Bad Wolf 2",
+            "prefab": "characters/monsters/wolf/wolf.json",
+            "transform": [
+                700.0,
+                300.0,
                 0.0
             ]
         },

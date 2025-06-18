@@ -3,14 +3,12 @@
 #include "../component.hpp"
 #include "../math.hpp"
 #include "../utils.hpp"
-
-#include "geometry.hpp"
 #include "collision.hpp"
+#include "geometry.hpp"
 
 struct SpellData;
 
 class SpellBookComponent : public Component<SpellBookComponent> {
-
 public:
     void attach() override;
     void update(const f32 dt) override;
@@ -19,6 +17,7 @@ public:
     void castSpell(u32 index, const Vec2& target);
     auto spells() const -> const std::vector<std::shared_ptr<SpellData>>;
     void setSlot(u32 index, std::shared_ptr<SpellData> spell);
+    auto slots() const -> std::array<std::shared_ptr<SpellData>, 4>;
     bool interruptible() const;
     void interruptCasting();
     f32 castProgress() const;
@@ -28,6 +27,7 @@ public:
     bool isSpellOnCooldown(std::shared_ptr<SpellData> spell);
 
 private:
+    void autoEquipSpells();
     auto determineGeometry() -> GeometryData;
     auto determineCollision() -> CollisionData;
 

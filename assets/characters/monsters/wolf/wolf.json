@@ -42,7 +42,7 @@
         },
         {
             "type": "velocity",
-            "speed": 1.5
+            "speed": 50.0
         },
         {
             "type": "geometry",
@@ -56,6 +56,10 @@
         },
         {
             "type": "status_effect"
+        },
+        {
+            "type": "ai",
+            "aggro_radius": 200.0
         }
     ]
 }

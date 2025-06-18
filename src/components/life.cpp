@@ -44,6 +44,7 @@ void LifeComponent::postUpdate(const f32 dt) {
     }
 
     if(life_.current < 1.0f) {
+        INFO("[LIFE]: " + entity()->name() + " died!");
         dead = true;
     }
 

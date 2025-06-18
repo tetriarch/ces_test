@@ -1,32 +1,38 @@
 # CES TEST
+A sandbox project using CES to test interaction between components and entities.
 
-## TODO:
-**Texture update**
- - update textures for spells and spell effects to enable animations for them
-
-**SDL_ Decoupling (optional)**
-**Particle system (optional)**
- - add possibility to spawn particles on collision
- 
-**AI**
- - research(decision tree,..)
- - states
- - update
- - take action
- 
+# TODO:
+## Priority
 **XP component**
- - current
- - next level requirement
- - lvl
+ - [ ] data representation
+ - [ ] lvl
 
 **OnKillAction**
- - reward (xp, loot)
+ - [ ] reward (xp, loot)
 
 **Entity Spawner**
- - Data representation
- - parsing
+ - [ ] data representation
+ - [ ] parsing
+ - [ ] mechanic
 
-**Polish, clean up**
- - UI
- - Consistency through out entire project
- - finish
+**AI**
+ - [ ] extend behaviour
+ - [ ] polish
+
+## Visual polish
+**UI**
+ - [ ] spell icons
+ - [ ] health bar on entity hover
+ - [ ] xp update
+
+**Assets**
+ - [ ] spell animations(textures, data)
+ - [ ] spell particles(textures, data)
+ - [ ] on cast animations(textures, data)
+ - [ ] on collision particles(textures, data)
+
+## Optional goals
+ - [ ] SDL_ Decoupling
+ - [ ] Animation polish
+ - [ ] Particles on collision
+

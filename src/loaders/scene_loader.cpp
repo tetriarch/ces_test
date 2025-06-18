@@ -3,6 +3,7 @@
 #include <magic_enum/magic_enum.hpp>
 
 #include "../asset_manager.hpp"
+#include "../components/ai.hpp"
 #include "../components/collision.hpp"
 #include "../components/geometry.hpp"
 #include "../components/life.hpp"
@@ -41,6 +42,7 @@ SceneLoader::SceneLoader() {
         "geometry", [this](const json& JSONData) { return parseGeometryComponent(JSONData); });
     registerComponent("status_effect",
         [this](const json& JSONData) { return parseStatusEffectComponent(JSONData); });
+    registerComponent("ai", [this](const json& JSONData) { return parseAIComponent(JSONData); });
 }
 
 auto SceneLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
@@ -466,6 +468,17 @@ auto SceneLoader::parseStatusEffectComponent(const json& o) -> ComponentPtr {
     StatusEffectComponent statusEffectComponent;
 
     return std::make_shared<StatusEffectComponent>(statusEffectComponent);
+}
+
+auto SceneLoader::parseAIComponent(const json& o) -> ComponentPtr {
+    AIComponent aiComponent;
+    f32 aggroRadius;
+
+    if(!get<f32>(o, "aggro_radius", true, aggroRadius, "components")) {
+        return nullptr;
+    }
+    aiComponent.setAggroRadius(aggroRadius);
+    return std::make_shared<AIComponent>(aiComponent);
 }
 
 auto SceneLoader::error(const std::string& msg, const std::string& parent) -> std::string {

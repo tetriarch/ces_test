@@ -27,6 +27,7 @@ private:
     auto parseVelocityComponent(const json& o) -> ComponentPtr;
     auto parseGeometryComponent(const json& o) -> ComponentPtr;
     auto parseStatusEffectComponent(const json& o) -> ComponentPtr;
+    auto parseAIComponent(const json& o) -> ComponentPtr;
 
     auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
 

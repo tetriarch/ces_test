@@ -21,8 +21,6 @@ UI::UI() : firstTime_(true) {
     showScene_ = true;
     showDemoWindow_ = false;
 #endif
-    selectedSpells_ = {
-        SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT, SPELL_SLOT_DEFAULT};
 }
 
 UI::~UI() {
@@ -201,15 +199,15 @@ void UI::renderHUD(EntityPtr player) {
 
     f32 windowWidth = ImGui::GetWindowWidth();
     f32 uiWidth = 750;
-    f32 horizontalCenter = (windowWidth - uiWidth) * 0.5;
-    f32 playerNameHorizontalCenter = (windowWidth - playerNameTextSize.x) * 0.5;
+    f32 horizontalCenter = (windowWidth - uiWidth) * 0.5f;
+    f32 playerNameHorizontalCenter = (windowWidth - playerNameTextSize.x) * 0.5f;
 
     ImVec2 resourceBarSize = {uiWidth / 2.0f, 20};
     ImVec2 xpBarSize = {uiWidth, 5};
     ImVec2 castBarSize = {uiWidth, 15};
 
     ImGui::SetCursorPosX(playerNameHorizontalCenter);
-    ImGui::Text(player->name().c_str());
+    ImGui::Text("%s", player->name().c_str());
 
     // render cast bar
     ImGui::SetCursorPosX(horizontalCenter);
@@ -301,10 +299,15 @@ void UI::renderHUD(EntityPtr player) {
 
         for(u32 i = 0; i < 4; i++) {
             ImGui::TableSetColumnIndex(i);
+            auto spellSlots = spellBook->slots();
+            if(!spellSlots[i]) {
+                selectedSpells_[i] = SPELL_SLOT_DEFAULT;
+            } else {
+                selectedSpells_[i] = spellSlots[i]->name;
+            }
 
             // render spell cooldown
             f32 cooldown;
-            ;
             f32 cooldownProgress;
             ImGui::SetNextItemWidth(spellSlotSize.x);
             if(spellBook->isSpellInSlotOnCooldown(i, &cooldown, &cooldownProgress)) {
