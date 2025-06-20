@@ -3,16 +3,21 @@
 #include "../asset_manager.hpp"
 #include "../entity.hpp"
 #include "../log.hpp"
+#include "ai.hpp"
 #include "animation.hpp"
 #include "life.hpp"
 #include "spell.hpp"
 #include "visual_status_effect.hpp"
 
-void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
+void StatusEffectComponent::applyEffect(const SpellEffect& effect, EntityPtr applier) {
     // handle direct effects
     if(effect.isDirect()) {
         applyDirectEffect(effect);
         return;
+    }
+    auto aiComponent = entity()->component<AIComponent>();
+    if(aiComponent) {
+        aiComponent->resolveEffectApplier(applier);
     }
 
     // check if is the effect already present

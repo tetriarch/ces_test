@@ -66,7 +66,7 @@ void SpellComponent::postUpdate(const f32 dt) {
                         auto statusEffectComponent = target->component<StatusEffectComponent>();
 
                         if(statusEffectComponent) {
-                            statusEffectComponent->applyEffect(effect);
+                            statusEffectComponent->applyEffect(effect, ownerComponent->owner());
                             effectApllied = true;
                         }
                     }
@@ -97,11 +97,11 @@ bool SpellComponent::isDead() {
     return dead_;
 }
 
-bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect effect) {
-    auto applicantTagComponent = applicant->component<TagComponent>();
+bool SpellComponent::canApplyEffect(EntityPtr applier, EntityPtr target, SpellEffect effect) {
+    auto applierTagComponent = applier->component<TagComponent>();
     auto targetTagComponent = target->component<TagComponent>();
 
-    if(!applicantTagComponent || !targetTagComponent) {
+    if(!applierTagComponent || !targetTagComponent) {
         return false;
     }
 
@@ -110,9 +110,9 @@ bool SpellComponent::canApplyEffect(EntityPtr applicant, EntityPtr target, Spell
     bool belongs;
 
     if(effect.targetFaction == FactionType::FRIENDLY) {
-        belongs = applicantTagComponent->isFriendly(targetTag);
+        belongs = applierTagComponent->isFriendly(targetTag);
     } else if(effect.targetFaction == FactionType::HOSTILE) {
-        belongs = applicantTagComponent->isHostile(targetTag);
+        belongs = applierTagComponent->isHostile(targetTag);
     } else {
         // unknown faction
         belongs = false;

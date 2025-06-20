@@ -15,10 +15,6 @@ A sandbox project using CES to test interaction between components and entities.
  - [ ] parsing
  - [ ] mechanic
 
-**AI**
- - [ ] extend behaviour
- - [ ] polish
-
 ## Visual polish
 **UI**
  - [ ] spell icons
@@ -35,4 +31,6 @@ A sandbox project using CES to test interaction between components and entities.
  - [ ] SDL_ Decoupling
  - [ ] Animation polish
  - [ ] Particles on collision
+ - [ ] Collision with terrain
+ - [ ] AI Pathfinding
 

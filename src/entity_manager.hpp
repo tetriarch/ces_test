@@ -3,7 +3,6 @@
 #include "utils.hpp"
 
 class EntityManager {
-
 public:
     static EntityManager& get();
     ~EntityManager();
@@ -11,7 +10,7 @@ public:
     void addEntity(EntityPtr entity);
     void removeEntity(EntityPtr entity);
     auto find(const u32 id) -> EntityPtr;
-    auto entities() const->std::unordered_map<u32, EntityHandle> const&;
+    auto entities() const -> std::unordered_map<u32, EntityHandle> const&;
 
 private:
     std::unordered_map<u32, EntityHandle> entities_;

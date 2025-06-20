@@ -95,7 +95,7 @@ public:
     bool isDead();
 
 private:
-    bool canApplyEffect(EntityPtr applicant, EntityPtr target, SpellEffect onHitEffect);
+    bool canApplyEffect(EntityPtr applier, EntityPtr target, SpellEffect onHitEffect);
 
 private:
     std::shared_ptr<SpellData> spellData_;
