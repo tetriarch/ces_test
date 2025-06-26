@@ -8,10 +8,12 @@ public:
     void setLevel(u32 level);
     void setProgression(bool progression);
     u32 level() const;
-    void levelUp();
     u32 currentXP() const;
     u32 nextLevelXP() const;
     void update(const f32 dt) override;
+
+private:
+    void levelUp();
 
 private:
     u32 currentXP_;

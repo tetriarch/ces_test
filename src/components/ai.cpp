@@ -168,6 +168,18 @@ void AIComponent::updateCombat(const f32 dt) {
     auto transform = entity()->transform();
 
     if(target) {
+        auto targetLifeComponent = target->component<LifeComponent>();
+        if(targetLifeComponent->isDead()) {
+            collectEntitiesInRange();
+            if(!enemyInRange()) {
+                leaveCombat();
+                INFO("[AI]: " + entity()->name() + " leaving combat - enemies are dead");
+            } else {
+                // re-enter combat (overrides cd)
+                enterCombat();
+            }
+        }
+
         auto targetTransform = target->transform();
         Vec2 targetDirection = targetTransform.position - transform.position;
 
@@ -193,17 +205,6 @@ void AIComponent::updateCombat(const f32 dt) {
             aggroRadius_ * AGGRO_LOSS_MULTIPLAYER) {
             leaveCombat();
             INFO("[AI]: " + entity()->name() + " leaving combat - target outside range");
-        }
-        auto targetLifeComponent = target->component<LifeComponent>();
-        if(targetLifeComponent->isDead()) {
-            collectEntitiesInRange();
-            if(!enemyInRange()) {
-                leaveCombat();
-                INFO("[AI]: " + entity()->name() + " leaving combat - enemies are dead");
-            } else {
-                // re-enter combat (overrides cd)
-                enterCombat();
-            }
         }
     }
 }

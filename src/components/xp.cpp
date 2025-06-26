@@ -39,6 +39,24 @@ u32 XPComponent::level() const {
     return level_;
 }
 
+u32 XPComponent::currentXP() const {
+    return currentXP_;
+}
+
+u32 XPComponent::nextLevelXP() const {
+    return nextLevelXP_;
+}
+
+void XPComponent::update(const f32 dt) {
+    if(level_ == MAX_LEVEL || !progression_) {
+        return;
+    }
+
+    while(currentXP_ >= nextLevelXP_ && level_ < MAX_LEVEL) {
+        levelUp();
+    }
+}
+
 void XPComponent::levelUp() {
     ++level_;
     auto lifeComponent = entity()->component<LifeComponent>();
@@ -55,36 +73,17 @@ void XPComponent::levelUp() {
         mana.current = mana.max;
         manaComponent->setMana(mana);
     }
-}
+    INFO("[XP]: " + entity()->name() + " reached level " + std::to_string(level_));
 
-u32 XPComponent::currentXP() const {
-    return currentXP_;
-}
-
-u32 XPComponent::nextLevelXP() const {
-    return nextLevelXP_;
-}
-
-void XPComponent::update(const f32 dt) {
-    if(level_ == MAX_LEVEL || !progression_) {
-        return;
-    }
-
-    while(currentXP_ >= nextLevelXP_ && level_ < MAX_LEVEL) {
-        levelUp();
-        INFO("[XP]: " + entity()->name() + " reached level " + std::to_string(level_));
-
-        if(level_ == MAX_LEVEL) {
-            currentXP_ = 0;
-            nextLevelXP_ = 0;
-            INFO("[XP]: " + entity()->name() + " reached max level");
-        } else {
-            currentXP_ = currentXP_ - nextLevelXP_;
-            previousLevelXP_ = nextLevelXP_;
-            nextLevelXP_ =
-                previousLevelXP_ *
-                (1.0f + LEVEL_XP_STEEPNESS / (1.0f + (level_ - 1) / LEVEL_XP_MULTIPLIER));
-            INFO("[XP]: next level requires " + std::to_string(nextLevelXP_) + " XP");
-        }
+    if(level_ == MAX_LEVEL) {
+        currentXP_ = 0;
+        nextLevelXP_ = 0;
+        INFO("[XP]: " + entity()->name() + " reached max level");
+    } else {
+        currentXP_ = currentXP_ - nextLevelXP_;
+        previousLevelXP_ = nextLevelXP_;
+        nextLevelXP_ = previousLevelXP_ *
+                       (1.0f + LEVEL_XP_STEEPNESS / (1.0f + (level_ - 1) / LEVEL_XP_MULTIPLIER));
+        INFO("[XP]: next level requires " + std::to_string(nextLevelXP_) + " XP");
     }
 }

@@ -70,7 +70,7 @@ void LifeComponent::postUpdate(const f32 dt) {
             auto rewardComponent = entity()->component<RewardComponent>();
             auto attackerXPComponent = lastAttacker->component<XPComponent>();
             if(xpComponent && rewardComponent && attackerXPComponent) {
-                attackerXPComponent->gainXP(rewardComponent->xp());
+                attackerXPComponent->gainXP(xpComponent->level(), rewardComponent->xp());
             }
         }
         if(tagComponent->tag() == TagType::PLAYER) {

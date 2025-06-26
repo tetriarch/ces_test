@@ -271,7 +271,13 @@ void UI::renderHUD(EntityPtr player) {
     lifeValue = life->life();
     auto lifeCurrent = static_cast<u32>(std::floor(lifeValue.current));
     auto lifeMax = static_cast<u32>(std::floor(lifeValue.max));
-    std::string lifeText = std::to_string(lifeCurrent) + "/" + std::to_string(lifeMax) + " ";
+    std::string lifeText;
+    bool dead = life->isDead();
+    if(dead) {
+        lifeText = "DEAD";
+    } else {
+        lifeText = std::to_string(lifeCurrent) + "/" + std::to_string(lifeMax) + " ";
+    }
     ImVec2 lifeTextSize = ImGui::CalcTextSize(lifeText.c_str());
 
     if(!mana) {
@@ -289,13 +295,18 @@ void UI::renderHUD(EntityPtr player) {
     if(life && mana) {
         {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5f, 0.0f, 0.0f, 1.0f));
-            ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+            cursorPos = ImGui::GetCursorScreenPos();
             ImVec2 lifeTextPosition =
                 ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f,
                     cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
             ImGui::ProgressBar(lifeValue.current / lifeValue.max, resourceBarSize, "");
-            ImGui::GetWindowDrawList()->AddText(
-                lifeTextPosition, IM_COL32(255, 255, 255, 255), lifeText.c_str());
+            if(dead) {
+                ImGui::GetWindowDrawList()->AddText(
+                    lifeTextPosition, IM_COL32(255, 0, 0, 255), lifeText.c_str());
+            } else {
+                ImGui::GetWindowDrawList()->AddText(
+                    lifeTextPosition, IM_COL32(255, 255, 255, 255), lifeText.c_str());
+            }
             ImGui::PopStyleColor();
         }
         ImGui::SameLine();
