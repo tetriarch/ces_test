@@ -15,7 +15,7 @@ struct StatusEffectData : public IAsset {
 
 class StatusEffectComponent : public Component<StatusEffectComponent> {
 public:
-    void applyEffect(const SpellEffect& effect, EntityPtr applier);
+    void applyEffect(const SpellEffect& effect);
     void applyDirectEffect(const SpellEffect& effect);
 
     /// @brief Removes activeEffect from effects_

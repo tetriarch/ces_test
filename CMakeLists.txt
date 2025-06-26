@@ -75,7 +75,7 @@ endif()
 # static link mingw stuff on release to freely deploy
 if(CMAKE_HOST_WIN32)
 target_link_options(ces_test PRIVATE
-    $<$<CONFIG:Release>: -static -Wl,-Bstatic -lstdc++ -lgcc -lgcc_eh -lwinpthread>
+    $<$<CONFIG:Release>: -static -Wl,-Bstatic -lstdc++ -lgcc -lgcc_eh -lwinpthread -mwindows>
 )
 endif()
 

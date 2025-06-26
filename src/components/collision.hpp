@@ -4,19 +4,11 @@
 #include "../entity.hpp"
 #include "../math.hpp"
 
-enum class Shape {
-    CIRCLE,
-    LINE,
-    RECT
-};
+enum class Shape { CIRCLE, LINE, RECT };
 
-enum class CollisionSizeDeterminant {
-    TARGET,
-    NONE
-};
+enum class CollisionSizeDeterminant { TARGET, NONE };
 
 struct CollisionShape : std::variant<Circle, Line, Rect> {
-
     using std::variant<Circle, Line, Rect>::variant;
 
     auto shape() -> const Shape {
@@ -25,13 +17,11 @@ struct CollisionShape : std::variant<Circle, Line, Rect> {
 };
 
 struct CollisionData {
-
     CollisionShape shape;
     CollisionSizeDeterminant sizeDeterminant;
 };
 
 class CollisionComponent : public Component<CollisionComponent> {
-
 public:
     void attach() override;
     void setCollisionData(const CollisionData& data);

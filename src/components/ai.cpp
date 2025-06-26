@@ -3,6 +3,7 @@
 #include "../entity.hpp"
 #include "../entity_manager.hpp"
 #include "../renderer.hpp"
+#include "life.hpp"
 #include "spell_book.hpp"
 #include "status_effect.hpp"
 #include "velocity.hpp"
@@ -139,6 +140,7 @@ void AIComponent::updateIdle(const f32 dt) {
         if(canEnterCombat()) {
             enterCombat();
             INFO("[AI]: " + entity()->name() + " entering combat - enemies in range");
+            return;
         }
     }
 
@@ -192,6 +194,17 @@ void AIComponent::updateCombat(const f32 dt) {
             leaveCombat();
             INFO("[AI]: " + entity()->name() + " leaving combat - target outside range");
         }
+        auto targetLifeComponent = target->component<LifeComponent>();
+        if(targetLifeComponent->isDead()) {
+            collectEntitiesInRange();
+            if(!enemyInRange()) {
+                leaveCombat();
+                INFO("[AI]: " + entity()->name() + " leaving combat - enemies are dead");
+            } else {
+                // re-enter combat (overrides cd)
+                enterCombat();
+            }
+        }
     }
 }
 
@@ -222,10 +235,14 @@ void AIComponent::collectEntitiesInRange() {
         f32 distance = Vec2(eTransform.position - transform.position).length();
         if(distance < aggroRadius_) {
             if(tagComponent->isHostile(eTagComponent->tag())) {
-                enemiesInRange_.emplace_back(ePtr);
+                if(ePtr->isActive()) {
+                    enemiesInRange_.emplace_back(ePtr);
+                }
             }
             if(tagComponent->isFriendly(eTagComponent->tag())) {
-                alliesInRange_.emplace_back(ePtr);
+                if(ePtr->isActive()) {
+                    alliesInRange_.emplace_back(ePtr);
+                }
             }
         }
     }
@@ -251,10 +268,8 @@ void AIComponent::enterCombat(EntityPtr target) {
         return;
     }
     // no target - try pick one
-    if(!enemiesInRange_.empty()) {
-        u32 targetIndex = rng_.getUnsigned(0, enemiesInRange_.size() - 1);
-        target_ = enemiesInRange_[targetIndex];
-    }
+    u32 targetIndex = rng_.getUnsigned(0, enemiesInRange_.size() - 1);
+    target_ = enemiesInRange_[targetIndex];
 }
 
 void AIComponent::leaveCombat() {

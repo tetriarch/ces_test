@@ -9,7 +9,7 @@
 #include "spell.hpp"
 #include "visual_status_effect.hpp"
 
-void StatusEffectComponent::applyEffect(const SpellEffect& effect, EntityPtr applier) {
+void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
     // handle direct effects
     if(effect.isDirect()) {
         applyDirectEffect(effect);
@@ -17,7 +17,7 @@ void StatusEffectComponent::applyEffect(const SpellEffect& effect, EntityPtr app
     }
     auto aiComponent = entity()->component<AIComponent>();
     if(aiComponent) {
-        aiComponent->resolveEffectApplier(applier);
+        aiComponent->resolveEffectApplier(effect.applier.lock());
     }
 
     // check if is the effect already present
@@ -71,7 +71,7 @@ void StatusEffectComponent::applyDirectEffect(const SpellEffect& effect) {
 
     if(lifeComponent) {
         if(effect.type == SpellEffectType::DIRECT_DAMAGE) {
-            lifeComponent->reduceLife(value);
+            lifeComponent->reduceLife(value, effect.applier.lock());
         }
         if(effect.type == SpellEffectType::DIRECT_HEAL) {
             lifeComponent->increaseLife(value);
@@ -136,7 +136,7 @@ void StatusEffectComponent::updateEffect(SpellEffect& effect, const f32 dt) {
     if(effectType == SpellEffectType::DAMAGE_OVER_TIME) {
         if(lifeComponent) {
             f32 dmg = effect.periodicValue * effect.currentStacks * dt;
-            lifeComponent->reduceLife(dmg);
+            lifeComponent->reduceLife(dmg, effect.applier.lock());
         }
     }
 

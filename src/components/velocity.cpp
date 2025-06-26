@@ -1,13 +1,14 @@
 #include "velocity.hpp"
 
 #include "../entity.hpp"
+#include "ai.hpp"
 #include "collision.hpp"
 #include "owner.hpp"
 #include "spell_book.hpp"
 #include "status_effect.hpp"
 #include "tag.hpp"
 
-const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.5f;
+const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.75f;
 
 Vec2 VelocityComponent::velocity() const {
     Vec2 velocityVector = {0, 0};
@@ -22,7 +23,7 @@ void VelocityComponent::update(const f32 dt) {
     // slow down on casting
     auto spellBook = entity()->component<SpellBookComponent>();
     if(spellBook && spellBook->isCasting()) {
-        speedModifier -= ON_CAST_MOVEMENT_SPEED_MULTIPLIER;
+        speedModifier *= ON_CAST_MOVEMENT_SPEED_MULTIPLIER;
     }
 
     // modify speed when hasted or slowed
@@ -41,6 +42,10 @@ void VelocityComponent::update(const f32 dt) {
         if(stun) {
             speedModifier = 0.0f;
         }
+    }
+    auto aiComponent = entity()->component<AIComponent>();
+    if(aiComponent && aiComponent->isInMode(AIMode::IDLE)) {
+        speedModifier *= 0.5f;
     }
 
     speed *= speedModifier;

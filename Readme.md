@@ -3,13 +3,6 @@ A sandbox project using CES to test interaction between components and entities.
 
 # TODO:
 ## Priority
-**XP component**
- - [ ] data representation
- - [ ] lvl
-
-**OnKillAction**
- - [ ] reward (xp, loot)
-
 **Entity Spawner**
  - [ ] data representation
  - [ ] parsing

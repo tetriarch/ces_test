@@ -4,9 +4,8 @@
 #include "../utils.hpp"
 
 class OwnerComponent : public Component<OwnerComponent> {
-
 public:
-    EntityPtr owner() const;
+    EntityHandle owner() const;
     bool isOwnedBy(EntityPtr owner) const;
     void setOwner(EntityPtr owner);
 

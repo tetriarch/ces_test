@@ -39,6 +39,7 @@ struct SpellEffect {
     u32 maxStacks{1};
     bool visual;
     std::string effectFilePath{""};
+    EntityHandle applier;
 
     bool isDirect() const;
 };

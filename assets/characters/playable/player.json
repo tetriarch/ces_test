@@ -64,6 +64,11 @@
         },
         {
             "type": "status_effect"
+        },
+        {
+            "type": "xp",
+            "level": 1,
+            "progression": true
         }
     ]
 }

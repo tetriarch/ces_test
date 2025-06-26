@@ -3,12 +3,15 @@
 #include "../entity.hpp"
 #include "../renderer.hpp"
 #include "geometry.hpp"
+#include "reward.hpp"
+#include "tag.hpp"
+#include "xp.hpp"
 
 const f32 LIFE_BAR_VERTICAL_OFFSET = 10;
 const f32 LIFE_BAR_HEIGHT = 5;
 
 void LifeComponent::attach() {
-    dead = false;
+    dead_ = false;
 }
 
 const Life& LifeComponent::life() const {
@@ -19,16 +22,22 @@ void LifeComponent::setLife(const Life& life) {
     life_ = life;
 }
 
-void LifeComponent::reduceLife(f32 amount) {
+void LifeComponent::reduceLife(f32 amount, EntityPtr applier) {
     life_.current -= std::clamp(amount, 0.0f, life_.current);
+    lastAttacker_ = applier;
 }
 
 void LifeComponent::increaseLife(f32 amount) {
+    assert(amount > 0);
     life_.current = std::min(amount + life_.current, life_.max);
 }
 
 bool LifeComponent::isAtFull() {
     return life_.current == life_.max;
+}
+
+bool LifeComponent::isDead() const {
+    return dead_;
 }
 
 void LifeComponent::update(const f32 dt) {
@@ -43,13 +52,32 @@ void LifeComponent::postUpdate(const f32 dt) {
         life_.current = life_.max;
     }
 
-    if(life_.current < 1.0f) {
-        INFO("[LIFE]: " + entity()->name() + " died!");
-        dead = true;
+    auto tagComponent = entity()->component<TagComponent>();
+    if(life_.current < 0.1f) {
+        auto lastAttacker = lastAttacker_.lock();
+        if(lastAttacker && tagComponent && tagComponent->tag() == TagType::PLAYER) {
+            INFO("[LIFE]: " + entity()->name() + " was killed by " + lastAttacker_.lock()->name());
+        } else {
+            INFO("[LIFE]: " + entity()->name() + " died!");
+        }
+        dead_ = true;
     }
 
-    if(dead) {
-        entity()->parent()->queueRemoveChild(entity());
+    if(dead_) {
+        auto lastAttacker = lastAttacker_.lock();
+        if(lastAttacker) {
+            auto xpComponent = entity()->component<XPComponent>();
+            auto rewardComponent = entity()->component<RewardComponent>();
+            auto attackerXPComponent = lastAttacker->component<XPComponent>();
+            if(xpComponent && rewardComponent && attackerXPComponent) {
+                attackerXPComponent->gainXP(rewardComponent->xp());
+            }
+        }
+        if(tagComponent->tag() == TagType::PLAYER) {
+            entity()->setActive(false);
+        } else {
+            entity()->parent()->queueRemoveChild(entity());
+        }
     }
 }
 

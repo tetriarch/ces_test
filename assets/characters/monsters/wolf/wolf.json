@@ -8,8 +8,8 @@
         },
         {
             "type": "mana",
-            "current": 50.0,
-            "max": 50.0,
+            "current": 75.0,
+            "max": 75.0,
             "regen": 1.0
         },
         {
@@ -60,6 +60,14 @@
         {
             "type": "ai",
             "aggro_radius": 200.0
+        },
+        {
+            "type": "xp",
+            "level": 1
+        },
+        {
+            "type": "reward",
+            "xp": 250
         }
     ]
 }

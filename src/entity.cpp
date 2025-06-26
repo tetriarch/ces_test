@@ -1,15 +1,13 @@
 #include "entity.hpp"
+
+#include "component.hpp"
 #include "entity_manager.hpp"
 #include "scoped.hpp"
-#include "component.hpp"
 
 u32 Entity::NEXT_ID = 0;
 
-Entity::Entity(const std::string& name, bool lazyAttach) :
-    ID_(NEXT_ID),
-    name_(name),
-    lazyAttach_(lazyAttach) {
-
+Entity::Entity(const std::string& name, bool lazyAttach)
+    : ID_(NEXT_ID), name_(name), lazyAttach_(lazyAttach), active_(true) {
     NEXT_ID++;
 }
 
@@ -20,11 +18,9 @@ EntityPtr Entity::create(const std::string& name, bool lazyAttach) {
 }
 
 void Entity::addChild(EntityPtr child) {
-
     if(updateState_ == UpdateState::UPDATE) {
-        postUpdateActions_.push_back([child = std::move(child)](Entity* self) {
-            self->addChild(std::move(child));
-        });
+        postUpdateActions_.push_back(
+            [child = std::move(child)](Entity* self) { self->addChild(std::move(child)); });
         return;
     }
 
@@ -35,19 +31,14 @@ void Entity::addChild(EntityPtr child) {
     if(!lazyAttach_ && childPtr->lazyAttach_) {
         childPtr->executeAttached();
     }
-
 }
 
 void Entity::queueRemoveChild(const EntityPtr& child) {
-
-    postUpdateActions_.push_back([child = std::move(child)](Entity* self) {
-        self->removeChild(std::move(child));
-    });
-
+    postUpdateActions_.push_back(
+        [child = std::move(child)](Entity* self) { self->removeChild(std::move(child)); });
 }
 
 void Entity::removeChild(const EntityPtr& child) {
-
     if(updateState_ == UpdateState::UPDATE) {
         queueRemoveChild(child);
         return;
@@ -62,10 +53,8 @@ void Entity::removeChild(const EntityPtr& child) {
 }
 
 void Entity::addComponent(ComponentPtr component) {
-
     if(updateState_ == UpdateState::UPDATE) {
-        postUpdateActions_.push_back(
-            [component = std::move(component)](Entity* self) {
+        postUpdateActions_.push_back([component = std::move(component)](Entity* self) {
             self->addComponent(std::move(component));
         });
         return;
@@ -99,14 +88,12 @@ void Entity::addComponent(ComponentPtr component) {
 }
 
 void Entity::queueRemoveComponent(ComponentPtr component) {
-
     postUpdateActions_.push_back([component = std::move(component)](Entity* self) {
         self->removeComponent(std::move(component));
     });
 }
 
 void Entity::removeComponent(ComponentPtr component) {
-
     if(updateState_ == UpdateState::UPDATE) {
         queueRemoveComponent(component);
         return;
@@ -115,7 +102,8 @@ void Entity::removeComponent(ComponentPtr component) {
     assert(component->entity() == shared_from_this());
     component->entity_.reset();
 
-    components_.erase(std::remove(components_.begin(), components_.end(), component), components_.end());
+    components_.erase(
+        std::remove(components_.begin(), components_.end(), component), components_.end());
 
     if(component->hasHandleEvents()) {
         controllable_.erase(component.get());
@@ -155,7 +143,6 @@ auto Entity::parent() const -> Entity* {
 }
 
 auto Entity::root() -> Entity* {
-
     auto current = this;
     while(current->parent_) {
         current = current->parent_;
@@ -164,12 +151,10 @@ auto Entity::root() -> Entity* {
 }
 
 const Transform& Entity::transform() const {
-
     return transform_;
 }
 
 void Entity::executeAttached() {
-
     lazyAttach_ = false;
 
     for(auto& c : components_) {
@@ -181,30 +166,40 @@ void Entity::executeAttached() {
     }
 }
 
-void Entity::handleEvents(const SDL_Event& event) {
+bool Entity::isActive() const {
+    return active_;
+}
 
+void Entity::setActive(bool active) {
+    active_ = active;
+}
+
+void Entity::handleEvents(const SDL_Event& event) {
     {
         updateState_ = UpdateState::UPDATE;
-        SCOPED([this]() { updateState_ = UpdateState::IDLE;});
+        SCOPED([this]() { updateState_ = UpdateState::IDLE; });
         for(auto&& c : controllable_) {
+            if(!active_) {
+                break;
+            }
             c->handleEvents(event);
         }
-
 
         for(auto&& c : children_) {
             c->handleEvents(event);
         }
     }
     applyPostUpdateActions();
-
 }
 
 void Entity::update(const f32 dt) {
-
     {
         updateState_ = UpdateState::UPDATE;
-        SCOPED([this]() { updateState_ = UpdateState::IDLE;});
+        SCOPED([this]() { updateState_ = UpdateState::IDLE; });
         for(auto& u : updatable_) {
+            if(!active_) {
+                break;
+            }
             u->update(dt);
         }
 
@@ -216,12 +211,14 @@ void Entity::update(const f32 dt) {
 }
 
 void Entity::postUpdate(const f32 dt) {
-
     {
         updateState_ = UpdateState::UPDATE;
-        SCOPED([this]() { updateState_ = UpdateState::IDLE;});
+        SCOPED([this]() { updateState_ = UpdateState::IDLE; });
 
         for(auto&& component : postUpdatable_) {
+            if(!active_) {
+                break;
+            }
             component->postUpdate(dt);
         }
 
@@ -234,7 +231,6 @@ void Entity::postUpdate(const f32 dt) {
 }
 
 void Entity::applyPostUpdateActions() {
-
     if(updateState_ != UpdateState::IDLE) {
         FATAL_ERROR("[ENTITY]: update state is not idle");
     }
@@ -245,7 +241,6 @@ void Entity::applyPostUpdateActions() {
 }
 
 void Entity::render(std::shared_ptr<Renderer> renderer) {
-
     for(auto& r : renderable_) {
         r->render(renderer);
     }

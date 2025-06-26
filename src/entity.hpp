@@ -1,12 +1,11 @@
 #pragma once
 
-#include "math.hpp"
-#include "log.hpp"
-
 #include <SDL3/SDL.h>
+
+#include "log.hpp"
+#include "math.hpp"
 class Renderer;
 class Entity : public std::enable_shared_from_this<Entity> {
-
 public:
     Entity(const std::string& name, bool lazyAttach);
     static EntityPtr create(const std::string& name, bool lazyAttach = false);
@@ -22,17 +21,23 @@ public:
 
     auto children() const -> std::span<EntityPtr const>;
 
-    template<typename T>
+    template <typename T>
     auto component() -> std::shared_ptr<T>;
 
     auto components() const -> std::span<ComponentPtr const>;
     auto parent() const -> Entity*;
     auto root() -> Entity*;
     const Transform& transform() const;
-    u32 id() { return ID_; }
-    constexpr auto name() -> std::string const& { return name_; }
+    u32 id() {
+        return ID_;
+    }
+    constexpr auto name() -> std::string const& {
+        return name_;
+    }
 
     void executeAttached();
+    bool isActive() const;
+    void setActive(bool active = true);
     void handleEvents(const SDL_Event& event);
     void update(const f32 dt);
     void postUpdate(const f32 dt);
@@ -42,10 +47,7 @@ public:
 private:
     static u32 NEXT_ID;
 
-    enum class UpdateState {
-        IDLE,
-        UPDATE
-    };
+    enum class UpdateState { IDLE, UPDATE };
 
 private:
     u32 ID_;
@@ -61,11 +63,11 @@ private:
     std::unordered_set<ComponentBase*> renderable_;
     std::vector<std::function<void(Entity*)>> postUpdateActions_;
     bool lazyAttach_;
+    bool active_;
 };
 
-template<typename T>
+template <typename T>
 inline auto Entity::component() -> std::shared_ptr<T> {
-
     static_assert(std::is_base_of<ComponentBase, T>::value, "T must be derived from ComponentBase");
 
     for(const auto& c : components_) {

@@ -1,24 +1,22 @@
 #include "collision.hpp"
-#include "../entity_manager.hpp"
+
 #include "../entity.hpp"
+#include "../entity_manager.hpp"
 
 void CollisionComponent::attach() {
     reposition();
 }
 
 void CollisionComponent::setCollisionData(const CollisionData& data) {
-
     collisionData_ = data;
     shape_ = data.shape;
 }
 
 CollisionShape CollisionComponent::shape() const {
-
     return shape_;
 }
 
 bool CollisionComponent::checkCollision(EntityPtr target) {
-
     auto targetCollisionComponent = target->component<CollisionComponent>();
 
     if(!targetCollisionComponent) {
@@ -35,40 +33,34 @@ bool CollisionComponent::checkCollision(EntityPtr target) {
 }
 
 bool CollisionComponent::collided() const {
-
     return !colliders_.empty();
 }
 
 Vec2 CollisionComponent::collisionNormal() const {
-
     return collisionNormal_;
 }
 
 f32 CollisionComponent::collisionDepth() const {
-
     return collisionDepth_;
 }
 
 const std::unordered_set<EntityPtr>& CollisionComponent::colliders() const {
-
     return colliders_;
 }
 
 void CollisionComponent::postUpdate(f32 dt) {
-
     reposition();
+    colliders_.clear();
 
     collisionNormal_ = {0.0f, 0.0f};
     collisionDepth_ = 0.0f;
 
     auto entities = EntityManager::get().entities();
-    colliders_.clear();
 
     for(auto&& e : entities) {
-
-        // skip ourselves
+        // skip ourselves and innactive
         auto ePtr = e.second.lock();
-        if(ePtr == nullptr || ePtr == entity()) {
+        if(ePtr == nullptr || ePtr == entity() || !ePtr->isActive()) {
             continue;
         }
 
@@ -79,7 +71,6 @@ void CollisionComponent::postUpdate(f32 dt) {
 }
 
 void CollisionComponent::reposition() {
-
     auto transform = entity()->transform();
 
     if(shape_.shape() == Shape::RECT) {
@@ -106,28 +97,21 @@ void CollisionComponent::reposition() {
 }
 
 bool CollisionComponent::intersects(const CollisionShape& lsh, const CollisionShape& rsh) {
-
-    return std::visit([&](const auto& lShape, const auto& rShape) -> bool {
-        return this->intersects(lShape, rShape);
-    }, lsh, rsh);
+    return std::visit([&](const auto& lShape,
+                          const auto& rShape) -> bool { return this->intersects(lShape, rShape); },
+        lsh, rsh);
     return false;
 }
 
 bool CollisionComponent::intersects(const Rect& l, const Rect& r) {
-
-    if(l.x < r.x + r.w &&
-        l.x + l.w > r.x &&
-        l.y < r.y + r.h &&
-        l.y + l.h > r.y) {
-
+    if(l.x < r.x + r.w && l.x + l.w > r.x && l.y < r.y + r.h && l.y + l.h > r.y) {
         f32 overlapX = std::min(l.x + l.w, r.x + r.w) - std::max(l.x, r.x);
         f32 overlapY = std::min(l.y + l.h, r.y + r.h) - std::max(l.y, r.y);
 
         Vec2 normal;
         if(overlapX > overlapY) {
             normal = (l.y > r.y) ? Vec2(0.0f, -1.0f) : Vec2(0.0f, 1.0f);
-        }
-        else {
+        } else {
             normal = (l.x > r.x) ? Vec2(-1.0f, 0.0f) : Vec2(1.0f, 0.0f);
         }
 
@@ -140,7 +124,6 @@ bool CollisionComponent::intersects(const Rect& l, const Rect& r) {
 }
 
 bool CollisionComponent::intersects(const Rect& l, const Circle& r) {
-
     // AABB check first
     if(r.x > l.x && r.x < l.x + l.w && r.y > l.y && r.y < l.y + l.h) {
         return true;
@@ -180,7 +163,6 @@ bool CollisionComponent::intersects(const Rect& l, const Circle& r) {
 }
 
 bool CollisionComponent::intersects(const Rect& l, const Line& r) {
-
     f32 rectMinX, rectMaxX, rectMinY, rectMaxY;
     f32 lineMinX, lineMaxX, lineMinY, lineMaxY;
 
@@ -234,7 +216,6 @@ bool CollisionComponent::intersects(const Circle& l, const Rect& r) {
 }
 
 bool CollisionComponent::intersects(const Circle& l, const Circle& r) {
-
     auto lrx = pow(l.x - r.x, 2);
     auto lry = pow(l.y - r.y, 2);
 
@@ -247,7 +228,6 @@ bool CollisionComponent::intersects(const Circle& l, const Circle& r) {
 }
 
 bool CollisionComponent::intersects(const Circle& l, const Line& r) {
-
     Vec2 center = {l.x, l.y};
     Vec2 lineToCenter = center - r.p1;
     Vec2 lineDirection = r.p2 - r.p1;
@@ -279,7 +259,6 @@ bool CollisionComponent::intersects(const Line& l, const Circle& r) {
 }
 
 bool CollisionComponent::intersects(const Line& l, const Line& r) {
-
     Vec2 LtoR = r.p1 - l.p1;
     Vec2 lDirection = l.p2 - l.p1;
     Vec2 rDirection = r.p2 - r.p1;

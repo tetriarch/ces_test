@@ -9,10 +9,12 @@
 #include "../components/life.hpp"
 #include "../components/mana.hpp"
 #include "../components/player_control.hpp"
+#include "../components/reward.hpp"
 #include "../components/spell_book.hpp"
 #include "../components/status_effect.hpp"
 #include "../components/tag.hpp"
 #include "../components/velocity.hpp"
+#include "../components/xp.hpp"
 #include "../file_io.hpp"
 #include "../math.hpp"
 #include "../scene.hpp"
@@ -43,6 +45,9 @@ SceneLoader::SceneLoader() {
     registerComponent("status_effect",
         [this](const json& JSONData) { return parseStatusEffectComponent(JSONData); });
     registerComponent("ai", [this](const json& JSONData) { return parseAIComponent(JSONData); });
+    registerComponent("xp", [this](const json& JSONData) { return parseXPComponent(JSONData); });
+    registerComponent(
+        "reward", [this](const json& JSONData) { return parseRewardComponent(JSONData); });
 }
 
 auto SceneLoader::load(AssetManager& assetManager, const std::string& filePath) -> IAssetPtr {
@@ -479,6 +484,31 @@ auto SceneLoader::parseAIComponent(const json& o) -> ComponentPtr {
     }
     aiComponent.setAggroRadius(aggroRadius);
     return std::make_shared<AIComponent>(aiComponent);
+}
+
+auto SceneLoader::parseXPComponent(const json& o) -> ComponentPtr {
+    XPComponent xpComponent;
+    u32 level = 0;
+    bool progression = false;
+    if(!get<u32>(o, "level", true, level, "components")) {
+        return nullptr;
+    }
+    if(get<bool>(o, "progression", false, progression, "components")) {
+        xpComponent.setProgression(progression);
+    }
+
+    xpComponent.setLevel(level);
+    return std::make_shared<XPComponent>(xpComponent);
+}
+
+auto SceneLoader::parseRewardComponent(const json& o) -> ComponentPtr {
+    RewardComponent rewardComponent;
+    u32 xp = 0;
+    if(!get<u32>(o, "xp", true, xp, "components")) {
+        return nullptr;
+    }
+    rewardComponent.setXP(xp);
+    return std::make_shared<RewardComponent>(rewardComponent);
 }
 
 auto SceneLoader::error(const std::string& msg, const std::string& parent) -> std::string {

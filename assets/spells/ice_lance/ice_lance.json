@@ -3,7 +3,7 @@
     "texture_path": "spells/ice_lance/ice_lance.png",
     "cast_time": 2.5,
     "interrupt_time": 2.0,
-    "mana_cost": 25,
+    "mana_cost": 20,
     "cooldown": 0.0,
     "duration": 0.0,
     "max_range": 750.0,

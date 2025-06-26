@@ -10,6 +10,7 @@
 #include "components/spell.hpp"
 #include "components/spell_book.hpp"
 #include "components/tag.hpp"
+#include "components/xp.hpp"
 #include "log.hpp"
 #include "renderer.hpp"
 #include "scene.hpp"
@@ -45,12 +46,12 @@ bool UI::init(SDL_Window* window, std::shared_ptr<Renderer> renderer) {
 
     imguiSDL3InitResult_ = ImGui_ImplSDL3_InitForSDLRenderer(window, renderer->handle());
     if(!imguiSDL3InitResult_) {
-        ERROR("failed to init imgui for SDL renderer");
+        ERROR("[UI]: failed to init imgui for SDL renderer");
         return false;
     }
     imguiSDL3RendererInitResult_ = ImGui_ImplSDLRenderer3_Init(renderer->handle());
     if(!imguiSDL3RendererInitResult_) {
-        ERROR("failed to init imgui for SDL renderer");
+        ERROR("[UI]: failed to init imgui for SDL renderer");
         return false;
     }
 
@@ -154,7 +155,7 @@ void UI::render(std::shared_ptr<Scene> scene) {
     auto renderer = renderer_.lock();
 
     if(!renderer) {
-        ERROR_ONCE("Unable to access renderer");
+        ERROR_ONCE("[UI]: unable to access renderer");
         return;
     }
 
@@ -182,7 +183,7 @@ void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
 
 void UI::renderHUD(EntityPtr player) {
     if(!player) {
-        ERROR_ONCE("no player to render hud");
+        ERROR_ONCE("[UI]: no player to render hud");
         return;
     }
     ImGui::Begin("hud", nullptr, 0);
@@ -194,24 +195,36 @@ void UI::renderHUD(EntityPtr player) {
     auto spellBook = player ? player->component<SpellBookComponent>() : nullptr;
     auto life = player ? player->component<LifeComponent>() : nullptr;
     auto mana = player ? player->component<ManaComponent>() : nullptr;
+    auto xp = player ? player->component<XPComponent>() : nullptr;
 
-    ImVec2 playerNameTextSize = ImGui::CalcTextSize(player->name().c_str());
+    // we need xp to get level value
+    if(!xp) {
+        ERROR_ONCE("[UI]: no xp component to render hud");
+        return;
+    }
+    u32 level = xp->level();
+    std::string playerText = player->name() + " - level " + std::to_string(level);
+    ImVec2 playerTextSize = ImGui::CalcTextSize(playerText.c_str());
 
     f32 windowWidth = ImGui::GetWindowWidth();
     f32 uiWidth = 750;
     f32 horizontalCenter = (windowWidth - uiWidth) * 0.5f;
-    f32 playerNameHorizontalCenter = (windowWidth - playerNameTextSize.x) * 0.5f;
+    f32 playerNameHorizontalCenter = (windowWidth - playerTextSize.x) * 0.5f;
 
     ImVec2 resourceBarSize = {uiWidth / 2.0f, 20};
-    ImVec2 xpBarSize = {uiWidth, 5};
+    ImVec2 xpBarSize = {uiWidth, 15};
     ImVec2 castBarSize = {uiWidth, 15};
 
     ImGui::SetCursorPosX(playerNameHorizontalCenter);
-    ImGui::Text("%s", player->name().c_str());
+    ImGui::Text("%s", playerText.c_str());
 
     // render cast bar
-    ImGui::SetCursorPosX(horizontalCenter);
-    if(spellBook && spellBook->castedSpell()) {
+    if(!spellBook) {
+        ERROR_ONCE("[UI]: no spellbook component to render hud");
+        return;
+    }
+    if(spellBook->castedSpell()) {
+        ImGui::SetCursorPosX(horizontalCenter);
         if(spellBook->interruptible()) {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.4f, 0.00f, 0.4f, 1.0f));
         } else {
@@ -232,14 +245,27 @@ void UI::renderHUD(EntityPtr player) {
 
     // render xp bar
     ImGui::SetCursorPosX(horizontalCenter);
+    ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+
+    u32 currentXP = xp->currentXP();
+    u32 nextLevelXP = xp->nextLevelXP();
+    f32 progress = static_cast<f32>(currentXP) / static_cast<f32>(nextLevelXP);
+
+    std::string xpText = std::to_string(currentXP) + " / " + std::to_string(nextLevelXP);
+    ImVec2 xpTextSize = ImGui::CalcTextSize(xpText.c_str());
+    ImVec2 xpTextPosition = ImVec2(cursorPos.x + (xpBarSize.x - xpTextSize.x) * 0.5f,
+        cursorPos.y + (xpBarSize.y - xpTextSize.y) * 0.5f);
+
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.73f, 0.43f, 0.0f, 1.0f));
-    ImGui::ProgressBar(0.74f, xpBarSize, "");
+    ImGui::ProgressBar(progress, xpBarSize, "");
+    ImGui::GetWindowDrawList()->AddText(
+        xpTextPosition, IM_COL32(255, 255, 255, 255), xpText.c_str());
     ImGui::PopStyleColor();
 
     Life lifeValue;
     Mana manaValue;
     if(!life) {
-        ERROR_ONCE("no life component to render hud");
+        ERROR_ONCE("[UI]: no life component to render hud");
         return;
     }
     lifeValue = life->life();
@@ -249,7 +275,7 @@ void UI::renderHUD(EntityPtr player) {
     ImVec2 lifeTextSize = ImGui::CalcTextSize(lifeText.c_str());
 
     if(!mana) {
-        ERROR_ONCE("no mana component to render hud");
+        ERROR_ONCE("[UI]: no mana component to render hud");
         return;
     }
     manaValue = mana->mana();

@@ -1,19 +1,10 @@
 #include "owner.hpp"
 
-EntityPtr OwnerComponent::owner() const {
-
-    if(owner_.expired()) {
-        return nullptr;
-    }
-    return owner_.lock();
+EntityHandle OwnerComponent::owner() const {
+    return owner_;
 }
 
 bool OwnerComponent::isOwnedBy(EntityPtr owner) const {
-
-    if(owner_.expired()) {
-        return false;
-    }
-
     return owner_.lock() == owner;
 }
 

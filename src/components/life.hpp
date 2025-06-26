@@ -9,14 +9,14 @@ struct Life {
 };
 
 class LifeComponent : public Component<LifeComponent> {
-
 public:
     void attach() override;
     const Life& life() const;
     void setLife(const Life& life);
-    void reduceLife(f32 amount);
+    void reduceLife(f32 amount, EntityPtr applier);
     void increaseLife(f32 amount);
     bool isAtFull();
+    bool isDead() const;
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
     void render(std::shared_ptr<Renderer> renderer) override;
@@ -26,5 +26,6 @@ private:
 
 private:
     Life life_;
-    bool dead;
+    bool dead_;
+    EntityHandle lastAttacker_;
 };
