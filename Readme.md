@@ -12,7 +12,6 @@ A sandbox project using CES to test interaction between components and entities.
 **UI**
  - [ ] spell icons
  - [ ] health bar on entity hover
- - [ ] xp update
 
 **Assets**
  - [ ] spell animations(textures, data)

@@ -247,11 +247,17 @@ void UI::renderHUD(EntityPtr player) {
     ImGui::SetCursorPosX(horizontalCenter);
     ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 
+    bool maxLevel = xp->isMaxLevel();
     u32 currentXP = xp->currentXP();
     u32 nextLevelXP = xp->nextLevelXP();
-    f32 progress = static_cast<f32>(currentXP) / static_cast<f32>(nextLevelXP);
+    f32 progress = maxLevel ? 1.0f : static_cast<f32>(currentXP) / static_cast<f32>(nextLevelXP);
 
-    std::string xpText = std::to_string(currentXP) + " / " + std::to_string(nextLevelXP);
+    std::string xpText;
+    if(maxLevel) {
+        xpText = "MAXIMUM LEVEL";
+    } else {
+        xpText = std::to_string(currentXP) + " / " + std::to_string(nextLevelXP);
+    }
     ImVec2 xpTextSize = ImGui::CalcTextSize(xpText.c_str());
     ImVec2 xpTextPosition = ImVec2(cursorPos.x + (xpBarSize.x - xpTextSize.x) * 0.5f,
         cursorPos.y + (xpBarSize.y - xpTextSize.y) * 0.5f);

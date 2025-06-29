@@ -9,8 +9,11 @@ bool SpellEffect::isDirect() const {
     return (type == SpellEffectType::DIRECT_DAMAGE || type == SpellEffectType::DIRECT_HEAL);
 }
 
-SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData) {
-    spellData_ = spellData;
+SpellComponent::SpellComponent() : casterTag_(TagType::UNKNOWN) {
+}
+
+SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData)
+    : spellData_(spellData), casterTag_(TagType::UNKNOWN) {
 }
 
 void SpellComponent::attach() {
@@ -62,7 +65,7 @@ void SpellComponent::postUpdate(const f32 dt) {
 
             for(auto target : colliders) {
                 for(auto& effect : spellData_->action.effects) {
-                    if(canApplyEffect(ownerComponent->owner().lock(), target, effect)) {
+                    if(canApplyEffect(target, effect)) {
                         auto statusEffectComponent = target->component<StatusEffectComponent>();
 
                         if(statusEffectComponent) {
@@ -98,22 +101,23 @@ bool SpellComponent::isDead() {
     return dead_;
 }
 
-bool SpellComponent::canApplyEffect(EntityPtr applier, EntityPtr target, SpellEffect effect) {
-    auto applierTagComponent = applier->component<TagComponent>();
+void SpellComponent::setCasterTag(TagType tag) {
+    casterTag_ = tag;
+}
+
+bool SpellComponent::canApplyEffect(EntityPtr target, SpellEffect effect) {
     auto targetTagComponent = target->component<TagComponent>();
 
-    if(!applierTagComponent || !targetTagComponent) {
+    if(!targetTagComponent) {
         return false;
     }
-
-    auto targetTag = targetTagComponent->tag();
 
     bool belongs;
 
     if(effect.targetFaction == FactionType::FRIENDLY) {
-        belongs = applierTagComponent->isFriendly(targetTag);
+        belongs = targetTagComponent->isFriendly(casterTag_);
     } else if(effect.targetFaction == FactionType::HOSTILE) {
-        belongs = applierTagComponent->isHostile(targetTag);
+        belongs = targetTagComponent->isHostile(casterTag_);
     } else {
         // unknown faction
         belongs = false;

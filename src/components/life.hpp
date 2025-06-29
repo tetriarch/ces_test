@@ -10,8 +10,10 @@ struct Life {
 
 class LifeComponent : public Component<LifeComponent> {
 public:
+    LifeComponent();
     void attach() override;
     const Life& life() const;
+    void reset();
     void setLife(const Life& life);
     void reduceLife(f32 amount, EntityPtr applier);
     void increaseLife(f32 amount);

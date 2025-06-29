@@ -169,7 +169,7 @@ void AIComponent::updateCombat(const f32 dt) {
 
     if(target) {
         auto targetLifeComponent = target->component<LifeComponent>();
-        if(targetLifeComponent->isDead()) {
+        if(targetLifeComponent && targetLifeComponent->isDead()) {
             collectEntitiesInRange();
             if(!enemyInRange()) {
                 leaveCombat();

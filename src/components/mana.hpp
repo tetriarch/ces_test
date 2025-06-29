@@ -9,10 +9,12 @@ struct Mana {
 };
 
 class ManaComponent : public Component<ManaComponent> {
-
 public:
+    ManaComponent();
+    void attach() override;
     const Mana& mana() const;
     void setMana(const Mana& mana);
+    void reset();
     void reduceMana(u32 amount);
     void increaseMana(u32 amount);
 

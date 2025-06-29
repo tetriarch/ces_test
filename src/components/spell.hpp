@@ -89,18 +89,21 @@ struct SpellData : public IAsset {
 
 class SpellComponent : public Component<SpellComponent> {
 public:
+    SpellComponent();
     SpellComponent(std::shared_ptr<SpellData> spellData);
     void attach() override;
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
     bool isDead();
+    void setCasterTag(TagType tag);
 
 private:
-    bool canApplyEffect(EntityPtr applier, EntityPtr target, SpellEffect onHitEffect);
+    bool canApplyEffect(EntityPtr target, SpellEffect onHitEffect);
 
 private:
     std::shared_ptr<SpellData> spellData_;
     f32 currentDuration_;
     f32 traveledDistance_;
     bool dead_;
+    TagType casterTag_;
 };

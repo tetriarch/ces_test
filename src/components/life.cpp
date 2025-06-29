@@ -7,11 +7,15 @@
 #include "tag.hpp"
 #include "xp.hpp"
 
+const f32 LIFE_PER_LEVEL_INCREMENT = 10.0f;
 const f32 LIFE_BAR_VERTICAL_OFFSET = 10;
 const f32 LIFE_BAR_HEIGHT = 5;
 
+LifeComponent::LifeComponent() : life_{0.0f, 0.0f}, dead_(false) {
+}
+
 void LifeComponent::attach() {
-    dead_ = false;
+    reset();
 }
 
 const Life& LifeComponent::life() const {
@@ -20,6 +24,15 @@ const Life& LifeComponent::life() const {
 
 void LifeComponent::setLife(const Life& life) {
     life_ = life;
+}
+
+void LifeComponent::reset() {
+    auto xpComponent = entity()->component<XPComponent>();
+    if(xpComponent) {
+        u32 level = xpComponent->level();
+        life_.max += LIFE_PER_LEVEL_INCREMENT * (level - 1);
+        life_.current = life_.max;
+    }
 }
 
 void LifeComponent::reduceLife(f32 amount, EntityPtr applier) {

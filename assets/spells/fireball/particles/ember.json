@@ -1,7 +1,7 @@
 {
     "texture_path": "particles/ember.png",
-    "lifetime_min": 0.8,
-    "lifetime_max": 1.5,
+    "lifetime_min": 0.6,
+    "lifetime_max": 1.0,
     "scale_min_start": 1.0,
     "scale_max_start": 1.0,
     "scale_min_end": 0.1,

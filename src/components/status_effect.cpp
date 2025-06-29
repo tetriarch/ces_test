@@ -43,7 +43,7 @@ void StatusEffectComponent::applyEffect(const SpellEffect& effect) {
         auto am = AssetManager::get();
         auto visualEffect = am->load<StatusEffectData>(e.effectFilePath);
         if(!visualEffect) {
-            ERROR("status effect " + e.name +
+            ERROR("[STATUS EFFECT]: " + e.name +
                   " is flagged as visual but no visual data has been found");
             return;
         }

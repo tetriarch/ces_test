@@ -2,22 +2,13 @@
 
 #include "../component.hpp"
 
-enum class TagType {
-    NPC,
-    PLAYER,
-    MONSTER,
-    UNKNOWN
-};
+enum class TagType { NPC, PLAYER, MONSTER, UNKNOWN };
 
-enum class FactionType {
-    FRIENDLY,
-    HOSTILE,
-    UNKNOWN
-};
+enum class FactionType { FRIENDLY, HOSTILE, UNKNOWN };
 
 class TagComponent : public Component<TagComponent> {
-
 public:
+    TagComponent();
     void setTag(TagType tag);
     void associate(FactionType faction, TagType tag);
     void disassociate(FactionType faction, TagType tag);
@@ -28,7 +19,7 @@ public:
     bool isTaggedAs(TagType tag);
 
 private:
-    TagType tag_{TagType::UNKNOWN};
+    TagType tag_;
     std::unordered_set<TagType> friends_;
     std::unordered_set<TagType> foes_;
     bool removeFromList(std::unordered_set<TagType>& list, TagType tag);

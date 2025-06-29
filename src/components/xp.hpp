@@ -10,10 +10,12 @@ public:
     u32 level() const;
     u32 currentXP() const;
     u32 nextLevelXP() const;
+    bool isMaxLevel() const;
     void update(const f32 dt) override;
 
 private:
     void levelUp();
+    void resetXP();
 
 private:
     u32 currentXP_;

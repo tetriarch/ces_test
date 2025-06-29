@@ -59,13 +59,18 @@ void SpellBookComponent::update(f32 dt) {
 
             EntityPtr spellEntity = Entity::create(castedSpell_->name, true);
             spellEntity->setTransform(entity()->transform());
-            spellEntity->addComponent(std::make_shared<SpellComponent>(castedSpell_));
+            auto spellComponent = std::make_shared<SpellComponent>(castedSpell_);
 
-            std::shared_ptr<GeometryComponent> geometryComponent =
-                std::make_shared<GeometryComponent>();
-            std::shared_ptr<CollisionComponent> collisionComponent =
-                std::make_shared<CollisionComponent>();
-            std::shared_ptr<OwnerComponent> ownerComponent = std::make_shared<OwnerComponent>();
+            // pass caster's tag in case caster dies
+            auto tagComponent = entity()->component<TagComponent>();
+            if(tagComponent) {
+                spellComponent->setCasterTag(tagComponent->tag());
+            }
+            spellEntity->addComponent(spellComponent);
+
+            auto geometryComponent = std::make_shared<GeometryComponent>();
+            auto collisionComponent = std::make_shared<CollisionComponent>();
+            auto ownerComponent = std::make_shared<OwnerComponent>();
 
             auto geometryData = determineGeometry();
             auto collisionData = determineCollision();
