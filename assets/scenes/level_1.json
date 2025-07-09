@@ -20,11 +20,20 @@
             ]
         },
         {
-            "name": "Big Bad Wolf 2",
+            "name": "Big Bad Wolf",
             "prefab": "characters/monsters/wolf/wolf.json",
             "transform": [
                 700.0,
                 300.0,
+                0.0
+            ]
+        },
+        {
+            "name": "Wolf's Den",
+            "prefab": "characters/monsters/wolf_den/wolf_den.json",
+            "transform": [
+                800.0,
+                400.0,
                 0.0
             ]
         },

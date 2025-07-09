@@ -4,7 +4,9 @@
 
 #include "log.hpp"
 #include "math.hpp"
+
 class Renderer;
+
 class Entity : public std::enable_shared_from_this<Entity> {
 public:
     Entity(const std::string& name, bool lazyAttach);

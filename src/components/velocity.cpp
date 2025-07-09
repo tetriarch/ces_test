@@ -34,10 +34,10 @@ void VelocityComponent::update(const f32 dt) {
         auto stun = statusEffect->effect(SpellEffectType::STUN);
 
         if(haste) {
-            speedModifier *= 1.0f + haste->magnitude;
+            speedModifier *= (1.0f + haste->magnitude);
         }
         if(slow) {
-            speedModifier *= 1.0f - slow->magnitude;
+            speedModifier *= (1.0f - slow->magnitude);
         }
         if(stun) {
             speedModifier = 0.0f;

@@ -3,6 +3,7 @@
 #include "asset_manager.hpp"
 #include "loaders/animation_loader.hpp"
 #include "loaders/emitter_loader.hpp"
+#include "loaders/entity_loader.hpp"
 #include "loaders/particle_loader.hpp"
 #include "loaders/scene_loader.hpp"
 #include "loaders/spell_loader.hpp"
@@ -43,6 +44,7 @@ bool Core::init() {
     am->setAssetRoot("assets");
     am->registerLoader<SpellData>(std::make_shared<SpellLoader>());
     am->registerLoader<Scene>(std::make_shared<SceneLoader>());
+    am->registerLoader<EntityData>(std::make_shared<EntityLoader>());
     am->registerLoader<Texture>(std::make_shared<TextureLoader>(renderer_));
     am->registerLoader<AnimationData>(std::make_shared<AnimationLoader>());
     am->registerLoader<StatusEffectData>(std::make_shared<StatusEffectLoader>());

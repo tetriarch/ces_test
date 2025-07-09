@@ -17,11 +17,9 @@ AIComponent::AIComponent()
 
 void AIComponent::attach() {
     auto velocityComponent = entity()->component<VelocityComponent>();
-    if(!velocityComponent) {
-        ERROR(entity()->name() + "does not have velocity component");
-        return;
+    if(velocityComponent) {
+        velocityComponent->setAIControl(true);
     }
-    velocityComponent->setAIControl(true);
 }
 
 void AIComponent::update(const f32 dt) {
@@ -116,12 +114,16 @@ void AIComponent::updateIdle(const f32 dt) {
         direction.x = rng_.getFloat(-1.0f, 1.0f);
         direction.y = rng_.getFloat(-1.0f, 1.0f);
         if(direction.length() >= 0.2f) {
-            velocityComponent->setMotion({direction.x, direction.y});
-            transform.rotationInDegrees = angleFromDirection(direction);
-            entity()->setTransform(transform);
+            if(velocityComponent) {
+                velocityComponent->setMotion({direction.x, direction.y});
+                transform.rotationInDegrees = angleFromDirection(direction);
+                entity()->setTransform(transform);
+            }
         } else {
             // clear motion on short direction length
-            velocityComponent->clearMotion();
+            if(velocityComponent) {
+                velocityComponent->clearMotion();
+            }
         }
         idleTimer_ = rng_.getFloat(0.5f, 1.5f);
     } else {
@@ -186,16 +188,32 @@ void AIComponent::updateCombat(const f32 dt) {
         auto velocityComponent = entity()->component<VelocityComponent>();
         if(velocityComponent) {
             velocityComponent->setMotion(targetDirection);
+            transform.rotationInDegrees = angleFromDirection(targetDirection);
+            entity()->setTransform(transform);
         }
-
-        transform.rotationInDegrees = angleFromDirection(targetDirection);
-        entity()->setTransform(transform);
 
         auto spellBookComponent = entity()->component<SpellBookComponent>();
         if(spellBookComponent) {
-            const auto& spells = spellBookComponent->spells();
-            if(!spells.empty()) {
-                u32 spellIndex = rng_.getUnsigned(0, spells.size() - 1);
+            u32 spellCount = spellBookComponent->availableSpellsCount();
+            if(spellCount > 0) {
+                u32 spellIndex = rng_.getUnsigned(0, spellCount - 1);
+                auto spell = spellBookComponent->spell(spellIndex);
+                if(spell && spell->action.type == ActionType::SPAWN) {
+                    auto geometryComponent = entity()->component<GeometryComponent>();
+                    if(geometryComponent) {
+                        auto rect = geometryComponent->rect();
+                        auto range = rng_.getFloat(-spell->maxRange, spell->maxRange);
+                        if(range > 0) {
+                            range -= std::min(rect.w, rect.h);
+                        } else {
+                            range += std::min(rect.w, rect.h);
+                        }
+
+                        targetDirection.x = transform.position.x + range;
+                        targetDirection.y = transform.position.y + range;
+                    }
+                }
+
                 if(!spellBookComponent->isCasting()) {
                     spellBookComponent->castSpell(spellIndex, targetDirection);
                 }

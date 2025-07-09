@@ -7,6 +7,7 @@
 #include "mana.hpp"
 #include "owner.hpp"
 #include "particle_system.hpp"
+#include "spawn.hpp"
 #include "spell.hpp"
 #include "status_effect.hpp"
 
@@ -62,30 +63,35 @@ void SpellBookComponent::update(f32 dt) {
             auto spellComponent = std::make_shared<SpellComponent>(castedSpell_);
 
             // pass caster's tag in case caster dies
-            auto tagComponent = entity()->component<TagComponent>();
-            if(tagComponent) {
-                spellComponent->setCasterTag(tagComponent->tag());
+            if(castedSpell_->action.type != ActionType::SELF) {
+                auto tagComponent = entity()->component<TagComponent>();
+                if(tagComponent) {
+                    spellComponent->setCasterTag(tagComponent->tag());
+                }
             }
-            spellEntity->addComponent(spellComponent);
 
-            auto geometryComponent = std::make_shared<GeometryComponent>();
-            auto collisionComponent = std::make_shared<CollisionComponent>();
             auto ownerComponent = std::make_shared<OwnerComponent>();
-
-            auto geometryData = determineGeometry();
-            auto collisionData = determineCollision();
-
-            geometryComponent->setGeometryData(geometryData);
-            geometryComponent->setTextureFilePath(castedSpell_->textureFilePath);
-            spellEntity->addComponent(geometryComponent);
-
-            collisionComponent->setCollisionData(collisionData);
-            spellEntity->addComponent(collisionComponent);
-
             ownerComponent->setOwner(entity());
             spellEntity->addComponent(ownerComponent);
 
-            if(castedSpell_->animated) {
+            spellEntity->addComponent(spellComponent);
+
+            if(castedSpell_->requiresComponent(SpellRequirement::GEOMETRY)) {
+                auto geometryComponent = std::make_shared<GeometryComponent>();
+                auto geometryData = determineGeometry();
+                geometryComponent->setGeometryData(geometryData);
+                geometryComponent->setTextureFilePath(castedSpell_->textureFilePath);
+                spellEntity->addComponent(geometryComponent);
+            }
+
+            if(castedSpell_->requiresComponent(SpellRequirement::COLLISION)) {
+                auto collisionComponent = std::make_shared<CollisionComponent>();
+                auto collisionData = determineCollision();
+                collisionComponent->setCollisionData(collisionData);
+                spellEntity->addComponent(collisionComponent);
+            }
+
+            if(castedSpell_->requiresComponent(SpellRequirement::ANIMATION)) {
                 std::shared_ptr<AnimationComponent> animationComponent =
                     std::make_shared<AnimationComponent>();
                 animationComponent->addAnimationFiles(castedSpell_->animationFiles);
@@ -93,20 +99,31 @@ void SpellBookComponent::update(f32 dt) {
                 spellEntity->addComponent(animationComponent);
             }
 
-            if(castedSpell_->particles) {
+            if(castedSpell_->requiresComponent(SpellRequirement::PARTICLE)) {
                 std::shared_ptr<ParticleSystemComponent> particleSystemComponent =
                     std::make_shared<ParticleSystemComponent>();
                 particleSystemComponent->addEmitterFiles(castedSpell_->emitterFiles);
                 spellEntity->addComponent(particleSystemComponent);
             }
 
-            // update mana
-            auto mana = entity()->component<ManaComponent>();
-            if(!mana) {
-                ERROR("[SPELL BOOK]: missing mana component");
-                return;
+            if(castedSpell_->requiresComponent(SpellRequirement::SPAWN)) {
+                std::shared_ptr<SpawnComponent> spawnComponent = std::make_shared<SpawnComponent>();
+                spawnComponent->setSpawn(castedSpell_->spawnName, castedSpell_->spawnPrefabFile);
+                auto spellEntityTransform = spellEntity->transform();
+                spellEntityTransform.position = target_;
+                spellEntity->setTransform(spellEntityTransform);
+                spellEntity->addComponent(spawnComponent);
             }
-            mana->reduceMana(castedSpell_->manaCost);
+
+            // update mana
+            if(castedSpell_->manaCost != 0) {
+                auto mana = entity()->component<ManaComponent>();
+                if(!mana) {
+                    ERROR("[SPELL BOOK]: missing mana component");
+                    return;
+                }
+                mana->reduceMana(castedSpell_->manaCost);
+            }
 
             castedSpell_ = nullptr;
             castProgress_ = 0.0f;
@@ -135,7 +152,7 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
     }
 
     if(isSpellInSlotOnCooldown(index)) {
-        INFO("[SPELL BOOK]: " + spellSlots_[index]->name + " on cooldown");
+        ERROR_ONCE("[SPELL BOOK]: " + spellSlots_[index]->name + " on cooldown");
         return;
     }
 
@@ -152,18 +169,20 @@ void SpellBookComponent::castSpell(u32 index, const Vec2& target) {
     }
 
     // check if we have enough mana
-    auto mana = entity()->component<ManaComponent>();
-    if(!mana) {
-        ERROR("[SPELL BOOK]: missing mana component");
-        return;
-    }
-
-    if(mana->mana().current < static_cast<f32>(spell->manaCost)) {
-        auto tagComponent = entity()->component<TagComponent>();
-        if(tagComponent->tag() == TagType::PLAYER) {
-            INFO("[SPELL BOOK]: not enough mana");
+    if(spell->manaCost != 0) {
+        auto mana = entity()->component<ManaComponent>();
+        if(!mana) {
+            ERROR("[SPELL BOOK]: missing mana component");
+            return;
         }
-        return;
+
+        if(mana->mana().current < static_cast<f32>(spell->manaCost)) {
+            auto tagComponent = entity()->component<TagComponent>();
+            if(tagComponent->tag() == TagType::PLAYER) {
+                INFO("[SPELL BOOK]: not enough mana");
+            }
+            return;
+        }
     }
 
     INFO("[SPELL BOOK]: caster " + entity()->name() + " casting " + spell->name);
@@ -182,6 +201,13 @@ void SpellBookComponent::interruptCasting() {
 
 auto SpellBookComponent::spells() const -> const std::vector<std::shared_ptr<SpellData>> {
     return spells_;
+}
+
+auto SpellBookComponent::spell(u32 index) -> std::shared_ptr<SpellData> {
+    if(index > spells_.size()) {
+        return nullptr;
+    }
+    return spells_[index];
 }
 
 void SpellBookComponent::setSlot(u32 index, std::shared_ptr<SpellData> spell) {
@@ -236,6 +262,10 @@ bool SpellBookComponent::isSpellOnCooldown(std::shared_ptr<SpellData> spell) {
         return true;
     }
     return false;
+}
+
+u32 SpellBookComponent::availableSpellsCount() const {
+    return static_cast<u32>(spells_.size());
 }
 
 void SpellBookComponent::autoEquipSpells() {

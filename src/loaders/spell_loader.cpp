@@ -30,57 +30,62 @@ auto SpellLoader::parseSpell(const std::string& source)
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    // parse basic stats
-    auto stats = parseBasicStats(spellJSON);
-    if(!stats) {
-        ERROR(error("failed to parse basic stats"));
-        return std::unexpected(stats.error());
-    }
-    auto spell = stats.value();
+    SpellData spell;
 
-    // parse action
+    // parse action to know what this spell actually do
     json::const_iterator it = spellJSON.find("action");
     if(it == spellJSON.end()) {
         ERROR(error("failed to find action"));
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    auto action = parseAction(it.value(), "action");
+    auto action = parseAction(it.value(), spell, "action");
     if(!action) {
         ERROR(error("failed to parse action"));
-        return std::unexpected(action.error());
+        return std::unexpected(JSONParserError::PARSE);
     }
-    spell.action = action.value();
+
+    // parse general stats
+    auto stats = parseGeneralData(spellJSON, spell);
+    if(!stats) {
+        ERROR(error("failed to parse general stats"));
+        return std::unexpected(JSONParserError::PARSE);
+    }
 
     // parse geometry
-    it = spellJSON.find("geometry");
-    if(it == spellJSON.end()) {
-        ERROR(error("failed to find geometry"));
-        return std::unexpected(JSONParserError::PARSE);
+    if(spell.requiresComponent(SpellRequirement::GEOMETRY)) {
+        it = spellJSON.find("geometry");
+        if(it == spellJSON.end()) {
+            ERROR(error("failed to find geometry"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        auto geometry = parseGeometryData(it.value(), "geometry");
+        if(!geometry) {
+            ERROR(error("failed to parse geometry"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        spell.geometryData = std::move(geometry.value());
     }
 
-    auto geometry = parseGeometryData(it.value(), "geometry");
-    if(!geometry) {
-        ERROR(error("failed to parse geometry"));
-        return std::unexpected(JSONParserError::PARSE);
+    if(spell.requiresComponent(SpellRequirement::COLLISION)) {
+        it = spellJSON.find("collision");
+        if(it == spellJSON.end()) {
+            ERROR(error("failed to find collision"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+
+        auto collisionData = parseCollisionData(it.value(), "collision");
+        if(!collisionData) {
+            ERROR(error("failed to parse collision"));
+            return std::unexpected(JSONParserError::PARSE);
+        }
+        spell.collisionData = std::move(collisionData.value());
     }
 
-    spell.geometryData = std::move(geometry.value());
-
-    it = spellJSON.find("collision");
-    if(it == spellJSON.end()) {
-        ERROR(error("failed to find collision"));
-        return std::unexpected(JSONParserError::PARSE);
-    }
-
-    auto collisionData = parseCollisionData(it.value(), "collision");
-    if(!collisionData) {
-        ERROR(error("failed to parse collision"));
-        return std::unexpected(JSONParserError::PARSE);
-    }
-    spell.collisionData = std::move(collisionData.value());
-
-    if(spell.animated) {
+    // animation
+    if(spell.requiresComponent(SpellRequirement::ANIMATION)) {
         it = spellJSON.find("animations");
         if(it == spellJSON.end()) {
             ERROR(error("failed to find animations"));
@@ -95,7 +100,7 @@ auto SpellLoader::parseSpell(const std::string& source)
         spell.animationFiles = std::move(animations.value());
     }
 
-    if(spell.particles) {
+    if(spell.requiresComponent(SpellRequirement::PARTICLE)) {
         it = spellJSON.find("emitters");
         if(it == spellJSON.end()) {
             ERROR(error("failed to find emitters"));
@@ -113,114 +118,162 @@ auto SpellLoader::parseSpell(const std::string& source)
     return std::move(spell);
 }
 
-auto SpellLoader::parseBasicStats(const json& o, const std::string& parent)
-    -> std::expected<SpellData, JSONParserError> {
-    SpellData spellData;
-
-    if(!get<std::string>(o, "name", true, spellData.name, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+bool SpellLoader::parseGeneralData(const json& o, SpellData& spell, const std::string& parent) {
+    if(!get<std::string>(o, "name", true, spell.name, parent)) {
+        return false;
     }
 
-    if(!get<f32>(o, "cast_time", true, spellData.castTime, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(!get<f32>(o, "cast_time", true, spell.castTime, parent)) {
+        return false;
     }
 
-    if(!get<f32>(o, "interrupt_time", true, spellData.interruptTime, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(!get<f32>(o, "interrupt_time", true, spell.interruptTime, parent)) {
+        return false;
     }
 
-    if(!get<u32>(o, "mana_cost", true, spellData.manaCost, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(!get<u32>(o, "mana_cost", true, spell.manaCost, parent)) {
+        return false;
     }
 
-    if(!get<f32>(o, "cooldown", true, spellData.cooldown, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(!get<f32>(o, "cooldown", true, spell.cooldown, parent)) {
+        return false;
     }
 
-    if(!get<f32>(o, "duration", true, spellData.duration, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(!get<f32>(o, "duration", true, spell.duration, parent)) {
+        return false;
     }
 
-    if(!get<f32>(o, "max_range", true, spellData.maxRange, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(!get<f32>(o, "max_range", true, spell.maxRange, parent)) {
+        return false;
     }
 
-    if(!get<std::string>(o, "texture_path", false, spellData.textureFilePath, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    bool animated = false;
+    if(!get<bool>(o, "animated", true, animated, parent)) {
+        return false;
+    }
+    if(animated) {
+        spell.componentRequirements |= static_cast<u8>(SpellRequirement::ANIMATION);
+        spell.componentRequirements |= static_cast<u8>(SpellRequirement::GEOMETRY);
     }
 
-    if(!get<bool>(o, "animated", true, spellData.animated, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    if(spell.requiresComponent(SpellRequirement::GEOMETRY)) {
+        if(!get<std::string>(o, "texture_path", true, spell.textureFilePath, parent)) {
+            return false;
+        }
     }
 
-    if(!get<bool>(o, "particles", true, spellData.particles, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    bool particles = false;
+    if(!get<bool>(o, "particles", true, particles, parent)) {
+        return false;
+    }
+    if(particles) {
+        spell.componentRequirements |= static_cast<u8>(SpellRequirement::PARTICLE);
     }
 
-    return std::move(spellData);
+    return true;
 }
 
-auto SpellLoader::parseAction(const json& o, const std::string& parent)
-    -> std::expected<SpellAction, JSONParserError> {
-    SpellAction action;
-
+bool SpellLoader::parseAction(const json& o, SpellData& spell, const std::string& parent) {
     std::string actionType;
-    bool pierce;
     std::string movementType;
 
     if(!get<std::string>(o, "type", true, actionType, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+        return false;
     }
 
-    if(!get<bool>(o, "pierce", true, pierce, parent)) {
-        return std::unexpected(JSONParserError::PARSE);
+    spell.action.type = magic_enum::enum_cast<ActionType>(actionType).value_or(ActionType::UNKNOWN);
+    if(spell.action.type == ActionType::BEAM || spell.action.type == ActionType::PROJECTILE) {
+        if(!get<bool>(o, "pierce", true, spell.action.pierce, parent)) {
+            return false;
+        }
     }
-
-    action.type = magic_enum::enum_cast<ActionType>(actionType).value_or(ActionType::UNKNOWN);
-    action.pierce = pierce;
 
     // movement
-    json::const_iterator it = o.find("movement");
-    if(it == o.end()) {
-        ERROR(error("has no movement", parent));
-        return std::unexpected(JSONParserError::PARSE);
-    }
+    if(spell.action.type != ActionType::SELF && spell.action.type != ActionType::SPAWN &&
+        spell.action.type != ActionType::UNKNOWN) {
+        spell.componentRequirements |= static_cast<u8>(SpellRequirement::GEOMETRY);
 
-    if(!get<std::string>(it.value(), "type", true, movementType, "movement")) {
-        return std::unexpected(JSONParserError::PARSE);
-    }
-
-    if(movementType == "constant_motion") {
-        ConstantMotion motion;
-        if(!get<f32>(it.value(), "speed", true, motion.speed, parent)) {
-            return std::unexpected(JSONParserError::PARSE);
+        json::const_iterator it = o.find("movement");
+        if(it == o.end()) {
+            ERROR(error("has no movement", parent));
+            return false;
         }
-        action.motion = std::make_shared<ConstantMotion>(motion);
-    } else if(movementType == "instant") {
-        InstantMotion motion;
-        action.motion = std::make_shared<InstantMotion>(motion);
-    } else {
-        ERROR(error("invalid movement type", "movement"));
-        return std::unexpected(JSONParserError::PARSE);
+
+        if(!get<std::string>(it.value(), "type", true, movementType, "movement")) {
+            return false;
+        }
+
+        if(movementType == "constant_motion") {
+            ConstantMotion motion;
+            if(!get<f32>(it.value(), "speed", true, motion.speed, parent)) {
+                return false;
+            }
+            spell.action.motion = std::make_shared<ConstantMotion>(motion);
+        } else if(movementType == "instant") {
+            InstantMotion motion;
+            spell.action.motion = std::make_shared<InstantMotion>(motion);
+        } else {
+            ERROR(error("invalid movement type", "movement"));
+            return false;
+        }
     }
 
     // on hit
-    it = o.find("on_hit");
-    if(it == o.end()) {
-        ERROR(error("has no on_hit", parent));
-        return std::unexpected(JSONParserError::PARSE);
-    }
+    if(o.contains("on_hit")) {
+        spell.componentRequirements |= static_cast<u8>(SpellRequirement::COLLISION);
 
-    for(auto& oh : it.value()) {
-        auto onHitEffect = parseOnHitEffect(oh, "on_hit");
-        if(!onHitEffect) {
-            ERROR(error("failed to parse on_hit action", parent));
-            return std::unexpected(JSONParserError::PARSE);
+        auto it = o.find("on_hit");
+        if(it == o.end()) {
+            ERROR(error("has no on_hit", parent));
+            return false;
         }
-        action.effects.emplace_back(onHitEffect.value());
+
+        for(auto& oh : it.value()) {
+            auto onHitEffect = parseOnHitEffect(oh, "on_hit");
+            if(!onHitEffect) {
+                ERROR(error("failed to parse on_hit action", parent));
+                return false;
+            }
+            spell.action.effects.emplace_back(onHitEffect.value());
+        }
     }
 
-    return action;
+    // spawn
+    if(o.contains("spawn")) {
+        spell.componentRequirements |= static_cast<u8>(SpellRequirement::SPAWN);
+
+        auto it = o.find("spawn");
+        if(it == o.end()) {
+            ERROR(error("has no spawn", parent));
+            return false;
+        }
+
+        auto spawnEffect = parseSpawnEffect(it.value(), spell, "spawn");
+        if(!spawnEffect) {
+            ERROR(error("failed to parse spawn action", parent));
+            return false;
+        }
+    }
+
+    // self
+    if(o.contains("self")) {
+        auto it = o.find("self");
+        if(it == o.end()) {
+            ERROR(error("has no self", parent));
+            return false;
+        }
+
+        for(auto& s : it.value()) {
+            auto selfEffect = parseSelfEffect(s, "self");
+            if(!selfEffect) {
+                ERROR(error("failed to parse self action", parent));
+                return false;
+            }
+            spell.action.effects.emplace_back(selfEffect.value());
+        }
+    }
+
+    return true;
 }
 
 auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent)
@@ -231,48 +284,98 @@ auto SpellLoader::parseOnHitEffect(const json& o, const std::string& parent)
     std::string targetFaction;
 
     // mandatory
-    if(!get<std::string>(o, "name", true, onHitEffect.name, "on_hit")) {
+    if(!get<std::string>(o, "name", true, onHitEffect.name, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    if(!get<std::string>(o, "effect_type", true, effectType, "on_hit")) {
+    if(!get<std::string>(o, "effect_type", true, effectType, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
     onHitEffect.type =
         magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
 
-    if(!get<f32>(o, "duration", true, onHitEffect.maxDuration, "on_hit")) {
+    if(!get<f32>(o, "duration", true, onHitEffect.maxDuration, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    if(!get<std::string>(o, "damage_type", true, dmgType, "on_hit")) {
+    if(!get<std::string>(o, "damage_type", true, dmgType, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
     onHitEffect.dmgType = magic_enum::enum_cast<DamageType>(dmgType).value_or(DamageType::UNKNOWN);
 
-    if(!get<std::string>(o, "target_faction", true, targetFaction, "on_hit")) {
+    if(!get<std::string>(o, "target_faction", true, targetFaction, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
     onHitEffect.targetFaction =
         magic_enum::enum_cast<FactionType>(targetFaction).value_or(FactionType::UNKNOWN);
 
-    if(!get<bool>(o, "visual", true, onHitEffect.visual, "on_hit")) {
+    if(!get<bool>(o, "visual", true, onHitEffect.visual, parent)) {
         return std::unexpected(JSONParserError::PARSE);
     }
 
     if(onHitEffect.visual) {
-        if(!get<std::string>(o, "effect_path", true, onHitEffect.effectFilePath, "on_hit")) {
+        if(!get<std::string>(o, "effect_path", true, onHitEffect.effectFilePath, parent)) {
             return std::unexpected(JSONParserError::PARSE);
         }
     }
     // optional
-    get<u32>(o, "min_value", false, onHitEffect.minValue, "on_hit");
-    get<u32>(o, "max_value", false, onHitEffect.maxValue, "on_hit");
-    get<u32>(o, "periodic_value", false, onHitEffect.periodicValue, "on_hit");
-    get<f32>(o, "magnitude", false, onHitEffect.magnitude, "on_hit");
-    get<u32>(o, "max_stacks", false, onHitEffect.maxStacks, "on_hit");
+    get<u32>(o, "min_value", false, onHitEffect.minValue, parent);
+    get<u32>(o, "max_value", false, onHitEffect.maxValue, parent);
+    get<u32>(o, "periodic_value", false, onHitEffect.periodicValue, parent);
+    get<f32>(o, "magnitude", false, onHitEffect.magnitude, parent);
+    get<u32>(o, "max_stacks", false, onHitEffect.maxStacks, parent);
 
     return onHitEffect;
+}
+
+bool SpellLoader::parseSpawnEffect(const json& o, SpellData& spell, const std::string& parent) {
+    if(!get<std::string>(o, "name", true, spell.spawnName, parent)) {
+        return false;
+    }
+    if(!get<std::string>(o, "prefab", true, spell.spawnPrefabFile, parent)) {
+        return false;
+    }
+    // for consistency
+    return true;
+}
+
+auto SpellLoader::parseSelfEffect(const json& o, const std::string& parent)
+    -> std::expected<SpellEffect, JSONParserError> {
+    SpellEffect selfEffect;
+    std::string effectType;
+
+    // mandatory
+    if(!get<std::string>(o, "name", true, selfEffect.name, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(!get<std::string>(o, "effect_type", true, effectType, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+    selfEffect.type =
+        magic_enum::enum_cast<SpellEffectType>(effectType).value_or(SpellEffectType::UNKNOWN);
+
+    if(!get<f32>(o, "duration", true, selfEffect.maxDuration, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(!get<bool>(o, "visual", true, selfEffect.visual, parent)) {
+        return std::unexpected(JSONParserError::PARSE);
+    }
+
+    if(selfEffect.visual) {
+        if(!get<std::string>(o, "effect_path", true, selfEffect.effectFilePath, parent)) {
+            return std::unexpected(JSONParserError::PARSE);
+        }
+    }
+    // optional
+    get<u32>(o, "min_value", false, selfEffect.minValue, parent);
+    get<u32>(o, "max_value", false, selfEffect.maxValue, parent);
+    get<u32>(o, "periodic_value", false, selfEffect.periodicValue, parent);
+    get<f32>(o, "magnitude", false, selfEffect.magnitude, parent);
+    get<u32>(o, "max_stacks", false, selfEffect.maxStacks, parent);
+
+    return selfEffect;
 }
 
 auto SpellLoader::parseGeometryData(const json& o, const std::string& parent)
@@ -438,7 +541,7 @@ auto SpellLoader::parseEmitters(const json& o, const std::string& parent)
     return emitters;
 }
 
-auto SpellLoader::error(const std::string& msg, const std::string& parent) -> std::string {
+auto SpellLoader::error(const std::string& msg, const std::string& parent) const -> std::string {
     std::string error = "[SPELL LOADER]: ";
     if(!parent.empty()) {
         error += '(' + parent + ") ";

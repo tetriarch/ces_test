@@ -110,7 +110,8 @@ auto StatusEffectLoader::parseRect(const json& o, const std::string& parent)
     return rect;
 }
 
-auto StatusEffectLoader::error(const std::string& msg, const std::string& parent) -> std::string {
+auto StatusEffectLoader::error(const std::string& msg, const std::string& parent) const
+    -> std::string {
     std::string error = "[STATUS EFFECT LOADER]: ";
     if(!parent.empty()) {
         error += '(' + parent + ") ";

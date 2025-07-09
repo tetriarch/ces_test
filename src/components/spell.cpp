@@ -3,10 +3,15 @@
 #include "animation.hpp"
 #include "owner.hpp"
 #include "particle_system.hpp"
+#include "spawn.hpp"
 #include "status_effect.hpp"
 
 bool SpellEffect::isDirect() const {
     return (type == SpellEffectType::DIRECT_DAMAGE || type == SpellEffectType::DIRECT_HEAL);
+}
+
+bool SpellData::requiresComponent(SpellRequirement req) const {
+    return (componentRequirements & static_cast<u8>(req)) != 0;
 }
 
 SpellComponent::SpellComponent() : casterTag_(TagType::UNKNOWN) {
@@ -29,12 +34,21 @@ void SpellComponent::update(const f32 dt) {
 
     auto oldPosition = entity()->transform().position;
 
-    spellData_->action.motion->apply(entity(), dt);
+    if(spellData_->action.type != ActionType::SELF &&
+        spellData_->action.type != ActionType::SPAWN) {
+        spellData_->action.motion->apply(entity(), dt);
+        auto newPosition = entity()->transform().position;
+        traveledDistance_ += Vec2(newPosition - oldPosition).length();
+    }
 
-    auto newPosition = entity()->transform().position;
-
+    if(spellData_->action.type == ActionType::SPAWN) {
+        auto spawnComponent = entity()->component<SpawnComponent>();
+        if(spawnComponent) {
+            spawnComponent->spawn(oldPosition);
+            dead_ = true;
+        }
+    }
     currentDuration_ += dt;
-    traveledDistance_ += Vec2(newPosition - oldPosition).length();
 }
 
 void SpellComponent::postUpdate(const f32 dt) {
@@ -47,37 +61,53 @@ void SpellComponent::postUpdate(const f32 dt) {
         return;
     }
 
-    if(spellData_->duration != 0) {
-        if(currentDuration_ >= spellData_->duration) {
+    if(spellData_->action.type != ActionType::SELF) {
+        if(spellData_->duration > 0) {
+            if(currentDuration_ >= spellData_->duration) {
+                dead_ = true;
+            }
+        } else if(traveledDistance_ >= spellData_->maxRange) {
             dead_ = true;
         }
-    } else if(traveledDistance_ >= spellData_->maxRange) {
-        dead_ = true;
     }
 
-    auto collisionComponent = entity()->component<CollisionComponent>();
     auto ownerComponent = entity()->component<OwnerComponent>();
+    if(spellData_->action.type == ActionType::SELF) {
+        for(auto& effect : spellData_->action.effects) {
+            if(ownerComponent) {
+                auto owner = ownerComponent->owner().lock();
+                auto statusEffectComponent = owner->component<StatusEffectComponent>();
+                if(statusEffectComponent) {
+                    effect.applier = owner;
+                    statusEffectComponent->applyEffect(effect);
+                    dead_ = true;
+                }
+            }
+        }
+    } else {
+        auto collisionComponent = entity()->component<CollisionComponent>();
 
-    if(collisionComponent && ownerComponent) {
-        if(collisionComponent->collided()) {
-            auto colliders = collisionComponent->colliders();
-            bool effectApllied = false;
+        if(collisionComponent && ownerComponent) {
+            if(collisionComponent->collided()) {
+                auto colliders = collisionComponent->colliders();
+                bool effectApplied = false;
 
-            for(auto target : colliders) {
-                for(auto& effect : spellData_->action.effects) {
-                    if(canApplyEffect(target, effect)) {
-                        auto statusEffectComponent = target->component<StatusEffectComponent>();
+                for(auto target : colliders) {
+                    for(auto& effect : spellData_->action.effects) {
+                        if(canApplyEffect(target, effect)) {
+                            auto statusEffectComponent = target->component<StatusEffectComponent>();
 
-                        if(statusEffectComponent) {
-                            effect.applier = ownerComponent->owner();
-                            statusEffectComponent->applyEffect(effect);
-                            effectApllied = true;
+                            if(statusEffectComponent) {
+                                effect.applier = ownerComponent->owner();
+                                statusEffectComponent->applyEffect(effect);
+                                effectApplied = true;
+                            }
                         }
                     }
                 }
-            }
-            if(effectApllied) {
-                dead_ = true;
+                if(effectApplied) {
+                    dead_ = true;
+                }
             }
         }
     }

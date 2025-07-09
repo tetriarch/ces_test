@@ -10,5 +10,6 @@ public:
 
 private:
     auto parseEmitter(const std::string& source) -> std::expected<EmitterData, JSONParserError>;
-    auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
+    auto error(const std::string& msg, const std::string& parent = "") const
+        -> std::string override;
 };

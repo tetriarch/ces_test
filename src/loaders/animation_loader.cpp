@@ -64,7 +64,8 @@ auto AnimationLoader::parseAnimationData(const json& o, const std::string& paren
     return std::move(animation);
 }
 
-auto AnimationLoader::error(const std::string& msg, const std::string& parent) -> std::string {
+auto AnimationLoader::error(const std::string& msg, const std::string& parent) const
+    -> std::string {
     std::string error = "[ANIMATION LOADER]: ";
     if(!parent.empty()) {
         error += '(' + parent + ") ";

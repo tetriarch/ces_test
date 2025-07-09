@@ -11,5 +11,6 @@ public:
 
 private:
     auto parseParticle(const std::string& source) -> std::expected<ParticleData, JSONParserError>;
-    auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
+    auto error(const std::string& msg, const std::string& parent = "") const
+        -> std::string override;
 };

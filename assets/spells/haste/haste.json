@@ -1,45 +1,19 @@
 {
     "name": "Haste",
-    "texture_path": "spells/haste/haste.png",
     "cast_time": 0.0,
     "interrupt_time": 0.0,
     "mana_cost": 20,
     "cooldown": 5.0,
     "duration": 0.1,
     "max_range": 0.0,
-    "geometry": {
-        "rect": {
-            "x": -8.0,
-            "y": -8.0,
-            "w": 16.0,
-            "h": 16.0
-        },
-        "determinant": "NONE"
-    },
-    "collision": {
-        "shape": "rect",
-        "rect": {
-            "x": -8.0,
-            "y": -8.0,
-            "w": 16.0,
-            "h": 16.0
-        },
-        "determinant": "NONE"
-    },
     "animated": false,
     "particles": false,
     "action": {
         "type": "SELF",
-        "pierce": false,
-        "movement": {
-            "type": "instant"
-        },
-        "on_hit": [
+        "self": [
             {
                 "name": "Haste",
                 "effect_type": "HASTE",
-                "damage_type": "PHYSICAL",
-                "target_faction": "FRIENDLY",
                 "magnitude": 0.40,
                 "duration": 3.0,
                 "visual": false

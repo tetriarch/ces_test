@@ -16,5 +16,6 @@ private:
         -> std::expected<std::unordered_map<std::string, std::string>, JSONParserError>;
     auto parseRect(const json& o, const std::string& parent)
         -> std::expected<Rect, JSONParserError>;
-    auto error(const std::string& msg, const std::string& parent = "") -> std::string override;
+    auto error(const std::string& msg, const std::string& parent = "") const
+        -> std::string override;
 };

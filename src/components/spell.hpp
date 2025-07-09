@@ -8,7 +8,16 @@
 #include "geometry.hpp"
 #include "tag.hpp"
 
-enum class ActionType { AOE, ARC, BEAM, PROJECTILE, SELF, UNKNOWN };
+enum class SpellRequirement : u8 {
+    NONE = 0,
+    GEOMETRY = 1 << 0,
+    COLLISION = 1 << 1,
+    ANIMATION = 1 << 2,
+    PARTICLE = 1 << 3,
+    SPAWN = 1 << 4
+};
+
+enum class ActionType { AOE, ARC, BEAM, PROJECTILE, SELF, SPAWN, UNKNOWN };
 
 // nature/element of the spell
 enum class DamageType { PHYSICAL, FIRE, COLD, LIGHTNING, VOID, UNKNOWN };
@@ -81,10 +90,13 @@ struct SpellData : public IAsset {
     SpellAction action;
     GeometryData geometryData;
     CollisionData collisionData;
-    bool animated{false};
     std::unordered_map<std::string, std::string> animationFiles;
-    bool particles{false};
     std::vector<std::string> emitterFiles;
+    u8 componentRequirements{0};
+    std::string spawnName{""};
+    std::string spawnPrefabFile{""};
+
+    bool requiresComponent(SpellRequirement req) const;
 };
 
 class SpellComponent : public Component<SpellComponent> {

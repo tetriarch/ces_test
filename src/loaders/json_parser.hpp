@@ -15,18 +15,19 @@ public:
 protected:
     template <typename T>
     bool get(const json& object, std::string key, bool required, T& result,
-        const std::string& parent = "");
+        const std::string& parent = "") const;
 
     template <typename T>
-    auto typeToString() -> std::string;
+    auto typeToString() const -> std::string;
 
-    auto valueTypeToTypeID(const json& value) -> std::type_index;
-    virtual auto error(const std::string& msg, const std::string& parent = "") -> std::string = 0;
+    auto valueTypeToTypeID(const json& value) const -> std::type_index;
+    virtual auto error(const std::string& msg, const std::string& parent = "") const
+        -> std::string = 0;
 };
 
 template <typename T>
-inline bool JSONParser::get(
-    const json& object, std::string key, bool required, T& result, const std::string& parent) {
+inline bool JSONParser::get(const json& object, std::string key, bool required, T& result,
+    const std::string& parent) const {
     json::const_iterator it = object.find(key);
     if(it == object.end()) {
         if(required) {
@@ -55,7 +56,7 @@ inline bool JSONParser::get(
 }
 
 template <typename T>
-inline auto JSONParser::typeToString() -> std::string {
+inline auto JSONParser::typeToString() const -> std::string {
     if constexpr(std::is_same_v<T, std::string>) return "string";
     if constexpr(std::is_same_v<T, s32>) return "int";
     if constexpr(std::is_same_v<T, u32>) return "unsigned int";

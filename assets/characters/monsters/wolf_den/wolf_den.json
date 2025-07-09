@@ -1,0 +1,63 @@
+{
+    "components": [
+        {
+            "type": "life",
+            "current": 400.0,
+            "max": 400.0,
+            "regen": 0.0
+        },
+        {
+            "type": "tag",
+            "tag": "MONSTER",
+            "factions": {
+                "friendly": [
+                    "MONSTER"
+                ],
+                "hostile": [
+                    "PLAYER"
+                ]
+            }
+        },
+        {
+            "type": "collision",
+            "shape": "rect",
+            "rect": {
+                "x": -32.0,
+                "y": -32.0,
+                "w": 64.0,
+                "h": 64.0
+            }
+        },
+        {
+            "type": "spellbook",
+            "spells": [
+                "spells/spawn_wolf/spawn_wolf.json"
+            ]
+        },
+        {
+            "type": "geometry",
+            "rect": {
+                "x": -32.0,
+                "y": -32.0,
+                "w": 64.0,
+                "h": 64.0
+            },
+            "texture_path": "characters/monsters/wolf_den/textures/wolf_den_c.png"
+        },
+        {
+            "type": "status_effect"
+        },
+        {
+            "type": "ai",
+            "aggro_radius": 500.0
+        },
+        {
+            "type": "xp",
+            "level": 2
+        },
+        {
+            "type": "reward",
+            "xp": 350
+        }
+    ]
+}

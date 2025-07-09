@@ -4,9 +4,7 @@ A sandbox project using CES to test interaction between components and entities.
 # TODO:
 ## Priority
 **Entity Spawner**
- - [ ] data representation
- - [ ] parsing
- - [ ] mechanic
+ - [ ] adjustments
 
 ## Visual polish
 **UI**

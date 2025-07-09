@@ -16,6 +16,7 @@ public:
     void addSpellFile(const std::string& filePath);
     void castSpell(u32 index, const Vec2& target);
     auto spells() const -> const std::vector<std::shared_ptr<SpellData>>;
+    auto spell(u32 index) -> std::shared_ptr<SpellData>;
     void setSlot(u32 index, std::shared_ptr<SpellData> spell);
     auto slots() const -> std::array<std::shared_ptr<SpellData>, 4>;
     bool interruptible() const;
@@ -25,6 +26,7 @@ public:
     bool isCasting();
     bool isSpellInSlotOnCooldown(u32 index, f32* cooldown = nullptr, f32* progress = nullptr);
     bool isSpellOnCooldown(std::shared_ptr<SpellData> spell);
+    u32 availableSpellsCount() const;
 
 private:
     void autoEquipSpells();

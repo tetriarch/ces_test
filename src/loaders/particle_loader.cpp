@@ -93,7 +93,7 @@ auto ParticleLoader::parseParticle(const std::string& source)
     return particle;
 }
 
-auto ParticleLoader::error(const std::string& msg, const std::string& parent) -> std::string {
+auto ParticleLoader::error(const std::string& msg, const std::string& parent) const -> std::string {
     std::string error = "[PARTICLE LOADER]: ";
     if(!parent.empty()) {
         error += '(' + parent + ") ";

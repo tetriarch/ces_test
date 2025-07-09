@@ -64,7 +64,7 @@ auto EmitterLoader::parseEmitter(const std::string& source)
     return emitter;
 }
 
-auto EmitterLoader::error(const std::string& msg, const std::string& parent) -> std::string {
+auto EmitterLoader::error(const std::string& msg, const std::string& parent) const -> std::string {
     std::string error = "[EMITTER LOADER]: ";
     if(!parent.empty()) {
         error += '(' + parent + ") ";
