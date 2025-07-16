@@ -64,22 +64,6 @@ void Entity::addComponent(ComponentPtr component) {
 
     component->entity_ = shared_from_this();
 
-    if(component->hasHandleEvents()) {
-        controllable_.insert(component.get());
-    }
-
-    if(component->hasUpdate()) {
-        updatable_.insert(component.get());
-    }
-
-    if(component->hasPostUpdate()) {
-        postUpdatable_.insert(component.get());
-    }
-
-    if(component->hasRender()) {
-        renderable_.insert(component.get());
-    }
-
     components_.push_back(component);
 
     if(!lazyAttach_) {
@@ -104,22 +88,6 @@ void Entity::removeComponent(ComponentPtr component) {
 
     components_.erase(
         std::remove(components_.begin(), components_.end(), component), components_.end());
-
-    if(component->hasHandleEvents()) {
-        controllable_.erase(component.get());
-    }
-
-    if(component->hasUpdate()) {
-        updatable_.erase(component.get());
-    }
-
-    if(component->hasPostUpdate()) {
-        postUpdatable_.erase(component.get());
-    }
-
-    if(component->hasRender()) {
-        renderable_.erase(component.get());
-    }
 }
 
 void Entity::setTransform(const Transform& transform) {
@@ -178,7 +146,7 @@ void Entity::handleEvents(const SDL_Event& event) {
     {
         updateState_ = UpdateState::UPDATE;
         SCOPED([this]() { updateState_ = UpdateState::IDLE; });
-        for(auto&& c : controllable_) {
+        for(auto&& c : components_) {
             if(!active_) {
                 break;
             }
@@ -196,7 +164,7 @@ void Entity::update(const f32 dt) {
     {
         updateState_ = UpdateState::UPDATE;
         SCOPED([this]() { updateState_ = UpdateState::IDLE; });
-        for(auto& u : updatable_) {
+        for(auto& u : components_) {
             if(!active_) {
                 break;
             }
@@ -215,7 +183,7 @@ void Entity::postUpdate(const f32 dt) {
         updateState_ = UpdateState::UPDATE;
         SCOPED([this]() { updateState_ = UpdateState::IDLE; });
 
-        for(auto&& component : postUpdatable_) {
+        for(auto&& component : components_) {
             if(!active_) {
                 break;
             }
@@ -241,7 +209,7 @@ void Entity::applyPostUpdateActions() {
 }
 
 void Entity::render(std::shared_ptr<Renderer> renderer) {
-    for(auto& r : renderable_) {
+    for(auto& r : components_) {
         r->render(renderer);
     }
 

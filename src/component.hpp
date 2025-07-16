@@ -23,10 +23,6 @@ private:
 
     friend class Entity;
 
-    virtual bool hasHandleEvents() const { return true; }
-    virtual bool hasUpdate() const { return true; }
-    virtual bool hasPostUpdate() const { return true; }
-    virtual bool hasRender() const { return true; }
     ComponentBase() = default;
 };
 
@@ -36,22 +32,5 @@ public:
     Component() {};
     auto componentType() const -> std::type_index override {
         return typeid(TDerived);
-    }
-
-private:
-    bool hasHandleEvents() const final {
-        return !std::is_same_v<decltype(&TDerived::handleEvents), decltype(&ComponentBase::handleEvents)>;
-    }
-
-    bool hasUpdate() const final {
-        return !std::is_same_v<decltype(&TDerived::update), decltype(&ComponentBase::update)>;
-    }
-
-    bool hasPostUpdate() const final {
-        return !std::is_same_v<decltype(&TDerived::postUpdate), decltype(&ComponentBase::postUpdate)>;
-    }
-
-    bool hasRender() const final {
-        return !std::is_same_v<decltype(&TDerived::render), decltype(&ComponentBase::render)>;
     }
 };

@@ -59,10 +59,6 @@ private:
     UpdateState updateState_{UpdateState::IDLE};
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
-    std::unordered_set<ComponentBase*> controllable_;
-    std::unordered_set<ComponentBase*> updatable_;
-    std::unordered_set<ComponentBase*> postUpdatable_;
-    std::unordered_set<ComponentBase*> renderable_;
     std::vector<std::function<void(Entity*)>> postUpdateActions_;
     bool lazyAttach_;
     bool active_;
