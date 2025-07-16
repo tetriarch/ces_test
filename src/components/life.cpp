@@ -89,7 +89,7 @@ void LifeComponent::postUpdate(const f32 dt) {
         if(tagComponent->tag() == TagType::PLAYER) {
             entity()->setActive(false);
         } else {
-            entity()->parent()->queueRemoveChild(entity());
+            entity()->parent()->removeChild(entity());
         }
     }
 }

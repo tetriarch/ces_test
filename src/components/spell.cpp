@@ -56,7 +56,7 @@ void SpellComponent::postUpdate(const f32 dt) {
 
     if(dead_) {
         if(!animationComponent) {
-            entity()->parent()->queueRemoveChild(entity());
+            entity()->parent()->removeChild(entity());
         }
         return;
     }
@@ -117,7 +117,7 @@ void SpellComponent::postUpdate(const f32 dt) {
         auto animation = entity()->component<AnimationComponent>();
         if(animation) {
             animation->playAnimation(
-                "death", [&]() { return entity()->parent()->queueRemoveChild(entity()); });
+                "death", [&]() { return entity()->parent()->removeChild(entity()); });
         }
 
         auto particles = entity()->component<ParticleSystemComponent>();

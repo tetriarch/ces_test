@@ -17,6 +17,8 @@ public:
     virtual void render(std::shared_ptr<Renderer> renderer) {}
 
 private:
+    friend struct EntityStructureModifier;
+
     EntityHandle entity_;
     template <class T>
     friend class Component;

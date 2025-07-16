@@ -90,7 +90,7 @@ bool StatusEffectComponent::removeEffect(SpellEffectType type) {
             auto children = entity()->children();
             for(auto& c : children) {
                 if(c->name() == it->second.name) {
-                    entity()->queueRemoveChild(c);
+                    entity()->removeChild(c);
                     break;
                 }
             }

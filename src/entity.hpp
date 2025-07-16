@@ -10,13 +10,12 @@ class Renderer;
 class Entity : public std::enable_shared_from_this<Entity> {
 public:
     Entity(const std::string& name, bool lazyAttach);
+
     static EntityPtr create(const std::string& name, bool lazyAttach = false);
     void addChild(EntityPtr child);
-    void queueRemoveChild(const EntityPtr& child);
     void removeChild(const EntityPtr& child);
 
     void addComponent(ComponentPtr component);
-    void queueRemoveComponent(ComponentPtr component);
     void removeComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
     void setName(const std::string& name);
@@ -43,7 +42,6 @@ public:
     void handleEvents(const SDL_Event& event);
     void update(const f32 dt);
     void postUpdate(const f32 dt);
-    void applyPostUpdateActions();
     void render(std::shared_ptr<Renderer> renderer);
 
 private:
@@ -52,14 +50,14 @@ private:
     enum class UpdateState { IDLE, UPDATE };
 
 private:
+    friend struct EntityStructureModifier;
+
     u32 ID_;
     std::string name_;
     Transform transform_;
-    Entity* parent_{nullptr};
-    UpdateState updateState_{UpdateState::IDLE};
+    EntityHandle parent_;
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
-    std::vector<std::function<void(Entity*)>> postUpdateActions_;
     bool lazyAttach_;
     bool active_;
 };
