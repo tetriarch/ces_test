@@ -15,7 +15,7 @@ public:
     virtual void update(const f32 dt) {}
     virtual void postUpdate(const f32 dt) {}
     virtual void render(std::shared_ptr<Renderer> renderer) {}
-
+    virtual int32_t updatePriority() { return 0; }
 private:
     friend struct EntityStructureModifier;
 
