@@ -8,8 +8,7 @@
 u32 Entity::NEXT_ID = 0;
 
 Entity::Entity(const std::string& name, bool lazyAttach)
-    : ID_(NEXT_ID), name_(name), lazyAttach_(lazyAttach), active_(true) {
-    NEXT_ID++;
+    : ID_(NEXT_ID++), name_(name), lazyAttach_(lazyAttach), active_(true) {
 }
 
 EntityPtr Entity::create(const std::string& name, bool lazyAttach) {
@@ -87,10 +86,9 @@ void Entity::setActive(bool active) {
 }
 
 void Entity::handleEvents(const SDL_Event& event) {
+    if (!active_) return;
+
     for(auto&& c : components_) {
-        if(!active_) {
-            break;
-        }
         c->handleEvents(event);
     }
 
@@ -100,10 +98,9 @@ void Entity::handleEvents(const SDL_Event& event) {
 }
 
 void Entity::update(const f32 dt) {
+    if(!active_) return;
+
     for(auto& u : components_) {
-        if(!active_) {
-            break;
-        }
         u->update(dt);
     }
 
@@ -113,10 +110,9 @@ void Entity::update(const f32 dt) {
 }
 
 void Entity::postUpdate(const f32 dt) {
+    if (!active_) return;
+
     for(auto&& component : components_) {
-        if(!active_) {
-            break;
-        }
         component->postUpdate(dt);
     }
 
@@ -126,6 +122,8 @@ void Entity::postUpdate(const f32 dt) {
 }
 
 void Entity::render(std::shared_ptr<Renderer> renderer) {
+    if (!active_) return;
+
     for(auto& r : components_) {
         r->render(renderer);
     }
