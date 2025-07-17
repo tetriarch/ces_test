@@ -26,8 +26,10 @@ public:
     auto component() -> std::shared_ptr<T>;
 
     auto components() const -> std::span<ComponentPtr const>;
-    auto parent() const -> Entity*;
-    auto root() -> Entity*;
+
+    auto parent() const -> EntityPtr;
+    auto root() -> EntityPtr;
+
     const Transform& transform() const;
     u32 id() {
         return ID_;

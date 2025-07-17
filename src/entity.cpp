@@ -49,12 +49,12 @@ auto Entity::components() const -> std::span<ComponentPtr const> {
     return components_;
 }
 
-auto Entity::parent() const -> Entity* {
-    return parent_.lock().get();
+auto Entity::parent() const -> EntityPtr {
+    return parent_.lock();
 }
 
-auto Entity::root() -> Entity* {
-    auto current = this;
+auto Entity::root() -> EntityPtr {
+    auto current = shared_from_this();
     while(current->parent()) {
         current = current->parent();
     }

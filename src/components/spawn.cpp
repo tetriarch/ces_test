@@ -33,7 +33,7 @@ void SpawnComponent::spawn(const Vec2& position) const {
 
     auto ed = entityData_.lock();
     if(ed) {
-        auto root = static_cast<Scene*>(entity()->root());
+        auto root = std::static_pointer_cast<Scene>(entity()->root());
         auto entity = root->entityCreator().createEntity(spawnName_, ed);
         Transform transform = {{0.0f, 0.0f}, 0.0f};
         transform.position = position;
