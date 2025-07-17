@@ -4,10 +4,8 @@
 #include "entity_structure_modifier.hpp"
 #include "scoped.hpp"
 
-u32 Entity::NEXT_ID = 0;
-
 Entity::Entity(const std::string& name, bool lazyAttach)
-    : ID_(NEXT_ID++), name_(name), lazyAttach_(lazyAttach), active_(true) {
+    : name_(name), lazyAttach_(lazyAttach), active_(true) {
 }
 
 Entity::~Entity() {

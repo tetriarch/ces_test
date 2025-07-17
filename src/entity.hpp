@@ -32,9 +32,6 @@ public:
     auto root() -> EntityPtr;
 
     const Transform& transform() const;
-    u32 id() {
-        return ID_;
-    }
     constexpr auto name() -> std::string const& {
         return name_;
     }
@@ -48,14 +45,8 @@ public:
     void render(std::shared_ptr<Renderer> renderer);
 
 private:
-    static u32 NEXT_ID;
-
-    enum class UpdateState { IDLE, UPDATE };
-
-private:
     friend struct EntityStructureModifier;
 
-    u32 ID_;
     std::string name_;
     Transform transform_;
     EntityHandle parent_;
