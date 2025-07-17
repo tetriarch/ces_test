@@ -1,10 +1,19 @@
 #include "collision.hpp"
 
 #include "../entity.hpp"
-#include "../entity_manager.hpp"
+
+// We use a map of pointer to weak_ptr because we cannot hash weak_ptr alone. Raw pointers, however,
+// can become invalid. Therefore, when walking the container, we lock the weak pointer to ensure we get
+// a valid pointer.
+static std::unordered_map<CollisionComponent*, std::weak_ptr<CollisionComponent>> s_collisionComponents;
 
 void CollisionComponent::attach() {
     reposition();
+    s_collisionComponents.emplace(this, shared_from_this());
+}
+
+void CollisionComponent::detach() {
+    s_collisionComponents.erase(this);
 }
 
 void CollisionComponent::setCollisionData(const CollisionData& data) {
@@ -16,14 +25,8 @@ CollisionShape CollisionComponent::shape() const {
     return shape_;
 }
 
-bool CollisionComponent::checkCollision(EntityPtr target) {
-    auto targetCollisionComponent = target->component<CollisionComponent>();
-
-    if(!targetCollisionComponent) {
-        return false;
-    }
-
-    auto targetShape = targetCollisionComponent->shape();
+bool CollisionComponent::checkCollision(const CollisionComponent& target) {
+    auto targetShape = target.shape();
 
     if(intersects(shape_, targetShape)) {
         return true;
@@ -55,17 +58,19 @@ void CollisionComponent::postUpdate(f32 dt) {
     collisionNormal_ = {0.0f, 0.0f};
     collisionDepth_ = 0.0f;
 
-    auto entities = EntityManager::get().entities();
-
-    for(auto&& e : entities) {
+    for(auto&& [key, weakComp] : s_collisionComponents) {
         // skip ourselves and innactive
-        auto ePtr = e.second.lock();
-        if(ePtr == nullptr || ePtr == entity() || !ePtr->isActive()) {
+        if (key == this) continue;
+        auto comp = weakComp.lock();
+        if (comp == nullptr) continue;
+
+        auto e = comp->entity();
+        if(e == nullptr || !e->isActive()) {
             continue;
         }
 
-        if(checkCollision(ePtr)) {
-            colliders_.emplace(ePtr);
+        if(checkCollision(*comp)) {
+            colliders_.emplace(e);
         }
     }
 }

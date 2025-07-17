@@ -10,6 +10,7 @@ class Renderer;
 class Entity : public std::enable_shared_from_this<Entity> {
 public:
     Entity(const std::string& name, bool lazyAttach);
+    ~Entity();
 
     static EntityPtr create(const std::string& name, bool lazyAttach = false);
     void addChild(EntityPtr child);

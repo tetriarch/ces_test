@@ -1,7 +1,6 @@
 #include "entity.hpp"
 
 #include "component.hpp"
-#include "entity_manager.hpp"
 #include "entity_structure_modifier.hpp"
 #include "scoped.hpp"
 
@@ -11,9 +10,14 @@ Entity::Entity(const std::string& name, bool lazyAttach)
     : ID_(NEXT_ID++), name_(name), lazyAttach_(lazyAttach), active_(true) {
 }
 
+Entity::~Entity() {
+    for(auto && comp : components_) {
+        comp->detach();
+    }
+}
+
 EntityPtr Entity::create(const std::string& name, bool lazyAttach) {
     auto e = std::make_shared<Entity>(name, lazyAttach);
-    EntityManager::get().addEntity(e);
     return e;
 }
 

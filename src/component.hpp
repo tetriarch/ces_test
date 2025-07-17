@@ -10,7 +10,10 @@ public:
     virtual ~ComponentBase() = default;
     auto entity() const -> EntityPtr { return entity_.lock(); }
     virtual auto componentType() const -> std::type_index = 0;
+
     virtual void attach() {}
+    virtual void detach() {}
+
     virtual void handleEvents(const SDL_Event& event) {}
     virtual void update(const f32 dt) {}
     virtual void postUpdate(const f32 dt) {}

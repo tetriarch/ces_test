@@ -1,6 +1,5 @@
 #include "component.hpp"
 #include "entity.hpp"
-#include "entity_manager.hpp"
 #include "entity_structure_modifier.hpp"
 
 EntityState EntityStructureModifier::state_ = EntityState::Idle;
@@ -40,8 +39,6 @@ void EntityStructureModifier::removeChild(
     parent->children_.erase(
         std::remove(parent->children_.begin(), parent->children_.end(), child),
         parent->children_.end());
-
-    EntityManager::get().removeEntity(child);
 }
 
 void EntityStructureModifier::addComponent(
@@ -86,6 +83,8 @@ void EntityStructureModifier::removeComponent(
     }
 
     assert(component->entity_.lock() == parent);
+
+    component->detach();
     component->entity_.reset();
     parent->components_.erase(
         std::remove(parent->components_.begin(), parent->components_.end(), component),
