@@ -15,6 +15,9 @@ struct GeometryData {
 
 class GeometryComponent : public Component<GeometryComponent> {
 public:
+    s32 updatePriority() override {
+        return 3;
+    }
     void setTextureFilePath(const std::string& filePath);
     void setGeometryData(const GeometryData& geometryData);
     void postUpdate(f32 dt) override;

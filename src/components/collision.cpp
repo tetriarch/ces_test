@@ -3,9 +3,10 @@
 #include "../entity.hpp"
 
 // We use a map of pointer to weak_ptr because we cannot hash weak_ptr alone. Raw pointers, however,
-// can become invalid. Therefore, when walking the container, we lock the weak pointer to ensure we get
-// a valid pointer.
-static std::unordered_map<CollisionComponent*, std::weak_ptr<CollisionComponent>> s_collisionComponents;
+// can become invalid. Therefore, when walking the container, we lock the weak pointer to ensure we
+// get a valid pointer.
+static std::unordered_map<CollisionComponent*, std::weak_ptr<CollisionComponent>>
+    s_collisionComponents;
 
 void CollisionComponent::attach() {
     reposition();
@@ -51,7 +52,7 @@ const std::unordered_set<EntityPtr>& CollisionComponent::colliders() const {
     return colliders_;
 }
 
-void CollisionComponent::postUpdate(f32 dt) {
+void CollisionComponent::update(f32 dt) {
     reposition();
     colliders_.clear();
 
@@ -60,9 +61,9 @@ void CollisionComponent::postUpdate(f32 dt) {
 
     for(auto&& [key, weakComp] : s_collisionComponents) {
         // skip ourselves and innactive
-        if (key == this) continue;
+        if(key == this) continue;
         auto comp = weakComp.lock();
-        if (comp == nullptr) continue;
+        if(comp == nullptr) continue;
 
         auto e = comp->entity();
         if(e == nullptr || !e->isActive()) {

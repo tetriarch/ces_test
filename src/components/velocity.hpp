@@ -14,6 +14,9 @@ enum class MovementDirection : u8 {
 
 class VelocityComponent : public Component<VelocityComponent> {
 public:
+    s32 updatePriority() override {
+        return 2;
+    }
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
     Vec2 velocity() const;

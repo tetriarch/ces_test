@@ -9,9 +9,12 @@
 
 const f32 AGGRO_LOSS_MULTIPLAYER = 2.0f;
 const f32 COMBAT_ENTRY_COOLDOWN = 1.0f;
+const f32 DEFAULT_IDLE_TIMER = 1.5f;
 
 AIComponent::AIComponent()
-    : idleTimer_(0.0f), aggroRadius_(0.0f), combatEntryCooldown_(COMBAT_ENTRY_COOLDOWN) {
+    : idleTimer_(DEFAULT_IDLE_TIMER),
+      aggroRadius_(0.0f),
+      combatEntryCooldown_(COMBAT_ENTRY_COOLDOWN) {
 }
 
 void AIComponent::attach() {
@@ -241,7 +244,7 @@ void AIComponent::collectEntitiesInRange() {
 
     for(auto& [key, weakTagComponent] : tagComponents) {
         auto eTagComponent = weakTagComponent.lock();
-        if (!eTagComponent || eTagComponent == tagComponent) continue;
+        if(!eTagComponent || eTagComponent == tagComponent) continue;
 
         auto ePtr = eTagComponent->entity();
         if(!ePtr) {

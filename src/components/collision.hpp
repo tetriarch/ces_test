@@ -21,8 +21,12 @@ struct CollisionData {
     CollisionSizeDeterminant sizeDeterminant;
 };
 
-class CollisionComponent : public Component<CollisionComponent>, public std::enable_shared_from_this<CollisionComponent> {
+class CollisionComponent : public Component<CollisionComponent>,
+                           public std::enable_shared_from_this<CollisionComponent> {
 public:
+    s32 updatePriority() override {
+        return 1;
+    }
     void attach() override;
     void detach() override;
 
@@ -33,7 +37,7 @@ public:
     Vec2 collisionNormal() const;
     f32 collisionDepth() const;
     const std::unordered_set<EntityPtr>& colliders() const;
-    void postUpdate(f32 dt) override;
+    void update(f32 dt) override;
 
 private:
     bool checkCollision(const CollisionComponent& target);
