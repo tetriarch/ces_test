@@ -10,13 +10,13 @@ class Renderer;
 class Entity : public std::enable_shared_from_this<Entity> {
 public:
     Entity(const std::string& name, bool lazyAttach);
+    ~Entity();
+
     static EntityPtr create(const std::string& name, bool lazyAttach = false);
     void addChild(EntityPtr child);
-    void queueRemoveChild(const EntityPtr& child);
     void removeChild(const EntityPtr& child);
 
     void addComponent(ComponentPtr component);
-    void queueRemoveComponent(ComponentPtr component);
     void removeComponent(ComponentPtr component);
     void setTransform(const Transform& transform);
     void setName(const std::string& name);
@@ -27,12 +27,11 @@ public:
     auto component() -> std::shared_ptr<T>;
 
     auto components() const -> std::span<ComponentPtr const>;
-    auto parent() const -> Entity*;
-    auto root() -> Entity*;
+
+    auto parent() const -> EntityPtr;
+    auto root() -> EntityPtr;
+
     const Transform& transform() const;
-    u32 id() {
-        return ID_;
-    }
     constexpr auto name() -> std::string const& {
         return name_;
     }
@@ -43,27 +42,16 @@ public:
     void handleEvents(const SDL_Event& event);
     void update(const f32 dt);
     void postUpdate(const f32 dt);
-    void applyPostUpdateActions();
     void render(std::shared_ptr<Renderer> renderer);
 
 private:
-    static u32 NEXT_ID;
+    friend struct EntityStructureModifier;
 
-    enum class UpdateState { IDLE, UPDATE };
-
-private:
-    u32 ID_;
     std::string name_;
     Transform transform_;
-    Entity* parent_{nullptr};
-    UpdateState updateState_{UpdateState::IDLE};
+    EntityHandle parent_;
     std::vector<ComponentPtr> components_;
     std::vector<EntityPtr> children_;
-    std::unordered_set<ComponentBase*> controllable_;
-    std::unordered_set<ComponentBase*> updatable_;
-    std::unordered_set<ComponentBase*> postUpdatable_;
-    std::unordered_set<ComponentBase*> renderable_;
-    std::vector<std::function<void(Entity*)>> postUpdateActions_;
     bool lazyAttach_;
     bool active_;
 };

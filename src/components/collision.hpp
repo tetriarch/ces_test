@@ -21,9 +21,11 @@ struct CollisionData {
     CollisionSizeDeterminant sizeDeterminant;
 };
 
-class CollisionComponent : public Component<CollisionComponent> {
+class CollisionComponent : public Component<CollisionComponent>, public std::enable_shared_from_this<CollisionComponent> {
 public:
     void attach() override;
+    void detach() override;
+
     void setCollisionData(const CollisionData& data);
 
     CollisionShape shape() const;
@@ -34,7 +36,7 @@ public:
     void postUpdate(f32 dt) override;
 
 private:
-    bool checkCollision(EntityPtr target);
+    bool checkCollision(const CollisionComponent& target);
     void reposition();
     bool intersects(const CollisionShape& l, const CollisionShape& r);
     bool intersects(const Rect& l, const Rect& r);

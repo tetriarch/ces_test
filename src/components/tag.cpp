@@ -2,7 +2,24 @@
 
 #include "../log.hpp"
 
+// We use a map of pointer to weak_ptr because we cannot hash weak_ptr alone. Raw pointers, however,
+// can become invalid. Therefore, when walking the container, we lock the weak pointer to ensure we get
+// a valid pointer.
+static std::unordered_map<TagComponent*, std::weak_ptr<TagComponent>> s_tagComponents;
+
+auto TagComponent::allTagComponents() -> const std::unordered_map<TagComponent*, std::weak_ptr<TagComponent>> & {
+    return s_tagComponents;
+}
+
 TagComponent::TagComponent() : tag_(TagType::UNKNOWN) {
+}
+
+void TagComponent::attach() {
+    s_tagComponents.emplace(this, shared_from_this());
+}
+
+void TagComponent::detach() {
+    s_tagComponents.erase(this);
 }
 
 void TagComponent::setTag(TagType tag) {

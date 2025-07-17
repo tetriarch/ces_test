@@ -9,6 +9,7 @@ class AIComponent : public Component<AIComponent> {
 public:
     AIComponent();
     void attach() override;
+
     void update(const f32 dt) override;
     void render(std::shared_ptr<Renderer> renderer) override;
     void setAggroRadius(f32 radius);

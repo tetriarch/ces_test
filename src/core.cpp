@@ -1,6 +1,7 @@
 #include "core.hpp"
 
 #include "asset_manager.hpp"
+#include "entity_structure_modifier.hpp"
 #include "loaders/animation_loader.hpp"
 #include "loaders/emitter_loader.hpp"
 #include "loaders/entity_loader.hpp"
@@ -101,9 +102,17 @@ s32 Core::run() {
             handleEvents(event);
         }
         Time::get().update();
+
         while(Time::get().isTimeToUpdate()) {
-            update(Time::get().DELTA_TIME);
-            postUpdate(Time::get().DELTA_TIME);
+            // Apply all the modifications queued from the previous frame
+            EntityStructureModifier::applyStructureModifications();
+            {
+                // Begin our update cycle
+                EntityStructureModifier::beginUpdate();
+                update(Time::get().DELTA_TIME);
+                postUpdate(Time::get().DELTA_TIME);
+                EntityStructureModifier::endUpdate();
+            }
         }
         render();
     }

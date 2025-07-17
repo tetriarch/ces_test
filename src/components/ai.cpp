@@ -1,7 +1,6 @@
 #include "ai.hpp"
 
 #include "../entity.hpp"
-#include "../entity_manager.hpp"
 #include "../renderer.hpp"
 #include "life.hpp"
 #include "spell_book.hpp"
@@ -231,7 +230,7 @@ void AIComponent::collectEntitiesInRange() {
     enemiesInRange_.clear();
     alliesInRange_.clear();
 
-    auto entities = EntityManager::get().entities();
+    auto tagComponents = TagComponent::allTagComponents();
     auto transform = entity()->transform();
 
     auto tagComponent = entity()->component<TagComponent>();
@@ -240,16 +239,15 @@ void AIComponent::collectEntitiesInRange() {
         return;
     }
 
-    for(auto& e : entities) {
-        auto ePtr = e.second.lock();
-        if(!ePtr || ePtr == entity()) {
+    for(auto& [key, weakTagComponent] : tagComponents) {
+        auto eTagComponent = weakTagComponent.lock();
+        if (!eTagComponent || eTagComponent == tagComponent) continue;
+
+        auto ePtr = eTagComponent->entity();
+        if(!ePtr) {
             continue;
         }
-        // no tag, skip
-        auto eTagComponent = ePtr->component<TagComponent>();
-        if(!eTagComponent) {
-            continue;
-        }
+
         auto eTransform = ePtr->transform();
         f32 distance = Vec2(eTransform.position - transform.position).length();
         if(distance < aggroRadius_) {
