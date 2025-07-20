@@ -4,7 +4,7 @@
             "type": "life",
             "current": 200.0,
             "max": 200.0,
-            "regen": 1.0
+            "regen": 0.5
         },
         {
             "type": "mana",

@@ -36,7 +36,7 @@ public:
     bool collided() const;
     Vec2 collisionNormal() const;
     f32 collisionDepth() const;
-    const std::unordered_set<EntityPtr>& colliders() const;
+    const std::vector<EntityHandle>& colliders() const;
     void update(f32 dt) override;
 
 private:
@@ -53,7 +53,7 @@ private:
     bool intersects(const Line& l, const Circle& r);
     bool intersects(const Line& l, const Line& r);
 
-    std::unordered_set<EntityPtr> colliders_;
+    std::vector<EntityHandle> colliders_;
     Vec2 collisionNormal_{0.0f, 0.0f};
     f32 collisionDepth_{0.0f};
 

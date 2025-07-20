@@ -59,8 +59,9 @@ void Renderer::queueRenderTexture(
     });
 }
 
-void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textureName,
-    const Rect& sRect, const Rect& dRect, const Vec2& pivot, f32 angleInDegrees) {
+void Renderer::queueRenderTextureRotated(
+    Strata strata, const std::string& textureName, const Rect& sRect, const Rect& dRect,
+    const Vec2& pivot, f32 angleInDegrees) {
     auto texture = AssetManager::get()->load<Texture>(textureName);
 
     if(!texture) {
@@ -72,13 +73,15 @@ void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textu
         SDL_FRect srcRect = {sRect.x, sRect.y, sRect.w, sRect.h};
         SDL_FRect dstRect = {dRect.x, dRect.y, dRect.w, dRect.h};
         SDL_FPoint rotationPoint = {pivot.x, pivot.y};
-        SDL_RenderTextureRotated(renderer_, texture->get(), &srcRect, &dstRect, angleInDegrees,
-            &rotationPoint, SDL_FlipMode::SDL_FLIP_NONE);
+        SDL_RenderTextureRotated(
+            renderer_, texture->get(), &srcRect, &dstRect, angleInDegrees, &rotationPoint,
+            SDL_FlipMode::SDL_FLIP_NONE);
     });
 }
 
-void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textureName,
-    Vec2 position, f32 angleInDegrees, f32 scale, f32 alpha) {
+void Renderer::queueRenderTextureRotated(
+    Strata strata, const std::string& textureName, Vec2 position, f32 angleInDegrees, f32 scale,
+    f32 alpha) {
     auto texture = AssetManager::get()->load<Texture>(textureName);
     if(!texture) {
         ERROR_ONCE("[RENDERER]: failed to acquire texture - " + textureName);
@@ -93,8 +96,9 @@ void Renderer::queueRenderTextureRotated(Strata strata, const std::string& textu
         SDL_FRect dstRect = {position.x - width / 2.0f, position.y - height / 2.0f, width, height};
         u8 textureAlpha = static_cast<u8>(255 * alpha);
         SDL_SetTextureAlphaMod(texture->get(), textureAlpha);
-        SDL_RenderTextureRotated(renderer_, texture->get(), nullptr, &dstRect, angleInDegrees,
-            nullptr, SDL_FlipMode::SDL_FLIP_NONE);
+        SDL_RenderTextureRotated(
+            renderer_, texture->get(), nullptr, &dstRect, angleInDegrees, nullptr,
+            SDL_FlipMode::SDL_FLIP_NONE);
     });
 }
 

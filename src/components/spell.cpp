@@ -94,8 +94,9 @@ void SpellComponent::postUpdate(const f32 dt) {
 
                 for(auto target : colliders) {
                     for(auto& effect : spellData_->action.effects) {
-                        if(canApplyEffect(target, effect)) {
-                            auto statusEffectComponent = target->component<StatusEffectComponent>();
+                        auto t = target.lock();
+                        if(canApplyEffect(t, effect)) {
+                            auto statusEffectComponent = t->component<StatusEffectComponent>();
 
                             if(statusEffectComponent) {
                                 effect.applier = ownerComponent->owner();

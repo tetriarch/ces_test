@@ -33,7 +33,8 @@ void EntityStructureModifier::removeChild(
 
     assert(child->parent_.lock() == parent);
     child->parent_.reset();
-    parent->children_.erase(std::remove(parent->children_.begin(), parent->children_.end(), child),
+    parent->children_.erase(
+        std::remove(parent->children_.begin(), parent->children_.end(), child),
         parent->children_.end());
 }
 
@@ -53,7 +54,8 @@ void EntityStructureModifier::addComponent(
     // update before another component always appears in the list of components _before_ the latter
     // one. Note that this has NO EFFECT on components in OTHER entities.
     parent->components_.insert(
-        std::lower_bound(parent->components_.begin(), parent->components_.end(), component,
+        std::lower_bound(
+            parent->components_.begin(), parent->components_.end(), component,
             [](auto const& lhs, auto const& rhs) {
                 return lhs->updatePriority() < rhs->updatePriority();
             }),

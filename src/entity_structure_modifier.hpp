@@ -1,38 +1,31 @@
 #pragma once
-#include "utils.hpp"
-
 #include <functional>
 #include <vector>
+
+#include "utils.hpp"
 
 enum class EntityState {
     Idle,
     Updating,
 };
 
-enum class StructureUpdateType {
-    Deferred,
-    Immediate
-};
+enum class StructureUpdateType { Deferred, Immediate };
 
 struct EntityStructureModifier {
     static void addChild(
-        EntityPtr parent,
-        EntityPtr child,
+        EntityPtr parent, EntityPtr child,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void removeChild(
-        EntityPtr parent,
-        EntityPtr child,
+        EntityPtr parent, EntityPtr child,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void addComponent(
-        EntityPtr parent,
-        ComponentPtr component,
+        EntityPtr parent, ComponentPtr component,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void removeComponent(
-        EntityPtr parent,
-        ComponentPtr component,
+        EntityPtr parent, ComponentPtr component,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void beginUpdate();

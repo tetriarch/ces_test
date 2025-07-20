@@ -64,12 +64,13 @@ void VelocityComponent::postUpdate(const f32 dt) {
 
         for(auto&& collider : colliders) {
             // collider is spell -- skip
-            auto colliderSpellComponent = collider->component<SpellComponent>();
+            auto c = collider.lock();
+            auto colliderSpellComponent = c->component<SpellComponent>();
             if(colliderSpellComponent) {
                 continue;
             }
 
-            auto colliderOwnerComponent = collider->component<OwnerComponent>();
+            auto colliderOwnerComponent = c->component<OwnerComponent>();
             if(!colliderOwnerComponent ||
                 (colliderOwnerComponent && !colliderOwnerComponent->isOwnedBy(entity()))) {
                 // push around only when we are not stunned

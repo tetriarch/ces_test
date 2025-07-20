@@ -48,7 +48,7 @@ f32 CollisionComponent::collisionDepth() const {
     return collisionDepth_;
 }
 
-const std::unordered_set<EntityPtr>& CollisionComponent::colliders() const {
+const std::vector<EntityHandle>& CollisionComponent::colliders() const {
     return colliders_;
 }
 
@@ -71,7 +71,7 @@ void CollisionComponent::update(f32 dt) {
         }
 
         if(checkCollision(*comp)) {
-            colliders_.emplace(e);
+            colliders_.emplace_back(e);
         }
     }
 }
