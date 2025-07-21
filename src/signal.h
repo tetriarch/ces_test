@@ -27,7 +27,10 @@ public:
 
     void fire(TArgs const&... args) {
         for(auto && callback : callbacks_) {
-            callback(args...);
+            if (callback)
+            {
+                callback(args...);
+            }
         }
     }
 
