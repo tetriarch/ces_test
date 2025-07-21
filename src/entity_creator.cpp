@@ -213,7 +213,7 @@ auto EntityCreator::parseControlComponent(const json& o) const -> ComponentPtr {
 }
 
 auto EntityCreator::parseCollisionComponent(const json& o) const -> ComponentPtr {
-    CollisionData collisionData;
+    CollisionShape collisionShape;
     std::string shape;
 
     if(!get<std::string>(o, "shape", true, shape, "components")) {
@@ -241,7 +241,7 @@ auto EntityCreator::parseCollisionComponent(const json& o) const -> ComponentPtr
             return nullptr;
         }
 
-        collisionData.shape = rect;
+        collisionShape = rect;
     }
 
     else if(shape == "circle") {
@@ -262,7 +262,7 @@ auto EntityCreator::parseCollisionComponent(const json& o) const -> ComponentPtr
             return nullptr;
         }
 
-        collisionData.shape = circle;
+        collisionShape = circle;
     }
 
     else if(shape == "line") {
@@ -286,18 +286,15 @@ auto EntityCreator::parseCollisionComponent(const json& o) const -> ComponentPtr
             return nullptr;
         }
 
-        collisionData.shape = line;
+        collisionShape = line;
     } else {
         ERROR(error("invalid shape - " + shape));
         return nullptr;
     }
 
-    // assuming no sizeDeterminant for dynamic sizing of entities
-    collisionData.sizeDeterminant = CollisionSizeDeterminant::NONE;
-
-    CollisionComponent collisionComponent;
-    collisionComponent.setCollisionData(collisionData);
-    return std::make_shared<CollisionComponent>(collisionComponent);
+    auto comp = std::make_shared<CollisionComponent>();
+    comp->setCollisionShape(collisionShape);
+    return comp;
 }
 
 auto EntityCreator::parseSpellBookComponent(const json& o) const -> ComponentPtr {

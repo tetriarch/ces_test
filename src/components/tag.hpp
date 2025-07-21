@@ -6,11 +6,9 @@ enum class TagType { NPC, PLAYER, MONSTER, UNKNOWN };
 
 enum class FactionType { FRIENDLY, HOSTILE, UNKNOWN };
 
-class TagComponent : public Component<TagComponent>, public std::enable_shared_from_this<TagComponent> {
+class TagComponent : public TrackedComponent<TagComponent> {
 public:
     TagComponent();
-    void attach() override;
-    void detach() override;
 
     void setTag(TagType tag);
     void associate(FactionType faction, TagType tag);
@@ -21,7 +19,6 @@ public:
     TagType tag();
     bool isTaggedAs(TagType tag);
 
-    static auto allTagComponents() -> const std::unordered_map<TagComponent*, std::weak_ptr<TagComponent>> &;
 private:
     TagType tag_;
     std::unordered_set<TagType> friends_;

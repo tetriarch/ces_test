@@ -102,20 +102,26 @@ struct SpellData : public IAsset {
 class SpellComponent : public Component<SpellComponent> {
 public:
     SpellComponent();
-    SpellComponent(std::shared_ptr<SpellData> spellData);
+    explicit SpellComponent(std::shared_ptr<SpellData> spellData);
+
     void attach() override;
-    void update(const f32 dt) override;
-    void postUpdate(const f32 dt) override;
-    bool isDead();
+    void update(f32 dt) override;
+    void postUpdate(f32 dt) override;
     void setCasterTag(TagType tag);
 
 private:
-    bool canApplyEffect(EntityPtr target, SpellEffect onHitEffect);
+    enum class State {
+        Alive,
+        Dying,
+        Dead
+    };
 
-private:
+    bool canApplyEffect(EntityPtr target, SpellEffect onHitEffect) const;
+
     std::shared_ptr<SpellData> spellData_;
-    f32 currentDuration_;
-    f32 traveledDistance_;
-    bool dead_;
+    f32 currentDuration_ {0};
+    f32 traveledDistance_ {0};
+    State state_ { State::Alive };
     TagType casterTag_;
+    size_t colliderListenerId_;
 };

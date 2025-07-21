@@ -233,7 +233,7 @@ void AIComponent::collectEntitiesInRange() {
     enemiesInRange_.clear();
     alliesInRange_.clear();
 
-    auto tagComponents = TagComponent::allTagComponents();
+    auto tagComponents = TagComponent::trackedComponents();
     auto transform = entity()->transform();
 
     auto tagComponent = entity()->component<TagComponent>();
@@ -242,7 +242,7 @@ void AIComponent::collectEntitiesInRange() {
         return;
     }
 
-    for(auto& [key, weakTagComponent] : tagComponents) {
+    for(auto& weakTagComponent : tagComponents) {
         auto eTagComponent = weakTagComponent.lock();
         if(!eTagComponent || eTagComponent == tagComponent) continue;
 

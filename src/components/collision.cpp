@@ -5,35 +5,75 @@
 // We use a map of pointer to weak_ptr because we cannot hash weak_ptr alone. Raw pointers, however,
 // can become invalid. Therefore, when walking the container, we lock the weak pointer to ensure we
 // get a valid pointer.
-static std::unordered_map<CollisionComponent*, std::weak_ptr<CollisionComponent>>
-    s_collisionComponents;
+void CollisionSystem::update(f32 dt) {
+    auto span = CollisionComponent::trackedComponents();
 
-void CollisionComponent::attach() {
-    reposition();
-    s_collisionComponents.emplace(this, shared_from_this());
+    // TODO: Remove this when everything is using onCollision
+    for(auto && weakCol : span) {
+        auto component = weakCol.lock();
+        assert(component != nullptr);
+        component->colliders_.clear();
+    }
+
+    for(size_t i = 0; i < span.size(); ++i) {
+        for(size_t j = i + 1; j < span.size(); ++j) {
+            auto lhs = span[i].lock();
+            assert(lhs);
+            auto rhs = span[j].lock();
+            assert(rhs);
+
+            auto lhsE = lhs->entity();
+            assert(lhsE);
+
+            auto rhsE = rhs->entity();
+            assert(rhsE);
+
+            if(auto [suc, normal, depth] =  intersects(lhs->shape(), rhs->shape()); suc) {
+                // TODO: remove this whole section and just have the onCollision callbacks {
+                lhs->collisionNormal_ = normal;
+                lhs->collisionDepth_ = depth;
+                lhs->colliders_.push_back(rhsE);
+
+                rhs->collisionNormal_ = -normal;
+                rhs->collisionDepth_ = depth;
+                rhs->colliders_.push_back(lhsE);
+                // TODO: }
+
+                // Global collision event
+                onCollision_.fire(lhsE, rhsE);
+
+                // Individual collision event
+                lhs->onCollision_.fire(rhsE, normal, depth);
+                rhs->onCollision_.fire(lhsE, normal, depth);
+            }
+        }
+    }
 }
 
-void CollisionComponent::detach() {
-    s_collisionComponents.erase(this);
-}
-
-void CollisionComponent::setCollisionData(const CollisionData& data) {
-    collisionData_ = data;
-    shape_ = data.shape;
+void CollisionComponent::setCollisionShape(const CollisionShape& shape) {
+    shape_ = shape;
 }
 
 CollisionShape CollisionComponent::shape() const {
-    return shape_;
-}
+    auto transform = entity()->transform();
 
-bool CollisionComponent::checkCollision(const CollisionComponent& target) {
-    auto targetShape = target.shape();
-
-    if(intersects(shape_, targetShape)) {
-        return true;
-    }
-
-    return false;
+    return std::visit(overloaded{
+        [&transform](Rect rect) {
+            rect.x += transform.position.x;
+            rect.y += transform.position.y;
+            return CollisionShape { rect };
+        },
+        [&transform](Line line) {
+            line.p1.x = transform.position.x;
+            line.p1.y = transform.position.y;
+            return CollisionShape { line };
+        },
+        [&transform](Circle circle) {
+            circle.x = transform.position.x;
+            circle.y = transform.position.y;
+            return CollisionShape { circle };
+        }
+    }, shape_);
 }
 
 bool CollisionComponent::collided() const {
@@ -52,64 +92,13 @@ const std::vector<EntityHandle>& CollisionComponent::colliders() const {
     return colliders_;
 }
 
-void CollisionComponent::update(f32 dt) {
-    reposition();
-    colliders_.clear();
-
-    collisionNormal_ = {0.0f, 0.0f};
-    collisionDepth_ = 0.0f;
-
-    for(auto&& [key, weakComp] : s_collisionComponents) {
-        // skip ourselves and innactive
-        if(key == this) continue;
-        auto comp = weakComp.lock();
-        if(comp == nullptr) continue;
-
-        auto e = comp->entity();
-        if(e == nullptr || !e->isActive()) {
-            continue;
-        }
-
-        if(checkCollision(*comp)) {
-            colliders_.emplace_back(e);
-        }
-    }
+std::tuple<bool, Vec2, float> intersects(const CollisionShape& lsh, const CollisionShape& rsh) {
+    return std::visit([](auto const& lhs, auto const& rhs) {
+        return intersects(lhs, rhs);
+    }, lsh, rsh);
 }
 
-void CollisionComponent::reposition() {
-    auto transform = entity()->transform();
-
-    if(shape_.shape() == Shape::RECT) {
-        auto rect = std::get<Rect>(shape_);
-        auto dataRect = std::get<Rect>(collisionData_.shape);
-        rect.x = transform.position.x + dataRect.x;
-        rect.y = transform.position.y + dataRect.y;
-        shape_ = rect;
-    }
-
-    if(shape_.shape() == Shape::LINE) {
-        auto line = std::get<Line>(shape_);
-        line.p1.x = transform.position.x;
-        line.p1.y = transform.position.y;
-        shape_ = line;
-    }
-
-    if(shape_.shape() == Shape::CIRCLE) {
-        auto circle = std::get<Circle>(shape_);
-        circle.x = transform.position.x;
-        circle.y = transform.position.y;
-        shape_ = circle;
-    }
-}
-
-bool CollisionComponent::intersects(const CollisionShape& lsh, const CollisionShape& rsh) {
-    return std::visit([&](const auto& lShape,
-                          const auto& rShape) -> bool { return this->intersects(lShape, rShape); },
-        lsh, rsh);
-    return false;
-}
-
-bool CollisionComponent::intersects(const Rect& l, const Rect& r) {
+std::tuple<bool, Vec2, float> intersects(const Rect& l, const Rect& r) {
     if(l.x < r.x + r.w && l.x + l.w > r.x && l.y < r.y + r.h && l.y + l.h > r.y) {
         f32 overlapX = std::min(l.x + l.w, r.x + r.w) - std::max(l.x, r.x);
         f32 overlapY = std::min(l.y + l.h, r.y + r.h) - std::max(l.y, r.y);
@@ -121,26 +110,21 @@ bool CollisionComponent::intersects(const Rect& l, const Rect& r) {
             normal = (l.x > r.x) ? Vec2(-1.0f, 0.0f) : Vec2(1.0f, 0.0f);
         }
 
-        collisionNormal_ = normal;
-
-        collisionDepth_ = std::min(overlapX, overlapY);
-        return true;
+        return {true, normal, std::min(overlapX, overlapY)};
     }
-    return false;
+    return {false, {}, 0};
 }
 
-bool CollisionComponent::intersects(const Rect& l, const Circle& r) {
+std::tuple<bool, Vec2, float> intersects(const Rect& l, const Circle& r) {
     // AABB check first
     if(r.x > l.x && r.x < l.x + l.w && r.y > l.y && r.y < l.y + l.h) {
-        return true;
+        return {true, {}, 0};
     }
 
-    f32 rectMinX, rectMaxX, rectMinY, rectMaxY;
-
-    rectMinX = l.x;
-    rectMaxX = l.x + l.w;
-    rectMinY = l.y;
-    rectMaxY = l.y + l.h;
+    f32 rectMinX = l.x;
+    f32 rectMaxX = l.x + l.w;
+    f32 rectMinY = l.y;
+    f32 rectMaxY = l.y + l.h;
 
     Line edges[4];
     // top
@@ -160,34 +144,31 @@ bool CollisionComponent::intersects(const Rect& l, const Circle& r) {
     edges[3].p2 = {rectMinX, rectMaxY};
 
     for(auto& e : edges) {
-        if(intersects(e, r)) {
-            return true;
+        if(auto [suc, normal, depth] = intersects(e, r); suc) {
+            return { true, normal, depth };
         }
     }
 
-    return false;
+    return {false, {}, 0};
 }
 
-bool CollisionComponent::intersects(const Rect& l, const Line& r) {
-    f32 rectMinX, rectMaxX, rectMinY, rectMaxY;
-    f32 lineMinX, lineMaxX, lineMinY, lineMaxY;
+std::tuple<bool, Vec2, float> intersects(const Rect& l, const Line& r) {
+    f32 rectMinX = l.x;
+    f32 rectMaxX = l.x + l.w;
+    f32 rectMinY = l.y;
+    f32 rectMaxY = l.y + l.h;
 
-    rectMinX = l.x;
-    rectMaxX = l.x + l.w;
-    rectMinY = l.y;
-    rectMaxY = l.y + l.h;
-
-    lineMinX = std::min(r.p1.x, r.p2.x);
-    lineMaxX = std::max(r.p1.x, r.p2.x);
-    lineMinY = std::min(r.p1.y, r.p2.y);
-    lineMaxY = std::max(r.p1.y, r.p2.y);
+    f32 lineMinX = std::min(r.p1.x, r.p2.x);
+    f32 lineMaxX = std::max(r.p1.x, r.p2.x);
+    f32 lineMinY = std::min(r.p1.y, r.p2.y);
+    f32 lineMaxY = std::max(r.p1.y, r.p2.y);
 
     f32 overlapX = std::min(rectMaxX, lineMaxX) - std::max(rectMinX, lineMinX);
     f32 overlapY = std::min(rectMaxY, lineMaxY) - std::max(rectMinY, lineMinY);
 
     // no overlap
     if(overlapX < 0 || overlapY < 0) {
-        return false;
+        return {false, {}, 0};
     }
 
     Line edges[4];
@@ -209,19 +190,19 @@ bool CollisionComponent::intersects(const Rect& l, const Line& r) {
 
     // if at least one edge intersects with the line
     for(auto& e : edges) {
-        if(intersects(e, r)) {
-            return true;
+        if(auto [suc, normal, depth] = intersects(e, r); suc) {
+            return { true, normal, depth };
         }
     }
 
-    return false;
+    return {false, {}, 0};
 }
 
-bool CollisionComponent::intersects(const Circle& l, const Rect& r) {
+std::tuple<bool, Vec2, float> intersects(const Circle& l, const Rect& r) {
     return intersects(r, l);
 }
 
-bool CollisionComponent::intersects(const Circle& l, const Circle& r) {
+std::tuple<bool, Vec2, float> intersects(const Circle& l, const Circle& r) {
     auto lrx = pow(l.x - r.x, 2);
     auto lry = pow(l.y - r.y, 2);
 
@@ -230,10 +211,10 @@ bool CollisionComponent::intersects(const Circle& l, const Circle& r) {
 
     auto squareRadius = pow(l.r + r.r, 2);
 
-    return squareDistance <= squareRadius;
+    return {squareDistance <= squareRadius, {}, 0};
 }
 
-bool CollisionComponent::intersects(const Circle& l, const Line& r) {
+std::tuple<bool, Vec2, float> intersects(const Circle& l, const Line& r) {
     Vec2 center = {l.x, l.y};
     Vec2 lineToCenter = center - r.p1;
     Vec2 lineDirection = r.p2 - r.p1;
@@ -243,7 +224,7 @@ bool CollisionComponent::intersects(const Circle& l, const Line& r) {
 
     // line is a point
     if(denominator == 0) {
-        return false;
+        return {false, {}, 0};
     }
     f32 t = numerator / denominator;
     t = std::clamp(t, 0.0f, 1.0f);
@@ -253,18 +234,18 @@ bool CollisionComponent::intersects(const Circle& l, const Line& r) {
     f32 squareDistance = math::dot(center - p, center - p);
     f32 squareRadius = l.r * l.r;
 
-    return squareDistance <= squareRadius;
+    return {squareDistance <= squareRadius, {}, 0};
 }
 
-bool CollisionComponent::intersects(const Line& l, const Rect& r) {
+std::tuple<bool, Vec2, float> intersects(const Line& l, const Rect& r) {
     return intersects(r, l);
 }
 
-bool CollisionComponent::intersects(const Line& l, const Circle& r) {
+std::tuple<bool, Vec2, float> intersects(const Line& l, const Circle& r) {
     return intersects(r, l);
 }
 
-bool CollisionComponent::intersects(const Line& l, const Line& r) {
+std::tuple<bool, Vec2, float> intersects(const Line& l, const Line& r) {
     Vec2 LtoR = r.p1 - l.p1;
     Vec2 lDirection = l.p2 - l.p1;
     Vec2 rDirection = r.p2 - r.p1;
@@ -276,14 +257,14 @@ bool CollisionComponent::intersects(const Line& l, const Line& r) {
 
     // lines are parallel
     if(denominator == 0.0f) {
-        return false;
+        return {false, {}, 0};
     }
 
     f32 t = numerator / denominator;
 
     if(t >= 0.0f && t <= 1.0f) {
-        return true;
+        return {true, {}, 0};
     }
 
-    return false;
+    return {false, {}, 0};
 }

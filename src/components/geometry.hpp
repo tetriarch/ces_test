@@ -35,5 +35,7 @@ private:
 
 #ifdef DEBUG
     bool showCollisions_{true};
+    size_t onCollisionId_{SIZE_MAX};
+    bool hit_;
 #endif
 };

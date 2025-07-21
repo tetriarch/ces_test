@@ -18,17 +18,37 @@ SpellComponent::SpellComponent() : casterTag_(TagType::UNKNOWN) {
 }
 
 SpellComponent::SpellComponent(std::shared_ptr<SpellData> spellData)
-    : spellData_(spellData), casterTag_(TagType::UNKNOWN) {
+    : spellData_(std::move(spellData)), casterTag_(TagType::UNKNOWN) {
 }
 
 void SpellComponent::attach() {
-    currentDuration_ = 0.0f;
-    traveledDistance_ = 0.0f;
-    dead_ = false;
+    if(spellData_->action.type != ActionType::SELF) {
+        auto ownerComponent = entity()->component<OwnerComponent>();
+        if (auto colComp = entity()->component<CollisionComponent>(); colComp && ownerComponent) {
+            // Pass the owner in as a weak pointer to avoid ownership loops
+            auto weakOwner = std::weak_ptr{ownerComponent};
+
+            colliderListenerId_ = colComp->addOnCollisionListener([this, weakOwner](EntityPtr const& target, auto normal, auto depth) {
+                // Ignore collisions if we're in the wrong state
+                if (this->state_ != State::Alive) return;
+
+                auto ownerComp = weakOwner.lock();
+                for(auto& effect : spellData_->action.effects) {
+                    if(canApplyEffect(target, effect)) {
+                        if(auto statusEffectComponent = target->component<StatusEffectComponent>()) {
+                            effect.applier = ownerComp->owner();
+                            statusEffectComponent->applyEffect(effect);
+                            this->state_ = State::Dying;
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
 
-void SpellComponent::update(const f32 dt) {
-    if(dead_) {
+void SpellComponent::update(f32 dt) {
+    if(state_ != State::Alive) {
         return;
     }
 
@@ -45,18 +65,28 @@ void SpellComponent::update(const f32 dt) {
         auto spawnComponent = entity()->component<SpawnComponent>();
         if(spawnComponent) {
             spawnComponent->spawn(oldPosition);
-            dead_ = true;
+            state_ = State::Dying;
         }
     }
     currentDuration_ += dt;
 }
 
-void SpellComponent::postUpdate(const f32 dt) {
-    auto animationComponent = entity()->component<AnimationComponent>();
+void SpellComponent::postUpdate(f32 dt) {
+    if (state_ == State::Dead) return;
 
-    if(dead_) {
-        if(!animationComponent) {
+    ;
+
+    if(state_ == State::Dying) {
+        state_ = State::Dead;
+        if(auto animation = entity()->component<AnimationComponent>()) {
+            animation->playAnimation(
+                "death", [&]() { return entity()->parent()->removeChild(entity()); });
+        } else {
             entity()->parent()->removeChild(entity());
+        }
+
+        if (auto particles = entity()->component<ParticleSystemComponent>()) {
+            particles->setEmitting(false);
         }
         return;
     }
@@ -64,10 +94,10 @@ void SpellComponent::postUpdate(const f32 dt) {
     if(spellData_->action.type != ActionType::SELF) {
         if(spellData_->duration > 0) {
             if(currentDuration_ >= spellData_->duration) {
-                dead_ = true;
+                state_ = State::Dying;
             }
         } else if(traveledDistance_ >= spellData_->maxRange) {
-            dead_ = true;
+            state_ = State::Dying;
         }
     }
 
@@ -80,63 +110,18 @@ void SpellComponent::postUpdate(const f32 dt) {
                 if(statusEffectComponent) {
                     effect.applier = owner;
                     statusEffectComponent->applyEffect(effect);
-                    dead_ = true;
-                }
-            }
-        }
-    } else {
-        auto collisionComponent = entity()->component<CollisionComponent>();
-
-        if(collisionComponent && ownerComponent) {
-            if(collisionComponent->collided()) {
-                auto colliders = collisionComponent->colliders();
-                bool effectApplied = false;
-
-                for(auto target : colliders) {
-                    for(auto& effect : spellData_->action.effects) {
-                        auto t = target.lock();
-                        if(canApplyEffect(t, effect)) {
-                            auto statusEffectComponent = t->component<StatusEffectComponent>();
-
-                            if(statusEffectComponent) {
-                                effect.applier = ownerComponent->owner();
-                                statusEffectComponent->applyEffect(effect);
-                                effectApplied = true;
-                            }
-                        }
-                    }
-                }
-                if(effectApplied) {
-                    dead_ = true;
+                    state_ = State::Dying;
                 }
             }
         }
     }
-
-    if(dead_) {
-        // play on death animation if there is any
-        auto animation = entity()->component<AnimationComponent>();
-        if(animation) {
-            animation->playAnimation(
-                "death", [&]() { return entity()->parent()->removeChild(entity()); });
-        }
-
-        auto particles = entity()->component<ParticleSystemComponent>();
-        if(particles) {
-            particles->setEmitting(false);
-        }
-    }
-}
-
-bool SpellComponent::isDead() {
-    return dead_;
 }
 
 void SpellComponent::setCasterTag(TagType tag) {
     casterTag_ = tag;
 }
 
-bool SpellComponent::canApplyEffect(EntityPtr target, SpellEffect effect) {
+bool SpellComponent::canApplyEffect(EntityPtr target, SpellEffect effect) const {
     auto targetTagComponent = target->component<TagComponent>();
 
     if(!targetTagComponent) {
