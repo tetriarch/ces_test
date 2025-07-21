@@ -25,18 +25,20 @@ void SpellComponent::attach() {
     if(spellData_->action.type != ActionType::SELF) {
         auto ownerComponent = entity()->component<OwnerComponent>();
         if (auto colComp = entity()->component<CollisionComponent>(); colComp && ownerComponent) {
-            // Pass the owner in as a weak pointer to avoid ownership loops
-            auto weakOwner = std::weak_ptr{ownerComponent};
+            // Owner should be configured by now, so get the owner of this spell and pass it into
+            // the collision callback
+            auto owner = ownerComponent->owner();
 
-            colliderListenerId_ = colComp->addOnCollisionListener([this, weakOwner](EntityPtr const& target, auto normal, auto depth) {
+            // We're capturing `this`, which can be dangerous since that's not a shared_ptr or a weak_ptr
+            // Thankfully, we should never be processing collisions while destroying the game object.
+            colliderListenerId_ = colComp->addOnCollisionListener([this, owner](EntityPtr const& target, auto normal, auto depth) {
                 // Ignore collisions if we're in the wrong state
                 if (this->state_ != State::Alive) return;
 
-                auto ownerComp = weakOwner.lock();
                 for(auto& effect : spellData_->action.effects) {
                     if(canApplyEffect(target, effect)) {
                         if(auto statusEffectComponent = target->component<StatusEffectComponent>()) {
-                            effect.applier = ownerComp->owner();
+                            effect.applier = owner;
                             statusEffectComponent->applyEffect(effect);
                             this->state_ = State::Dying;
                         }
@@ -73,8 +75,6 @@ void SpellComponent::update(f32 dt) {
 
 void SpellComponent::postUpdate(f32 dt) {
     if (state_ == State::Dead) return;
-
-    ;
 
     if(state_ == State::Dying) {
         state_ = State::Dead;
