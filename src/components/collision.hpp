@@ -33,9 +33,15 @@ struct CollisionData {
     CollisionSizeDeterminant sizeDeterminant;
 };
 
+class CollisionComponent;
+
 class CollisionSystem : public Component<CollisionSystem> {
 public:
     void update(f32 dt) override;
+
+    void handleEvents(const SDL_Event& event) override;
+
+    void render(std::shared_ptr<Renderer> renderer) override;
 
     size_t addOnCollisionListener(std::function<void(EntityPtr, EntityPtr)> callback) {
         return onCollision_.subscribe(std::move(callback));
@@ -46,6 +52,8 @@ public:
     }
 private:
     Signal<EntityPtr, EntityPtr> onCollision_;
+    std::unordered_set<CollisionComponent*> collisions_;
+    bool showCollisions_ { false };
 };
 
 class CollisionComponent : public TrackedComponent<CollisionComponent> {

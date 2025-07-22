@@ -24,18 +24,8 @@ public:
     void render(std::shared_ptr<Renderer> renderer) override;
     Rect rect() const;
 
-#ifdef DEBUG
-    void handleEvents(const SDL_Event& event) override;
-#endif
-
 private:
     std::string textureFilePath_;
     Rect rect_;
     GeometryData geometryData_;
-
-#ifdef DEBUG
-    bool showCollisions_{true};
-    size_t onCollisionId_{SIZE_MAX};
-    bool hit_;
-#endif
 };

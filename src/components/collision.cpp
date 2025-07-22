@@ -1,10 +1,8 @@
 #include "collision.hpp"
 
 #include "../entity.hpp"
+#include "../renderer.hpp"
 
-// We use a map of pointer to weak_ptr because we cannot hash weak_ptr alone. Raw pointers, however,
-// can become invalid. Therefore, when walking the container, we lock the weak pointer to ensure we
-// get a valid pointer.
 void CollisionSystem::update(f32 dt) {
     auto span = CollisionComponent::trackedComponents();
 
@@ -15,6 +13,7 @@ void CollisionSystem::update(f32 dt) {
         component->colliders_.clear();
     }
 
+    collisions_.clear();
     for(size_t i = 0; i < span.size(); ++i) {
         for(size_t j = i + 1; j < span.size(); ++j) {
             auto lhs = span[i].lock();
@@ -40,6 +39,8 @@ void CollisionSystem::update(f32 dt) {
                 // TODO: }
 
                 // Global collision event
+                collisions_.emplace(lhs.get());
+                collisions_.emplace(rhs.get());
                 onCollision_.fire(lhsE, rhsE);
 
                 // Individual collision event
@@ -49,6 +50,42 @@ void CollisionSystem::update(f32 dt) {
         }
     }
 }
+
+void CollisionSystem::handleEvents(const SDL_Event& event) {
+    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_F10 && event.key.mod & SDL_KMOD_LCTRL) {
+        showCollisions_ = !showCollisions_;
+    }
+}
+
+void CollisionSystem::render(std::shared_ptr<Renderer> renderer) {
+    if(showCollisions_) {
+        auto span = CollisionComponent::trackedComponents();
+        for(auto && weakCol : span) {
+            auto collider = weakCol.lock();
+            auto collided = collisions_.contains(collider.get());
+
+            std::visit(overloaded {
+                [&](Rect const& debugRect) {
+                    if(collided) {
+                        renderer->queueRenderRect(Strata::DEB, debugRect, 255, 0, 0, 255);
+                    } else {
+                        renderer->queueRenderRect(Strata::DEB, debugRect);
+                    }
+                },
+                [&](Line const& debugLine) {
+                    if(collided) {
+                        renderer->queueRenderLine(Strata::DEB, debugLine, 255, 0, 0, 255);
+                    } else {
+                        renderer->queueRenderLine(Strata::DEB, debugLine);
+                    }
+                },
+                [&](Circle const& debugCircle) {},
+            }, collider->shape());
+        }
+    }
+}
+
+
 
 void CollisionComponent::setCollisionShape(const CollisionShape& shape) {
     shape_ = shape;
