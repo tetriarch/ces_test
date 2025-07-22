@@ -3,7 +3,6 @@
 #include "../entity.hpp"
 #include "../renderer.hpp"
 #include "animation.hpp"
-#include "collision.hpp"
 
 void GeometryComponent::setTextureFilePath(const std::string& filePath) {
     textureFilePath_ = filePath;
@@ -13,29 +12,6 @@ void GeometryComponent::setGeometryData(const GeometryData& geometryData) {
     geometryData_ = geometryData;
     rect_ = geometryData_.rect;
 }
-
-#ifdef DEBUG
-void GeometryComponent::handleEvents(const SDL_Event& event) {
-    if(event.type == SDL_EVENT_KEY_DOWN) {
-        if(event.key.key == SDLK_F10 && event.key.mod & SDL_KMOD_LCTRL) {
-            if (auto collisionComponent = entity()->component<CollisionComponent>()) {
-                showCollisions_ = !showCollisions_;
-
-                if (showCollisions_) {
-                    onCollisionId_ = collisionComponent->addOnCollisionListener(
-                        [this](auto const&, auto, auto) {
-                            this->hit_ = true;
-                        });
-                }
-                else {
-                    collisionComponent->removeOnCollisionListener(onCollisionId_);
-                    onCollisionId_ = SIZE_MAX;
-                }
-            }
-        }
-    }
-}
-#endif
 
 void GeometryComponent::postUpdate(f32 dt) {
     Transform transform = entity()->transform();
@@ -65,32 +41,6 @@ void GeometryComponent::render(std::shared_ptr<Renderer> renderer) {
 
     renderer->queueRenderTextureRotated(
         Strata::ENTITY, textureFilePath_, sRect, dRect, rotationPoint, transform.rotationInDegrees);
-
-#ifdef DEBUG
-    if(showCollisions_) {
-        auto collisionComponent = entity()->component<CollisionComponent>();
-        bool collided = hit_;
-        hit_ = false;
-
-        auto shape = collisionComponent->shape();
-        if(shape.shape() == Shape::RECT) {
-            Rect debugRect = std::get<Rect>(shape);
-            if(collided) {
-                renderer->queueRenderRect(Strata::DEB, debugRect, 255, 0, 0, 255);
-            } else {
-                renderer->queueRenderRect(Strata::DEB, debugRect);
-            }
-        }
-        if(shape.shape() == Shape::LINE) {
-            Line debugLine = std::get<Line>(shape);
-            if(collided) {
-                renderer->queueRenderLine(Strata::DEB, debugLine, 255, 0, 0, 255);
-            } else {
-                renderer->queueRenderLine(Strata::DEB, debugLine);
-            }
-        }
-    }
-#endif
 }
 
 Rect GeometryComponent::rect() const {

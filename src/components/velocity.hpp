@@ -17,6 +17,7 @@ public:
     s32 updatePriority() override {
         return 2;
     }
+    void attach() override;
     void update(const f32 dt) override;
     void postUpdate(const f32 dt) override;
     Vec2 velocity() const;
@@ -37,4 +38,5 @@ private:
     Vec2 motionVector_ = {0.0f, 0.0f};
     f32 speed_;
     bool aiControled_{false};
+    size_t colliderListenerId_;
 };
