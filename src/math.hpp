@@ -54,6 +54,10 @@ struct Vec2 {
     inline Vec2 operator-(const Vec2& substraction) const {
         return {x - substraction.x, y - substraction.y};
     }
+
+    inline Vec2 operator-() const {
+        return {-x, -y};
+    }
 };
 
 struct Line {

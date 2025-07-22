@@ -54,6 +54,9 @@ bool Core::init() {
 
     root_ = am->load<Scene>("scenes/level_1.json");
 
+    // Add the collision system to the root.
+    root_->addComponent(std::make_shared<CollisionSystem>());
+
     if(!root_) {
         return false;
     }

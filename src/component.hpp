@@ -50,3 +50,36 @@ public:
         return typeid(TDerived);
     }
 };
+
+/// A tracked component keeps track of instances of its self. These instances can be retrieved using
+/// the trackedComponents function.
+template<class TDerived>
+class TrackedComponent : public Component<TDerived>, public std::enable_shared_from_this<TDerived> {
+public:
+    void attach() final {
+        assert(trackedIndex_ == SIZE_MAX);
+        s_components.push_back(this->shared_from_this());
+        trackedIndex_ = s_components.size() - 1;
+
+        onAttach();
+    }
+
+    void detach() final {
+        assert(trackedIndex_ != SIZE_MAX);
+        std::swap(s_components[trackedIndex_], s_components.back());
+        s_components[trackedIndex_].lock()->trackedIndex_ = trackedIndex_;
+        s_components.pop_back();
+        trackedIndex_ = SIZE_MAX;
+
+        onDetach();
+    }
+
+    static std::span<std::weak_ptr<TDerived> const> trackedComponents() { return s_components; }
+protected:
+    virtual void onAttach() {}
+    virtual void onDetach() {}
+
+private:
+    size_t trackedIndex_ { SIZE_MAX };
+    static inline std::vector<std::weak_ptr<TDerived>> s_components = {};
+};

@@ -60,6 +60,7 @@ void VelocityComponent::postUpdate(const f32 dt) {
     auto collisionComponent = entity()->component<CollisionComponent>();
     if(collisionComponent && collisionComponent->collided()) {
         auto tag = entity()->component<TagComponent>();
+        // TODO: Rework this to use onCollided event.
         auto colliders = collisionComponent->colliders();
 
         for(auto&& collider : colliders) {

@@ -87,7 +87,7 @@ void SpellBookComponent::update(f32 dt) {
             if(castedSpell_->requiresComponent(SpellRequirement::COLLISION)) {
                 auto collisionComponent = std::make_shared<CollisionComponent>();
                 auto collisionData = determineCollision();
-                collisionComponent->setCollisionData(collisionData);
+                collisionComponent->setCollisionShape(collisionData.shape);
                 spellEntity->addComponent(collisionComponent);
             }
 

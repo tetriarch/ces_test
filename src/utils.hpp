@@ -30,3 +30,5 @@ using IAssetPtr = std::shared_ptr<IAsset>;
 using EntityPtr = std::shared_ptr<Entity>;
 using EntityHandle = std::weak_ptr<Entity>;
 using ComponentPtr = std::shared_ptr<ComponentBase>;
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
