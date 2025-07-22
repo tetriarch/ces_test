@@ -18,7 +18,7 @@ void GeometryComponent::setGeometryData(const GeometryData& geometryData) {
 void GeometryComponent::handleEvents(const SDL_Event& event) {
     if(event.type == SDL_EVENT_KEY_DOWN) {
         if(event.key.key == SDLK_F10 && event.key.mod & SDL_KMOD_LCTRL) {
-            if (auto collisionComponent = std::make_shared<CollisionComponent>()) {
+            if (auto collisionComponent = entity()->component<CollisionComponent>()) {
                 showCollisions_ = !showCollisions_;
 
                 if (showCollisions_) {
