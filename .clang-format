@@ -1,5 +1,6 @@
 ---
 Language:        Cpp
+UseCRLF: false
 AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: None

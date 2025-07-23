@@ -12,20 +12,21 @@ const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.75f;
 void VelocityComponent::attach() {
     if(auto colComp = entity()->component<CollisionComponent>(); colComp) {
         colliderListenerId_ = colComp->addOnCollisionListener(
-            [entity = entity()](const EntityPtr& target, auto normal, auto depth) {
+            [this](const EntityPtr& target, auto normal, auto depth) {
                 // collision with spell -- skip
                 if(auto spellComp = target->component<SpellComponent>(); spellComp) {
                     return;
                 }
 
                 auto targetOwnerComp = target->component<OwnerComponent>();
-                if(!targetOwnerComp || (targetOwnerComp && !targetOwnerComp->isOwnedBy(entity))) {
-                    auto statusEffectComp = entity->component<StatusEffectComponent>();
+                if(!targetOwnerComp ||
+                   (targetOwnerComp && !targetOwnerComp->isOwnedBy(this->entity()))) {
+                    auto statusEffectComp = this->entity()->component<StatusEffectComponent>();
                     if(statusEffectComp &&
                        !statusEffectComp->isUnderEffect(SpellEffectType::STUN)) {
-                        auto transform = entity->transform();
+                        auto transform = this->entity()->transform();
                         transform.position -= normal * depth;
-                        entity->setTransform(transform);
+                        this->entity()->setTransform(transform);
                     }
                 }
             });
