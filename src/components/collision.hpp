@@ -40,10 +40,6 @@ public:
     void handleEvents(const SDL_Event& event) override;
     void render(std::shared_ptr<Renderer> renderer) override;
 
-    void handleEvents(const SDL_Event& event) override;
-
-    void render(std::shared_ptr<Renderer> renderer) override;
-
     size_t addOnCollisionListener(std::function<void(EntityPtr, EntityPtr)> callback) {
         return onCollision_.subscribe(std::move(callback));
     }
