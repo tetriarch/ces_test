@@ -6,13 +6,6 @@
 void CollisionSystem::update(f32 dt) {
     auto span = CollisionComponent::trackedComponents();
 
-    // TODO: Remove this when everything is using onCollision
-    for(auto && weakCol : span) {
-        auto component = weakCol.lock();
-        assert(component != nullptr);
-        component->colliders_.clear();
-    }
-
     collisions_.clear();
     for(size_t i = 0; i < span.size(); ++i) {
         for(size_t j = i + 1; j < span.size(); ++j) {
@@ -27,17 +20,7 @@ void CollisionSystem::update(f32 dt) {
             auto rhsE = rhs->entity();
             assert(rhsE);
 
-            if(auto [suc, normal, depth] =  intersects(lhs->shape(), rhs->shape()); suc) {
-                // TODO: remove this whole section and just have the onCollision callbacks {
-                lhs->collisionNormal_ = normal;
-                lhs->collisionDepth_ = depth;
-                lhs->colliders_.push_back(rhsE);
-
-                rhs->collisionNormal_ = -normal;
-                rhs->collisionDepth_ = depth;
-                rhs->colliders_.push_back(lhsE);
-                // TODO: }
-
+            if(auto [suc, normal, depth] = intersects(lhs->shape(), rhs->shape()); suc) {
                 // Global collision event
                 collisions_.emplace(lhs.get());
                 collisions_.emplace(rhs.get());
@@ -45,47 +28,50 @@ void CollisionSystem::update(f32 dt) {
 
                 // Individual collision event
                 lhs->onCollision_.fire(rhsE, normal, depth);
-                rhs->onCollision_.fire(lhsE, normal, depth);
+                rhs->onCollision_.fire(lhsE, -normal, depth);
             }
         }
     }
 }
 
 void CollisionSystem::handleEvents(const SDL_Event& event) {
-    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_F10 && event.key.mod & SDL_KMOD_LCTRL) {
+    if(event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_F10 &&
+       event.key.mod & SDL_KMOD_LCTRL) {
         showCollisions_ = !showCollisions_;
     }
 }
 
 void CollisionSystem::render(std::shared_ptr<Renderer> renderer) {
+#ifdef DEBUG
     if(showCollisions_) {
         auto span = CollisionComponent::trackedComponents();
-        for(auto && weakCol : span) {
+        for(auto&& weakCol : span) {
             auto collider = weakCol.lock();
             auto collided = collisions_.contains(collider.get());
 
-            std::visit(overloaded {
-                [&](Rect const& debugRect) {
-                    if(collided) {
-                        renderer->queueRenderRect(Strata::DEB, debugRect, 255, 0, 0, 255);
-                    } else {
-                        renderer->queueRenderRect(Strata::DEB, debugRect);
-                    }
+            std::visit(
+                overloaded{
+                    [&](const Rect& debugRect) {
+                        if(collided) {
+                            renderer->queueRenderRect(Strata::DEB, debugRect, 255, 0, 0, 255);
+                        } else {
+                            renderer->queueRenderRect(Strata::DEB, debugRect);
+                        }
+                    },
+                    [&](const Line& debugLine) {
+                        if(collided) {
+                            renderer->queueRenderLine(Strata::DEB, debugLine, 255, 0, 0, 255);
+                        } else {
+                            renderer->queueRenderLine(Strata::DEB, debugLine);
+                        }
+                    },
+                    [&](const Circle& debugCircle) {},
                 },
-                [&](Line const& debugLine) {
-                    if(collided) {
-                        renderer->queueRenderLine(Strata::DEB, debugLine, 255, 0, 0, 255);
-                    } else {
-                        renderer->queueRenderLine(Strata::DEB, debugLine);
-                    }
-                },
-                [&](Circle const& debugCircle) {},
-            }, collider->shape());
+                collider->shape());
         }
     }
+#endif
 }
-
-
 
 void CollisionComponent::setCollisionShape(const CollisionShape& shape) {
     shape_ = shape;
@@ -94,23 +80,24 @@ void CollisionComponent::setCollisionShape(const CollisionShape& shape) {
 CollisionShape CollisionComponent::shape() const {
     auto transform = entity()->transform();
 
-    return std::visit(overloaded{
-        [&transform](Rect rect) {
-            rect.x += transform.position.x;
-            rect.y += transform.position.y;
-            return CollisionShape { rect };
-        },
-        [&transform](Line line) {
-            line.p1.x = transform.position.x;
-            line.p1.y = transform.position.y;
-            return CollisionShape { line };
-        },
-        [&transform](Circle circle) {
-            circle.x = transform.position.x;
-            circle.y = transform.position.y;
-            return CollisionShape { circle };
-        }
-    }, shape_);
+    return std::visit(
+        overloaded{
+            [&transform](Rect rect) {
+                rect.x += transform.position.x;
+                rect.y += transform.position.y;
+                return CollisionShape{rect};
+            },
+            [&transform](Line line) {
+                line.p1.x = transform.position.x;
+                line.p1.y = transform.position.y;
+                return CollisionShape{line};
+            },
+            [&transform](Circle circle) {
+                circle.x = transform.position.x;
+                circle.y = transform.position.y;
+                return CollisionShape{circle};
+            }},
+        shape_);
 }
 
 bool CollisionComponent::collided() const {
@@ -130,9 +117,8 @@ const std::vector<EntityHandle>& CollisionComponent::colliders() const {
 }
 
 std::tuple<bool, Vec2, float> intersects(const CollisionShape& lsh, const CollisionShape& rsh) {
-    return std::visit([](auto const& lhs, auto const& rhs) {
-        return intersects(lhs, rhs);
-    }, lsh, rsh);
+    return std::visit(
+        [](auto const& lhs, auto const& rhs) { return intersects(lhs, rhs); }, lsh, rsh);
 }
 
 std::tuple<bool, Vec2, float> intersects(const Rect& l, const Rect& r) {
@@ -182,7 +168,7 @@ std::tuple<bool, Vec2, float> intersects(const Rect& l, const Circle& r) {
 
     for(auto& e : edges) {
         if(auto [suc, normal, depth] = intersects(e, r); suc) {
-            return { true, normal, depth };
+            return {true, normal, depth};
         }
     }
 
@@ -228,7 +214,7 @@ std::tuple<bool, Vec2, float> intersects(const Rect& l, const Line& r) {
     // if at least one edge intersects with the line
     for(auto& e : edges) {
         if(auto [suc, normal, depth] = intersects(e, r); suc) {
-            return { true, normal, depth };
+            return {true, normal, depth};
         }
     }
 

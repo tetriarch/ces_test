@@ -6,9 +6,31 @@
 #include "owner.hpp"
 #include "spell_book.hpp"
 #include "status_effect.hpp"
-#include "tag.hpp"
 
 const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.75f;
+
+void VelocityComponent::attach() {
+    if(auto colComp = entity()->component<CollisionComponent>(); colComp) {
+        colliderListenerId_ = colComp->addOnCollisionListener(
+            [entity = entity()](const EntityPtr& target, auto normal, auto depth) {
+                // collision with spell -- skip
+                if(auto spellComp = target->component<SpellComponent>(); spellComp) {
+                    return;
+                }
+
+                auto targetOwnerComp = target->component<OwnerComponent>();
+                if(!targetOwnerComp || (targetOwnerComp && !targetOwnerComp->isOwnedBy(entity))) {
+                    auto statusEffectComp = entity->component<StatusEffectComponent>();
+                    if(statusEffectComp &&
+                       !statusEffectComp->isUnderEffect(SpellEffectType::STUN)) {
+                        auto transform = entity->transform();
+                        transform.position -= normal * depth;
+                        entity->setTransform(transform);
+                    }
+                }
+            });
+    }
+}
 
 Vec2 VelocityComponent::velocity() const {
     Vec2 velocityVector = {0, 0};
@@ -57,35 +79,6 @@ void VelocityComponent::update(const f32 dt) {
 }
 
 void VelocityComponent::postUpdate(const f32 dt) {
-    auto collisionComponent = entity()->component<CollisionComponent>();
-    if(collisionComponent && collisionComponent->collided()) {
-        auto tag = entity()->component<TagComponent>();
-        // TODO: Rework this to use onCollided event.
-        auto colliders = collisionComponent->colliders();
-
-        for(auto&& collider : colliders) {
-            // collider is spell -- skip
-            auto c = collider.lock();
-            auto colliderSpellComponent = c->component<SpellComponent>();
-            if(colliderSpellComponent) {
-                continue;
-            }
-
-            auto colliderOwnerComponent = c->component<OwnerComponent>();
-            if(!colliderOwnerComponent ||
-                (colliderOwnerComponent && !colliderOwnerComponent->isOwnedBy(entity()))) {
-                // push around only when we are not stunned
-                auto statusEffectComponent = entity()->component<StatusEffectComponent>();
-                if(statusEffectComponent &&
-                    !statusEffectComponent->isUnderEffect(SpellEffectType::STUN)) {
-                    auto transform = entity()->transform();
-                    transform.position -= collisionComponent->collisionNormal() *
-                                          collisionComponent->collisionDepth();
-                    entity()->setTransform(transform);
-                }
-            }
-        }
-    }
 }
 
 f32 VelocityComponent::speed() const {

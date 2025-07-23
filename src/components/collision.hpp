@@ -34,10 +34,11 @@ struct CollisionData {
 };
 
 class CollisionComponent;
-
 class CollisionSystem : public Component<CollisionSystem> {
 public:
     void update(f32 dt) override;
+    void handleEvents(const SDL_Event& event) override;
+    void render(std::shared_ptr<Renderer> renderer) override;
 
     void handleEvents(const SDL_Event& event) override;
 
@@ -50,10 +51,11 @@ public:
     void removeOnCollisionListener(size_t id) {
         onCollision_.unsubscribe(id);
     }
+
 private:
     Signal<EntityPtr, EntityPtr> onCollision_;
     std::unordered_set<CollisionComponent*> collisions_;
-    bool showCollisions_ { false };
+    bool showCollisions_{true};
 };
 
 class CollisionComponent : public TrackedComponent<CollisionComponent> {
@@ -72,6 +74,7 @@ public:
     void removeOnCollisionListener(size_t id) {
         onCollision_.unsubscribe(id);
     }
+
 private:
     friend class CollisionSystem;
 
