@@ -56,6 +56,8 @@ public:
 template<class TDerived>
 class TrackedComponent : public Component<TDerived>, public std::enable_shared_from_this<TDerived> {
 public:
+    using Handle = std::weak_ptr<TDerived>;
+
     void attach() final {
         assert(trackedIndex_ == SIZE_MAX);
         s_components.push_back(this->shared_from_this());
