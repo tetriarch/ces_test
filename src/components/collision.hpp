@@ -40,18 +40,8 @@ public:
     void handleEvents(const SDL_Event& event) override;
     void render(std::shared_ptr<Renderer> renderer) override;
 
-    // size_t addOnCollisionListener(std::function<void(EntityPtr, EntityPtr)> callback) {
-    //     return onCollision_.subscribe(std::move(callback));
-    // }
-    //
-    // void removeOnCollisionListener(size_t id) {
-    //     onCollision_.unsubscribe(id);
-    // }
-
     EventF<CollisionSystem, EntityPtr, EntityPtr> onCollision;
 private:
-    // Signal<EntityPtr, EntityPtr> onCollision_;
-
     std::unordered_set<CollisionComponent*> collisions_;
     bool showCollisions_{true};
 };
@@ -61,18 +51,7 @@ public:
     void setCollisionShape(const CollisionShape& shape);
     CollisionShape shape() const;
 
-    // size_t addOnCollisionListener(std::function<void(EntityPtr, Vec2, float)> callback) {
-    //     return onCollision_.subscribe(std::move(callback));
-    // }
-    //
-    // void removeOnCollisionListener(size_t id) {
-    //     onCollision_.unsubscribe(id);
-    // }
-
     EventF<CollisionSystem, EntityPtr, Vec2, float> onCollision;
 private:
-    friend class CollisionSystem;
-
     CollisionShape shape_;
-    // Signal<EntityPtr, Vec2, float> onCollision_;
 };
