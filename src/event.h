@@ -4,8 +4,13 @@
 #include <functional>
 #include <vector>
 
+/**
+ * An event. The type arguments are the arguments that are passed to the event handlers.
+ * Subscribing will return an id that can be used to unsubscribe. Called like a function to invoke
+ * the subscribed handlers.
+ */
 template <class... TArgs>
-class Signal {
+class Event {
 public:
     size_t subscribe(std::function<void(TArgs...)> callback) {
         assert(!walking_ && "Do not subscribe while signaling");
@@ -28,7 +33,7 @@ public:
         freeItems_.push_back(id);
     }
 
-    void fire(TArgs const&... args) {
+    void operator()(TArgs const&... args) {
         // We should not allow modification of the signal while we're firing.
         walking_ = true;
         for(auto && callback : callbacks_) {
@@ -44,4 +49,29 @@ private:
     std::vector<std::function<void(TArgs...)>> callbacks_;
     std::vector<size_t> freeItems_;
     bool walking_ {false};
+};
+
+/**
+ * An event with a friend. The T parameter indicates a class capable of calling the event.
+ * @seealso Event
+ */
+template<class TFriend, class... TArgs>
+class EventF {
+public:
+    size_t subscribe(std::function<void(TArgs...)> callback) {
+        return signal_.subscribe(std::move(callback));
+    }
+
+    void unsubscribe(size_t id) {
+        signal_.unsubscribe(id);
+    }
+
+private:
+    friend TFriend;
+
+    void operator()(TArgs const&... args) {
+        signal_(args...);
+    }
+
+    Event<TArgs...> signal_;
 };

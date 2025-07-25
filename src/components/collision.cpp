@@ -24,11 +24,11 @@ void CollisionSystem::update(f32 dt) {
                 // Global collision event
                 collisions_.emplace(lhs.get());
                 collisions_.emplace(rhs.get());
-                onCollision_.fire(lhsE, rhsE);
+                onCollision(lhsE, rhsE);
 
                 // Individual collision event
-                lhs->onCollision_.fire(rhsE, normal, depth);
-                rhs->onCollision_.fire(lhsE, -normal, depth);
+                lhs->onCollision(rhsE, normal, depth);
+                rhs->onCollision(lhsE, -normal, depth);
             }
         }
     }
@@ -98,22 +98,6 @@ CollisionShape CollisionComponent::shape() const {
                 return CollisionShape{circle};
             }},
         shape_);
-}
-
-bool CollisionComponent::collided() const {
-    return !colliders_.empty();
-}
-
-Vec2 CollisionComponent::collisionNormal() const {
-    return collisionNormal_;
-}
-
-f32 CollisionComponent::collisionDepth() const {
-    return collisionDepth_;
-}
-
-const std::vector<EntityHandle>& CollisionComponent::colliders() const {
-    return colliders_;
 }
 
 std::tuple<bool, Vec2, float> intersects(const CollisionShape& lsh, const CollisionShape& rsh) {

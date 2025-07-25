@@ -3,7 +3,7 @@
 #include "../component.hpp"
 #include "../entity.hpp"
 #include "../math.hpp"
-#include "../signal.h"
+#include "../event.h"
 
 enum class Shape { CIRCLE, LINE, RECT };
 
@@ -40,16 +40,18 @@ public:
     void handleEvents(const SDL_Event& event) override;
     void render(std::shared_ptr<Renderer> renderer) override;
 
-    size_t addOnCollisionListener(std::function<void(EntityPtr, EntityPtr)> callback) {
-        return onCollision_.subscribe(std::move(callback));
-    }
+    // size_t addOnCollisionListener(std::function<void(EntityPtr, EntityPtr)> callback) {
+    //     return onCollision_.subscribe(std::move(callback));
+    // }
+    //
+    // void removeOnCollisionListener(size_t id) {
+    //     onCollision_.unsubscribe(id);
+    // }
 
-    void removeOnCollisionListener(size_t id) {
-        onCollision_.unsubscribe(id);
-    }
-
+    EventF<CollisionSystem, EntityPtr, EntityPtr> onCollision;
 private:
-    Signal<EntityPtr, EntityPtr> onCollision_;
+    // Signal<EntityPtr, EntityPtr> onCollision_;
+
     std::unordered_set<CollisionComponent*> collisions_;
     bool showCollisions_{true};
 };
@@ -58,26 +60,19 @@ class CollisionComponent : public TrackedComponent<CollisionComponent> {
 public:
     void setCollisionShape(const CollisionShape& shape);
     CollisionShape shape() const;
-    bool collided() const;
-    Vec2 collisionNormal() const;
-    f32 collisionDepth() const;
-    const std::vector<EntityHandle>& colliders() const;
 
-    size_t addOnCollisionListener(std::function<void(EntityPtr, Vec2, float)> callback) {
-        return onCollision_.subscribe(std::move(callback));
-    }
+    // size_t addOnCollisionListener(std::function<void(EntityPtr, Vec2, float)> callback) {
+    //     return onCollision_.subscribe(std::move(callback));
+    // }
+    //
+    // void removeOnCollisionListener(size_t id) {
+    //     onCollision_.unsubscribe(id);
+    // }
 
-    void removeOnCollisionListener(size_t id) {
-        onCollision_.unsubscribe(id);
-    }
-
+    EventF<CollisionSystem, EntityPtr, Vec2, float> onCollision;
 private:
     friend class CollisionSystem;
 
-    std::vector<EntityHandle> colliders_;
-    Vec2 collisionNormal_{0.0f, 0.0f};
-    f32 collisionDepth_{0.0f};
-
     CollisionShape shape_;
-    Signal<EntityPtr, Vec2, float> onCollision_;
+    // Signal<EntityPtr, Vec2, float> onCollision_;
 };

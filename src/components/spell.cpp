@@ -31,7 +31,7 @@ void SpellComponent::attach() {
 
             // We're capturing `this`, which can be dangerous since that's not a shared_ptr or a weak_ptr
             // Thankfully, we should never be processing collisions while destroying the game object.
-            colliderListenerId_ = colComp->addOnCollisionListener([this, owner](EntityPtr const& target, auto normal, auto depth) {
+            colliderListenerId_ = colComp->onCollision.subscribe([this, owner](EntityPtr const& target, auto normal, auto depth) {
                 // Ignore collisions if we're in the wrong state
                 if (this->state_ != State::Alive) return;
 
