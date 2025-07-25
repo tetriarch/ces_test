@@ -56,22 +56,15 @@ private:
  * @seealso Event
  */
 template<class TFriend, class... TArgs>
-class EventF {
+class EventF : private Event<TArgs...> {
 public:
-    size_t subscribe(std::function<void(TArgs...)> callback) {
-        return signal_.subscribe(std::move(callback));
-    }
-
-    void unsubscribe(size_t id) {
-        signal_.unsubscribe(id);
-    }
+    using Event<TArgs...>::subscribe;
+    using Event<TArgs...>::unsubscribe;
 
 private:
     friend TFriend;
 
-    void operator()(TArgs const&... args) {
-        signal_(args...);
-    }
+    using Event<TArgs...>::operator();
 
     Event<TArgs...> signal_;
 };
