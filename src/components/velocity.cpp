@@ -11,7 +11,7 @@ const f32 ON_CAST_MOVEMENT_SPEED_MULTIPLIER = 0.75f;
 
 void VelocityComponent::attach() {
     if(auto colComp = entity()->component<CollisionComponent>(); colComp) {
-        colliderListenerId_ = colComp->addOnCollisionListener(
+        colliderListenerId_ = colComp->onCollision.subscribe(
             [this](const EntityPtr& target, auto normal, auto depth) {
                 // collision with spell -- skip
                 if(auto spellComp = target->component<SpellComponent>(); spellComp) {
