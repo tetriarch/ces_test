@@ -72,7 +72,8 @@ bool Core::initSDL() {
         return false;
     }
 
-    window_ = SDL_CreateWindow(gameTitle.c_str(), startWindowWidth, startWindowHeight, 0);
+    window_ = SDL_CreateWindow(
+        gameTitle.c_str(), startWindowWidth, startWindowHeight, SDL_WINDOW_RESIZABLE);
     if(!window_) {
         ERROR(SDL_GetError());
         return false;

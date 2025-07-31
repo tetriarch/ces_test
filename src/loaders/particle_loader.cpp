@@ -82,13 +82,17 @@ auto ParticleLoader::parseParticle(const std::string& source)
         return std::unexpected(JSONParserError::PARSE);
     }
 
-    if(!get<f32>(particleJSON, "angular_velocity_min", true, particle.minAngularVelocity)) {
+    f32 minAngularVelocity = 0.0f;
+    if(!get<f32>(particleJSON, "angular_velocity_min", true, minAngularVelocity)) {
         return std::unexpected(JSONParserError::PARSE);
     }
+    particle.minAngularVelocity = math::radians(minAngularVelocity);
 
-    if(!get<f32>(particleJSON, "angular_velocity_max", true, particle.maxAngularVelocity)) {
+    f32 maxAngularVelocity = 0.0f;
+    if(!get<f32>(particleJSON, "angular_velocity_max", true, maxAngularVelocity)) {
         return std::unexpected(JSONParserError::PARSE);
     }
+    particle.maxAngularVelocity = math::radians(maxAngularVelocity);
 
     return particle;
 }

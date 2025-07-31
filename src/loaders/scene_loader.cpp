@@ -70,7 +70,8 @@ auto SceneLoader::parseScene(AssetManager& assetManager, const std::string& sour
         if(transformJSON.is_array() && transformJSON.size() == 3) {
             transform.position.x = transformJSON[0];
             transform.position.y = transformJSON[1];
-            transform.rotationInDegrees = transformJSON[2];
+            f32 angleInDegrees = transformJSON[2];
+            transform.rotation = math::radians(angleInDegrees);
         } else {
             ERROR(error("transform is invalid", "entitites"));
             return std::unexpected(JSONParserError::PARSE);

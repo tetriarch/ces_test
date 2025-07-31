@@ -20,9 +20,9 @@ public:
         Strata strata, const std::string& textureName, const Rect& sRect, const Rect& dRect);
     void queueRenderTextureRotated(
         Strata strata, const std::string& textureName, const Rect& sRect, const Rect& dRect,
-        const Vec2& pivot, f32 angleInDegrees);
+        const Vec2& pivot, f32 angle);
     void queueRenderTextureRotated(
-        Strata strata, const std::string& textureName, Vec2 position, f32 angleInDegrees, f32 scale,
+        Strata strata, const std::string& textureName, Vec2 position, f32 angle, f32 scale,
         f32 alpha);
 
     void queueRenderRect(Strata strata, const Rect& rect, u8 r = 0, u8 g = 0, u8 b = 0, u8 a = 255);

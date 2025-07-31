@@ -40,7 +40,7 @@ void GeometryComponent::render(std::shared_ptr<Renderer> renderer) {
     }
 
     renderer->queueRenderTextureRotated(
-        Strata::ENTITY, textureFilePath_, sRect, dRect, rotationPoint, transform.rotationInDegrees);
+        Strata::ENTITY, textureFilePath_, sRect, dRect, rotationPoint, transform.rotation);
 }
 
 Rect GeometryComponent::rect() const {

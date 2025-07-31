@@ -316,7 +316,7 @@ auto SpellBookComponent::determineCollision() -> CollisionData {
             rect.h = rect.h == 0 ? length : rect.h;
 
             Vec2 pivot(rect.w + rect.x, rect.h + rect.y);
-            rect.rotate(entity()->transform().rotationInDegrees, &pivot);
+            rect.rotate(entity()->transform().rotation, &pivot);
             collisionData.shape = rect;
         }
 
@@ -327,7 +327,7 @@ auto SpellBookComponent::determineCollision() -> CollisionData {
             line.p2.x = castPosition.x + length;
             line.p2.y = castPosition.y;
 
-            line.rotate(entity()->transform().rotationInDegrees, &line.p1);
+            line.rotate(entity()->transform().rotation, &line.p1);
             collisionData.shape = line;
         }
 

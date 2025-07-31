@@ -61,18 +61,19 @@ void Renderer::queueRenderTexture(
 
 void Renderer::queueRenderTextureRotated(
     Strata strata, const std::string& textureName, const Rect& sRect, const Rect& dRect,
-    const Vec2& pivot, f32 angleInDegrees) {
+    const Vec2& pivot, f32 angle) {
     auto texture = AssetManager::get()->load<Texture>(textureName);
 
     if(!texture) {
         ERROR_ONCE("[RENDERER]: failed to acquire texture - " + textureName);
         return;
     }
-
-    queueRenderCall(strata, [&, texture, sRect, dRect, angleInDegrees, pivot]() {
+    queueRenderCall(strata, [&, texture, sRect, dRect, angle, pivot]() {
         SDL_FRect srcRect = {sRect.x, sRect.y, sRect.w, sRect.h};
         SDL_FRect dstRect = {dRect.x, dRect.y, dRect.w, dRect.h};
         SDL_FPoint rotationPoint = {pivot.x, pivot.y};
+        // NOTE: We actually have to supply degrees because of SDL;
+        f32 angleInDegrees = math::degrees(angle);
         SDL_RenderTextureRotated(
             renderer_, texture->get(), &srcRect, &dstRect, angleInDegrees, &rotationPoint,
             SDL_FlipMode::SDL_FLIP_NONE);
@@ -80,15 +81,14 @@ void Renderer::queueRenderTextureRotated(
 }
 
 void Renderer::queueRenderTextureRotated(
-    Strata strata, const std::string& textureName, Vec2 position, f32 angleInDegrees, f32 scale,
-    f32 alpha) {
+    Strata strata, const std::string& textureName, Vec2 position, f32 angle, f32 scale, f32 alpha) {
     auto texture = AssetManager::get()->load<Texture>(textureName);
     if(!texture) {
         ERROR_ONCE("[RENDERER]: failed to acquire texture - " + textureName);
         return;
     }
 
-    queueRenderCall(strata, [&, texture, position, angleInDegrees, scale, alpha]() {
+    queueRenderCall(strata, [&, texture, position, angle, scale, alpha]() {
         f32 width, height;
         SDL_GetTextureSize(texture->get(), &width, &height);
         width *= scale;
@@ -96,6 +96,8 @@ void Renderer::queueRenderTextureRotated(
         SDL_FRect dstRect = {position.x - width / 2.0f, position.y - height / 2.0f, width, height};
         u8 textureAlpha = static_cast<u8>(255 * alpha);
         SDL_SetTextureAlphaMod(texture->get(), textureAlpha);
+        // NOTE: We actually have to supply degrees because of SDL;
+        f32 angleInDegrees = math::degrees(angle);
         SDL_RenderTextureRotated(
             renderer_, texture->get(), nullptr, &dstRect, angleInDegrees, nullptr,
             SDL_FlipMode::SDL_FLIP_NONE);

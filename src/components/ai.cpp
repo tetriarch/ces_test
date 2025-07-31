@@ -118,7 +118,7 @@ void AIComponent::updateIdle(const f32 dt) {
         if(direction.length() >= 0.2f) {
             if(velocityComponent) {
                 velocityComponent->setMotion({direction.x, direction.y});
-                transform.rotationInDegrees = angleFromDirection(direction);
+                transform.rotation = angleFromDirection(direction);
                 entity()->setTransform(transform);
             }
         } else {
@@ -190,7 +190,7 @@ void AIComponent::updateCombat(const f32 dt) {
         auto velocityComponent = entity()->component<VelocityComponent>();
         if(velocityComponent) {
             velocityComponent->setMotion(targetDirection);
-            transform.rotationInDegrees = angleFromDirection(targetDirection);
+            transform.rotation = angleFromDirection(targetDirection);
             entity()->setTransform(transform);
         }
 

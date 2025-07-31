@@ -1,20 +1,17 @@
 #include "math.hpp"
 
-Rect Rect::rotate(f32 angleInDegrees, const Vec2* pivotPoint) {
+Rect Rect::rotate(f32 angle, const Vec2* pivotPoint) {
+    const f32 c = cosf(angle);
+    const f32 s = sinf(angle);
 
-    const f32 radians = math::radians(angleInDegrees);
-    const f32 c = cosf(radians);
-    const f32 s = sinf(radians);
-
-    Vec2 min = {x,y};
+    Vec2 min = {x, y};
     Vec2 max = {x + w, y + h};
 
     Vec2 center;
 
     if(pivotPoint) {
         center = *pivotPoint;
-    }
-    else {
+    } else {
         center.x = x + w / 2.0f;
         center.y = y + h / 2.0f;
     }
@@ -38,8 +35,7 @@ Rect Rect::rotate(f32 angleInDegrees, const Vec2* pivotPoint) {
         Vec2((cMinX - sMinY) + pivotX, (sMinX + cMinY) + pivotY),
         Vec2((cMaxX - sMinY) + pivotX, (sMaxX + cMinY) + pivotY),
         Vec2((cMaxX - sMaxY) + pivotX, (sMaxX + cMaxY) + pivotY),
-        Vec2((cMinX - sMaxY) + pivotX, (sMinX + cMaxY) + pivotY)
-    };
+        Vec2((cMinX - sMaxY) + pivotX, (sMinX + cMaxY) + pivotY)};
 
     f32 minX = rotatedCorners[0].x;
     f32 minY = rotatedCorners[0].y;
@@ -61,11 +57,9 @@ Rect Rect::rotate(f32 angleInDegrees, const Vec2* pivotPoint) {
     return {x, y, w, h};
 }
 
-Box Box::rotate(f32 angleInDegrees, const Vec2* pivotPoint) {
-    f32 radians = math::radians(angleInDegrees);
-
-    f32 cosTheta = cosf(radians);
-    f32 sinTheta = sinf(radians);
+Box Box::rotate(f32 angle, const Vec2* pivotPoint) {
+    f32 cosTheta = cosf(angle);
+    f32 sinTheta = sinf(angle);
 
     f32 pivotX = 0.0f;
     f32 pivotY = 0.0f;
@@ -93,17 +87,14 @@ Box Box::rotate(f32 angleInDegrees, const Vec2* pivotPoint) {
     return {tl, tr, br, bl};
 }
 
-Line Line::rotate(f32 angleInDegrees, const Vec2* pivotPoint) {
-
-    const f32 radians = math::radians(angleInDegrees);
-    const f32 c = cosf(radians);
-    const f32 s = sinf(radians);
+Line Line::rotate(f32 angle, const Vec2* pivotPoint) {
+    const f32 c = cosf(angle);
+    const f32 s = sinf(angle);
 
     Vec2 center;
     if(pivotPoint) {
         center = *pivotPoint;
-    }
-    else {
+    } else {
         center = (p1 + p2) * 0.5f;
     }
 

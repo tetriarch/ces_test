@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cmath>
 
 #include "utils.hpp"
@@ -62,7 +61,7 @@ struct Vec2 {
 
 struct Line {
     Vec2 p1, p2;
-    Line rotate(f32 angleInDegrees, const Vec2* pivotPoint = nullptr);
+    Line rotate(f32 angle, const Vec2* pivotPoint = nullptr);
 };
 
 struct Circle {
@@ -71,25 +70,21 @@ struct Circle {
 
 struct Rect {
     f32 x, y, w, h;
-    Rect rotate(f32 angleInDegrees, const Vec2* pivotPoint = nullptr);
+    Rect rotate(f32 angle, const Vec2* pivotPoint = nullptr);
 };
 
 struct Box {
     Vec2 tl, tr, br, bl;
-    Box rotate(f32 angleInDegrees, const Vec2* pivotPoint = nullptr);
+    Box rotate(f32 angle, const Vec2* pivotPoint = nullptr);
 };
 
 struct Transform {
     Vec2 position;
-    f32 rotationInDegrees;
+    // Rotation in radians
+    f32 rotation;
 };
 
 namespace math {
-    /// @brief Calculates linear interpolation between 2 values
-    /// @param a min value
-    /// @param b max value
-    /// @param t 0.0 - 1.0 to interpolate min and max value with
-    /// @return result of interpolation
     inline f32 lerp(f32 a, f32 b, f32 t) {
         return a + t * (b - a);
     }
@@ -112,20 +107,12 @@ namespace math {
     }
 }  // namespace math
 
-/// @brief calculates directional vector based on angle in degrees
-/// @param angleInDegrees
-/// @return directional vector
-inline Vec2 directionFromAngle(f32 angleInDegrees) {
-    f32 radians = math::radians(angleInDegrees);
+inline Vec2 directionFromAngle(f32 angle) {
     Vec2 direction;
-    direction.x = cos(radians);
-    direction.y = sin(radians);
+    direction.x = cos(angle);
+    direction.y = sin(angle);
     return direction;
 }
-/// @brief calculates angle in degrees based on 2D vector
-/// @param 2D vector
-/// @return angle in degrees
 inline f32 angleFromDirection(Vec2 direction) {
-    f32 radians = atan2f(direction.y, direction.x);
-    return math::degrees(radians);
+    return atan2f(direction.y, direction.x);
 }

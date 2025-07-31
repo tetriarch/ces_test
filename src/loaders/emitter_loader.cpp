@@ -57,9 +57,11 @@ auto EmitterLoader::parseEmitter(const std::string& source)
         }
     }
 
-    if(!get<f32>(emitterJSON, "direction", true, emitter.directionInDegrees)) {
+    f32 directionAngle = 0.0f;
+    if(!get<f32>(emitterJSON, "direction", true, directionAngle)) {
         return std::unexpected(JSONParserError::PARSE);
     }
+    emitter.directionAngle = math::radians(directionAngle);
 
     return emitter;
 }

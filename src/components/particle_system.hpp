@@ -47,7 +47,7 @@ struct Particle {
     f32 currentScale;
     f32 finalScale;
     f32 speed;
-    f32 angleInDegrees;
+    f32 angle;
     f32 angularVelocity;
 };
 
@@ -59,7 +59,7 @@ struct EmitterData : IAsset {
     u32 maxParticles;
     EmitterShape shape;
     f32 arc;
-    f32 directionInDegrees;
+    f32 directionAngle;
 };
 
 class Emitter {

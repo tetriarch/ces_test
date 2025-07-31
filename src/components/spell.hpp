@@ -62,7 +62,7 @@ struct ConstantMotion : Motion {
     f32 speed{0};
     void apply(const EntityPtr& target, f32 dt) {
         Transform targetTransform = target->transform();
-        Vec2 direction = directionFromAngle(targetTransform.rotationInDegrees);
+        Vec2 direction = directionFromAngle(targetTransform.rotation);
         Vec2 velocity = direction * speed;
         targetTransform.position += velocity * dt;
         target->setTransform(targetTransform);
