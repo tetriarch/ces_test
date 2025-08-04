@@ -17,7 +17,7 @@ public:
     void handleEvents(const SDL_Event& event);
     void render(std::shared_ptr<Scene> scene);
     void renderSceneHierarchy(std::shared_ptr<Scene> scene);
-    void renderHUD(EntityPtr player);
+    void renderHUD(const EntityPtr& player);
 
 private:
     void setupDockSpace();

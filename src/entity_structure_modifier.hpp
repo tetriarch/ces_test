@@ -13,19 +13,19 @@ enum class StructureUpdateType { Deferred, Immediate };
 
 struct EntityStructureModifier {
     static void addChild(
-        EntityPtr parent, EntityPtr child,
+        const EntityPtr& parent, const EntityPtr& child,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void removeChild(
-        EntityPtr parent, EntityPtr child,
+        const EntityPtr& parent, const EntityPtr& child,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void addComponent(
-        EntityPtr parent, ComponentPtr component,
+        const EntityPtr& parent, const ComponentPtr& component,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void removeComponent(
-        EntityPtr parent, ComponentPtr component,
+        const EntityPtr& parent, const ComponentPtr& component,
         StructureUpdateType updateType = StructureUpdateType::Deferred);
 
     static void beginUpdate();

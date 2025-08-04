@@ -181,7 +181,7 @@ void UI::renderSceneHierarchy(std::shared_ptr<Scene> scene) {
     ImGui::End();
 }
 
-void UI::renderHUD(EntityPtr player) {
+void UI::renderHUD(const EntityPtr& player) {
     if(!player) {
         ERROR_ONCE("[UI]: no player to render hud");
         return;
@@ -233,7 +233,8 @@ void UI::renderHUD(EntityPtr player) {
         auto spellName = spellBook->castedSpell() ? spellBook->castedSpell()->name.c_str() : "";
         ImVec2 spellTextSize = ImGui::CalcTextSize(spellName);
         ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-        ImVec2 spellTextPosition = ImVec2(cursorPos.x + (castBarSize.x - spellTextSize.x) * 0.5f,
+        ImVec2 spellTextPosition = ImVec2(
+            cursorPos.x + (castBarSize.x - spellTextSize.x) * 0.5f,
             cursorPos.y + (castBarSize.y - spellTextSize.y) * 0.5f);
         ImGui::ProgressBar(spellBook->castProgress(), castBarSize, "");
         ImGui::GetWindowDrawList()->AddText(
@@ -259,7 +260,8 @@ void UI::renderHUD(EntityPtr player) {
         xpText = std::to_string(currentXP) + " / " + std::to_string(nextLevelXP);
     }
     ImVec2 xpTextSize = ImGui::CalcTextSize(xpText.c_str());
-    ImVec2 xpTextPosition = ImVec2(cursorPos.x + (xpBarSize.x - xpTextSize.x) * 0.5f,
+    ImVec2 xpTextPosition = ImVec2(
+        cursorPos.x + (xpBarSize.x - xpTextSize.x) * 0.5f,
         cursorPos.y + (xpBarSize.y - xpTextSize.y) * 0.5f);
 
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.73f, 0.43f, 0.0f, 1.0f));
@@ -302,9 +304,9 @@ void UI::renderHUD(EntityPtr player) {
         {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.5f, 0.0f, 0.0f, 1.0f));
             cursorPos = ImGui::GetCursorScreenPos();
-            ImVec2 lifeTextPosition =
-                ImVec2(cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f,
-                    cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
+            ImVec2 lifeTextPosition = ImVec2(
+                cursorPos.x + (resourceBarSize.x - lifeTextSize.x) * 0.5f,
+                cursorPos.y + (resourceBarSize.y - lifeTextSize.y) * 0.5f);
             ImGui::ProgressBar(lifeValue.current / lifeValue.max, resourceBarSize, "");
             if(dead) {
                 ImGui::GetWindowDrawList()->AddText(
@@ -319,9 +321,9 @@ void UI::renderHUD(EntityPtr player) {
         {
             ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.0f, 0.0f, 0.5f, 1.0f));
             ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-            ImVec2 manaTextPosition =
-                ImVec2(cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f,
-                    cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
+            ImVec2 manaTextPosition = ImVec2(
+                cursorPos.x + (resourceBarSize.x - manaTextSize.x) * 0.5f,
+                cursorPos.y + (resourceBarSize.y - manaTextSize.y) * 0.5f);
             ImGui::ProgressBar(manaValue.current / manaValue.max, resourceBarSize, "");
             ImGui::GetWindowDrawList()->AddText(
                 manaTextPosition, IM_COL32(255, 255, 255, 255), manaText.c_str());
@@ -358,9 +360,9 @@ void UI::renderHUD(EntityPtr player) {
                 std::string cooldownText = std::format("{:.2f}s", cooldown);
                 ImVec2 cooldownTextSize = ImGui::CalcTextSize(cooldownText.c_str());
                 ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-                ImVec2 spellTextPosition =
-                    ImVec2(cursorPos.x + (spellSlotSize.x - cooldownTextSize.x) * 0.5f,
-                        cursorPos.y + (spellSlotSize.y - cooldownTextSize.y) * 0.5f);
+                ImVec2 spellTextPosition = ImVec2(
+                    cursorPos.x + (spellSlotSize.x - cooldownTextSize.x) * 0.5f,
+                    cursorPos.y + (spellSlotSize.y - cooldownTextSize.y) * 0.5f);
                 ImGui::ProgressBar(cooldownProgress, spellSlotSize, "");
                 ImGui::GetWindowDrawList()->AddText(
                     spellTextPosition, IM_COL32(255, 255, 255, 255), cooldownText.c_str());

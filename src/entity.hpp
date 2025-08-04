@@ -13,7 +13,7 @@ public:
     ~Entity();
 
     static EntityPtr create(const std::string& name, bool lazyAttach = false);
-    void addChild(EntityPtr child);
+    void addChild(const EntityPtr& child);
     void removeChild(const EntityPtr& child);
 
     void addComponent(ComponentPtr component);
@@ -29,7 +29,7 @@ public:
     auto components() const -> std::span<ComponentPtr const>;
 
     auto parent() const -> EntityPtr;
-    auto root() -> EntityPtr;
+    auto root() const -> EntityPtr;
 
     const Transform& transform() const;
     constexpr auto name() -> std::string const& {

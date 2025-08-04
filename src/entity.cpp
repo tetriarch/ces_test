@@ -9,7 +9,7 @@ Entity::Entity(const std::string& name, bool lazyAttach)
 }
 
 Entity::~Entity() {
-    for(auto && comp : components_) {
+    for(auto&& comp : components_) {
         comp->detach();
     }
 }
@@ -19,7 +19,7 @@ EntityPtr Entity::create(const std::string& name, bool lazyAttach) {
     return e;
 }
 
-void Entity::addChild(EntityPtr child) {
+void Entity::addChild(const EntityPtr& child) {
     EntityStructureModifier::addChild(shared_from_this(), child);
 }
 
@@ -55,12 +55,13 @@ auto Entity::parent() const -> EntityPtr {
     return parent_.lock();
 }
 
-auto Entity::root() -> EntityPtr {
-    auto current = shared_from_this();
-    while(current->parent()) {
-        current = current->parent();
+auto Entity::root() const -> EntityPtr {
+    auto p = parent();
+    if(p) {
+        return p->root();
+    } else {
+        return std::const_pointer_cast<Entity>(shared_from_this());
     }
-    return current;
 }
 
 const Transform& Entity::transform() const {
@@ -88,7 +89,7 @@ void Entity::setActive(bool active) {
 }
 
 void Entity::handleEvents(const SDL_Event& event) {
-    if (!active_) return;
+    if(!active_) return;
 
     for(auto&& c : components_) {
         c->handleEvents(event);
@@ -112,7 +113,7 @@ void Entity::update(const f32 dt) {
 }
 
 void Entity::postUpdate(const f32 dt) {
-    if (!active_) return;
+    if(!active_) return;
 
     for(auto&& component : components_) {
         component->postUpdate(dt);
@@ -124,7 +125,7 @@ void Entity::postUpdate(const f32 dt) {
 }
 
 void Entity::render(std::shared_ptr<Renderer> renderer) {
-    if (!active_) return;
+    if(!active_) return;
 
     for(auto& r : components_) {
         r->render(renderer);

@@ -7,7 +7,7 @@ EntityState EntityStructureModifier::state_ = EntityState::Idle;
 std::vector<std::function<void()>> EntityStructureModifier::modifications_;
 
 void EntityStructureModifier::addChild(
-    EntityPtr parent, EntityPtr child, StructureUpdateType updateType) {
+    const EntityPtr& parent, const EntityPtr& child, StructureUpdateType updateType) {
     if(updateType == StructureUpdateType::Deferred && state_ == EntityState::Updating) {
         modifications_.push_back(
             [parent, child]() { addChild(parent, child, StructureUpdateType::Immediate); });
@@ -24,7 +24,7 @@ void EntityStructureModifier::addChild(
 }
 
 void EntityStructureModifier::removeChild(
-    EntityPtr parent, EntityPtr child, StructureUpdateType updateType) {
+    const EntityPtr& parent, const EntityPtr& child, StructureUpdateType updateType) {
     if(updateType == StructureUpdateType::Deferred && state_ == EntityState::Updating) {
         modifications_.push_back(
             [parent, child]() { removeChild(parent, child, StructureUpdateType::Immediate); });
@@ -39,7 +39,7 @@ void EntityStructureModifier::removeChild(
 }
 
 void EntityStructureModifier::addComponent(
-    EntityPtr parent, ComponentPtr component, StructureUpdateType updateType) {
+    const EntityPtr& parent, const ComponentPtr& component, StructureUpdateType updateType) {
     if(updateType == StructureUpdateType::Deferred && state_ == EntityState::Updating) {
         modifications_.push_back([parent, component]() {
             addComponent(parent, component, StructureUpdateType::Immediate);
@@ -67,7 +67,7 @@ void EntityStructureModifier::addComponent(
 }
 
 void EntityStructureModifier::removeComponent(
-    EntityPtr parent, ComponentPtr component, StructureUpdateType updateType) {
+    const EntityPtr& parent, const ComponentPtr& component, StructureUpdateType updateType) {
     if(updateType == StructureUpdateType::Deferred && state_ == EntityState::Updating) {
         modifications_.push_back([parent, component]() {
             removeComponent(parent, component, StructureUpdateType::Immediate);
